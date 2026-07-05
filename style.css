@@ -1063,23 +1063,33 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    
+    /* CAMBIO CLAVE 1: En vez de forzar el centro, alineamos todo desde arriba hacia abajo */
+    justify-content: flex-start; 
+    /* CAMBIO CLAVE 2: Le damos un espacio seguro desde el techo (12% del alto de la pantalla) */
+    padding-top: 12vh; 
     z-index: 2000;
+    
 }
 
 .login-header-visual {
     text-align: center;
-    margin-top: -50px; /* Empuja el logo más arriba */
-    margin-bottom: 35px; /* Lo separa más de la caja de login */
+    /* Separación entre los textos y la caja de vidrio (5% de la pantalla) */
+    margin-bottom: 4vh; 
     z-index: 2;
     padding: 0 20px;
 }
 
 .logo-visual {
-    width: 170px; /* Logo más pequeño (antes era 220px) */
-    margin-bottom: 10px;
+    width: 170px; 
+    
+    /* LA NUEVA MAGIA FLEXIBLE: */
+    margin-top: 0; /* Ya no necesitamos el negativo porque usamos flex-start arriba */
+    margin-bottom: 10vh; /* Crea el hueco enorme, pero calculando el 6% de la pantalla */
+    
     filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8));
 }
+
 
 .titulo-visual {
     color: white;
@@ -1096,6 +1106,7 @@ body {
     max-width: 250px;
     margin: 0 auto;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+    
 }
 
 /* La caja de vidrio ahora es más compacta */
