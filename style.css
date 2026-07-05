@@ -1081,11 +1081,10 @@ body {
 }
 
 .logo-visual {
-    width: 170px; 
+    width: 200px; /* Logo más grande (antes estaba en 170px) */
     
-    /* LA NUEVA MAGIA FLEXIBLE: */
-    margin-top: 0; /* Ya no necesitamos el negativo porque usamos flex-start arriba */
-    margin-bottom: 10vh; /* Crea el hueco enorme, pero calculando el 6% de la pantalla */
+    margin-top: 0; 
+    margin-bottom: 15vh; /* Hueco más grande para bajar los textos (antes 10vh) */
     
     filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8));
 }
@@ -1118,7 +1117,7 @@ body {
     border-radius: 20px; 
     padding: 40px 20px; /* Más alta (40px de espacio arriba y abajo) */
     width: 85%;
-    max-width: 280px; /* Más angosta (antes era 320px) */
+    max-width: 315px; /* Más angosta (antes era 320px) */
     display: flex;
     flex-direction: column;
     gap: 20px; /* Más separación entre los renglones */
