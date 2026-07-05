@@ -195,7 +195,13 @@ function entrarPerfil(id, nombre, apellido) {
     profeActivoId = id; 
     document.getElementById("nombre-profe-activo").innerText = "Profe " + nombre;
     
+    // Apagamos TODAS las pantallas
     document.getElementById("pantalla-perfiles").style.display = "none";
+    document.getElementById("pantalla-detalle-alumno").style.display = "none";
+    document.getElementById("pantalla-rutinas").style.display = "none";
+    document.getElementById("pantalla-detalle-pack").style.display = "none";
+    
+    // Encendemos solo el Dashboard (Alumnos)
     document.getElementById("pantalla-dashboard").style.display = "block";
     
     cargarAlumnos(); 
@@ -203,8 +209,27 @@ function entrarPerfil(id, nombre, apellido) {
 
 function volverAPerfiles() {
     profeActivoId = null;
+    
+    // Apagamos TODAS las pantallas operativas
     document.getElementById("pantalla-dashboard").style.display = "none";
+    document.getElementById("pantalla-detalle-alumno").style.display = "none";
+    document.getElementById("pantalla-rutinas").style.display = "none";
+    document.getElementById("pantalla-detalle-pack").style.display = "none";
+    
+    // Volvemos a Inicio
     document.getElementById("pantalla-perfiles").style.display = "flex";
+}
+
+function volverAlDashboard() {
+    // Apagamos TODAS las demás
+    document.getElementById("pantalla-detalle-alumno").style.display = "none";
+    document.getElementById("pantalla-rutinas").style.display = "none";
+    document.getElementById("pantalla-detalle-pack").style.display = "none";
+    document.getElementById("pantalla-perfiles").style.display = "none";
+    
+    // Encendemos solo Dashboard
+    document.getElementById("pantalla-dashboard").style.display = "block";
+    cargarAlumnos();
 }
 
 async function cargarAlumnos() {
@@ -896,11 +921,6 @@ function activarModoBorrado() {
     cargarAlumnos();
 }
 
-function volverAlDashboard() {
-    document.getElementById("pantalla-detalle-alumno").style.display = "none";
-    document.getElementById("pantalla-dashboard").style.display = "block";
-    cargarAlumnos();
-}
 
 // --- EDICIÓN DE ALUMNO ---
 function abrirModalEditarAlumno() {
@@ -991,4 +1011,243 @@ async function guardarOrdenEjercicios() {
     } catch (error) {
         console.error("Error al guardar el nuevo orden:", error.message);
     }
+}
+
+// --- 11. SISTEMA DE PACKS / RUTINAS PREDEFINIDAS ---
+let packActivoId = null;
+let packActivoEjercicios = []; // Array en memoria para editar rápido
+
+// Helper maestro para las animaciones (Se usa en Packs y en el Alumno)
+function obtenerAnimacionHTML(nombreEj) {
+    if (!nombreEj) return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
+    const n = nombreEj.trim();
+    if (n === "Vuelos laterales") return `<div class="img-animada anim-vuelos-laterales"></div>`;
+    if (n === "Press de banca") return `<div class="img-animada anim-press-banca"></div>`;
+    if (n === "Back squat" || n === "Sentadilla") return `<div class="img-animada anim-back-squat"></div>`;
+    if (n === "Peso muerto") return `<div class="img-animada anim-peso-muerto"></div>`;
+    return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
+}
+
+// 1. Navegación hacia la pantalla
+// 1. Navegación hacia la pantalla
+function abrirPantallaRutinas() {
+    // Apagamos TODAS las demás
+    document.getElementById("pantalla-dashboard").style.display = "none";
+    document.getElementById("pantalla-detalle-alumno").style.display = "none";
+    document.getElementById("pantalla-detalle-pack").style.display = "none";
+    document.getElementById("pantalla-perfiles").style.display = "none"; // Apagamos el inicio por las dudas
+    
+    // Encendemos Rutinas
+    document.getElementById("pantalla-rutinas").style.display = "block";
+    cargarPacks();
+}
+
+// 2. Cargar los packs creados
+async function cargarPacks() {
+    const contenedor = document.getElementById("lista-packs");
+    contenedor.innerHTML = "<p style='text-align:center;'>Cargando tus rutinas...</p>";
+    try {
+        const { data: packs, error } = await clienteSupabase.from('packs_rutinas').select('*').eq('profesor_id', profeActivoId);
+        if (error) throw error;
+        
+        contenedor.innerHTML = "";
+        if (packs.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top:20px;'>No tenés rutinas guardadas.</p>";
+            return;
+        }
+        
+        packs.forEach(pack => {
+            const ejCount = pack.ejercicios ? pack.ejercicios.length : 0;
+            // Magia: extraemos el primer ejercicio para mostrar su animación en la tarjeta principal
+            const primerEj = (ejCount > 0) ? pack.ejercicios[0].nombre : null;
+            const htmlAnim = obtenerAnimacionHTML(primerEj);
+
+            contenedor.innerHTML += `
+                <div class="card-alumno" onclick="abrirDetallePack('${pack.id}', '${pack.nombre}')" style="cursor:pointer;">
+                    ${htmlAnim}
+                    <div class="info-central" style="margin-left: 15px;">
+                        <h3 style="font-size:1.05rem;">${pack.nombre}</h3>
+                        <div class="info-detalle" style="font-size:0.8rem;">${ejCount} ejercicios configurados</div>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (e) { contenedor.innerHTML = "<p>Error al cargar.</p>"; }
+}
+
+// 3. Crear Pack (Creación básica)
+function abrirModalCrearPack() {
+    document.getElementById("input-pack-nombre").value = "";
+    document.getElementById("modal-crear-pack").style.display = "flex";
+}
+function cerrarModalCrearPack() { document.getElementById("modal-crear-pack").style.display = "none"; }
+
+async function guardarPackNuevo() {
+    const nombre = document.getElementById("input-pack-nombre").value.trim();
+    if(!nombre) { alert("Poné un nombre para el pack."); return; }
+    
+    try {
+        const { error } = await clienteSupabase.from('packs_rutinas').insert([{
+            profesor_id: profeActivoId,
+            nombre: nombre,
+            ejercicios: [] // Arranca con un array JSON vacío
+        }]);
+        if (error) throw error;
+        cerrarModalCrearPack();
+        cargarPacks();
+    } catch (e) { alert("Error: " + e.message); }
+}
+
+// 4. Detalle del Pack (Para meterle ejercicios adentro)
+async function abrirDetallePack(id, nombre) {
+    packActivoId = id;
+    document.getElementById("pantalla-rutinas").style.display = "none";
+    document.getElementById("pantalla-detalle-pack").style.display = "block";
+    document.getElementById("detalle-nombre-pack").innerText = nombre;
+    cargarEjerciciosDePack();
+}
+
+async function cargarEjerciciosDePack() {
+    const contenedor = document.getElementById("lista-ejercicios-pack");
+    contenedor.innerHTML = "<p style='text-align:center;'>Cargando...</p>";
+    try {
+        const { data, error } = await clienteSupabase.from('packs_rutinas').select('ejercicios').eq('id', packActivoId).single();
+        if (error) throw error;
+        
+        packActivoEjercicios = data.ejercicios || [];
+        contenedor.innerHTML = "";
+        
+        if (packActivoEjercicios.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top:30px;'>Pack vacío. Añadí ejercicios con el +</p>";
+            return;
+        }
+        
+        packActivoEjercicios.forEach((ej, index) => {
+            const htmlAnim = obtenerAnimacionHTML(ej.nombre);
+            contenedor.innerHTML += `
+                <div class="card-ejercicio">
+                    ${htmlAnim}
+                    <div class="info-ejercicio">
+                        <h4>${ej.nombre} <span style="font-size:0.7rem; color:#888; font-weight: normal;">(${ej.zona})</span></h4>
+                        <div class="detalle-ejercicio">
+                            <div class="punto-ama"></div>
+                            <span>${ej.series}</span> <span class="separador">|</span> <span>Descanso ${ej.descanso}</span>
+                        </div>
+                    </div>
+                    <div class="acciones-ejercicio">
+                        <svg onclick="borrarEjercicioDePack(${index})" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </div>
+                </div>
+            `;
+        });
+    } catch(e) { console.error(e); }
+}
+
+// 5. Agregar ejercicios al JSON
+function abrirModalEjercicioPack() {
+    document.getElementById("select-pack-ej-zona").value = "";
+    document.getElementById("select-pack-ej-nombre").innerHTML = '<option value="">Primero elegí una zona...</option>';
+    document.getElementById("input-pack-ej-series").value = "";
+    document.getElementById("input-pack-ej-descanso").value = "";
+    document.getElementById("modal-ejercicio-pack").style.display = "flex";
+}
+function actualizarListaEjerciciosPack() {
+    const zonaSeleccionada = document.getElementById("select-pack-ej-zona").value;
+    const selectNombre = document.getElementById("select-pack-ej-nombre");
+    selectNombre.innerHTML = "";
+    if (!zonaSeleccionada) { selectNombre.innerHTML = '<option value="">Primero elegí una zona...</option>'; return; }
+    catalogoEjercicios[zonaSeleccionada].forEach(ej => { selectNombre.innerHTML += `<option value="${ej}">${ej}</option>`; });
+}
+async function guardarEjercicioEnPack() {
+    const zona = document.getElementById("select-pack-ej-zona").value;
+    const nombre = document.getElementById("select-pack-ej-nombre").value;
+    const series = document.getElementById("input-pack-ej-series").value.trim();
+    const descanso = document.getElementById("input-pack-ej-descanso").value.trim();
+    if(!zona || !nombre) { alert("Elegí zona y ejercicio"); return; }
+    
+    packActivoEjercicios.push({ zona, nombre, series, descanso });
+    try {
+        const { error } = await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId);
+        if (error) throw error;
+        document.getElementById("modal-ejercicio-pack").style.display = "none";
+        cargarEjerciciosDePack();
+    } catch(e) { alert("Error: " + e.message); }
+}
+async function borrarEjercicioDePack(index) {
+    packActivoEjercicios.splice(index, 1);
+    try {
+        await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId);
+        cargarEjerciciosDePack();
+    } catch(e) { alert("Error: " + e.message); }
+}
+
+// --- 6. IMPORTAR PACK AL ALUMNO (LA MEJOR PARTE) ---
+async function abrirModalSeleccionarPack() {
+    document.getElementById("modal-ejercicio").style.display = "none"; // Cierra el modal manual
+    document.getElementById("modal-seleccionar-pack").style.display = "flex";
+    
+    const contenedor = document.getElementById("lista-seleccionar-packs");
+    contenedor.innerHTML = "<p style='text-align:center;'>Cargando rutinas...</p>";
+    
+    try {
+        const { data: packs, error } = await clienteSupabase.from('packs_rutinas').select('*').eq('profesor_id', profeActivoId);
+        if (error) throw error;
+        
+        contenedor.innerHTML = "";
+        if (packs.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center;'>No hay rutinas creadas.</p>";
+            return;
+        }
+        
+        packs.forEach(pack => {
+            const ejCount = pack.ejercicios ? pack.ejercicios.length : 0;
+            const primerEj = (ejCount > 0) ? pack.ejercicios[0].nombre : null;
+            const htmlAnim = obtenerAnimacionHTML(primerEj);
+
+            contenedor.innerHTML += `
+                <div class="card-alumno" onclick="importarPackAAlumno('${pack.id}')" style="cursor:pointer; background:#f9f9f9; border: 1px solid #ddd; margin-bottom: 10px;">
+                    ${htmlAnim}
+                    <div class="info-central" style="margin-left: 15px;">
+                        <h3 style="font-size: 1rem;">${pack.nombre}</h3>
+                        <div class="info-detalle" style="font-size: 0.75rem;">${ejCount} ejercicios adentro</div>
+                    </div>
+                    <div class="acciones-ejercicio">
+                        <span style="color:#f39c12; font-weight:700; font-size: 0.8rem;">Elegir</span>
+                    </div>
+                </div>
+            `;
+        });
+    } catch(e) { contenedor.innerHTML = "Error al cargar"; }
+}
+
+async function importarPackAAlumno(packId) {
+    document.getElementById("lista-seleccionar-packs").innerHTML = "<p style='text-align:center;'>Descargando rutina para el alumno...</p>";
+    try {
+        // 1. Extraemos los ejercicios del pack
+        const { data: pack, error: err1 } = await clienteSupabase.from('packs_rutinas').select('ejercicios').eq('id', packId).single();
+        if (err1) throw err1;
+        
+        const ejs = pack.ejercicios || [];
+        if(ejs.length === 0) { alert("Este pack está vacío."); document.getElementById("modal-seleccionar-pack").style.display = "none"; return; }
+
+        // 2. Armamos la caja de datos masiva para insertar en el alumno
+        const diaSelec = document.getElementById("selector-dia-rutina").value;
+        const insertData = ejs.map((ej, index) => ({
+            alumno_id: alumnoSeleccionadoId,
+            dia_semana: diaSelec,
+            zona_muscular: ej.zona,
+            ejercicio_nombre: ej.nombre,
+            series_reps: ej.series,
+            descanso: ej.descanso,
+            orden: 999 + index // Esto asegura que caigan todos juntitos al final de la lista
+        }));
+
+        // 3. Supabase inyecta todos los ejercicios en 1 solo segundo
+        const { error: err2 } = await clienteSupabase.from('rutinas_planificadas').insert(insertData);
+        if (err2) throw err2;
+
+        document.getElementById("modal-seleccionar-pack").style.display = "none";
+        cambiarDiaRutina(); // Refrescamos la pantalla para ver la magia
+        
+    } catch(e) { alert("Error al importar: " + e.message); }
 }

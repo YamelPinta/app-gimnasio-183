@@ -197,14 +197,11 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                         <span>Alumnos</span>
                     </button>
-                    <button class="nav-item">
+                    <button class="nav-item" onclick="abrirPantallaRutinas()">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
                         <span>Rutinas</span>
                     </button>
-                    <button class="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span>Perfil</span>
-                    </button>
+                    
 
                     
                 </nav>
@@ -261,6 +258,13 @@
             <div id="modal-ejercicio" class="modal-overlay" style="display: none;">
                 <div class="modal-contenido">
                     <h3>Añadir Ejercicio</h3>
+                    
+                    <button class="btn-guardar" onclick="abrirModalSeleccionarPack()" style="width: 100%; background-color: #2c2c2c; margin: 15px 0; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                        Elegir de Rutinas Predefinidas
+                    </button>
+                    
+                    <div style="text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 10px;">O crear un ejercicio manual:</div>
             
                     <div class="campo-detalle">
                         <label class="label-modal">Zona muscular:</label>
@@ -308,15 +312,11 @@
                     <span>Alumnos</span>
                 </button>
         
-                <button class="nav-item">
+                <button class="nav-item" onclick="abrirPantallaRutinas()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
                     <span>Rutinas</span>
                 </button>
         
-                <button class="nav-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span>Perfil</span>
-                </button>
             </nav>
         </div>
 
@@ -404,6 +404,88 @@
                     <button class="btn-cancelar" onclick="cerrarModalEditarAlumno()">Cancelar</button>
                     <button class="btn-guardar" onclick="guardarEdicionAlumnoEnBD()">Guardar</button>
                 </div>
+            </div>
+        </div>
+
+        <div id="pantalla-rutinas" class="pantalla-dashboard-moderna" style="display: none;">
+            <div class="header-dashboard">
+                <img src="imagenes/logo.png" alt="Logo" class="logo-dash">
+            </div>
+            <div class="titulo-dashboard">
+                <h2>Mis Rutinas</h2>
+                <p>Packs predefinidos para asignar rápido</p>
+            </div>
+            
+            <div class="contenedor-agregar-alumno">
+                <button class="btn-agregar-moderno" onclick="abrirModalCrearPack()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Crear Rutina
+                </button>
+            </div>
+            
+            <div id="lista-packs" class="lista-alumnos-moderna"></div>
+
+            <nav class="bottom-nav">
+                <button class="nav-item" onclick="volverAPerfiles()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Inicio</span></button>
+                <button class="nav-item" onclick="volverAlDashboard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Alumnos</span></button>
+                <button class="nav-item activo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line></svg><span>Rutinas</span></button>
+            </nav>
+        </div>
+
+        <div id="pantalla-detalle-pack" class="pantalla-fondo-claro" style="display: none;">
+            <div class="header-logo-centrado"><img src="imagenes/logo.png" alt="Logo" class="logo-top"></div>
+            
+            <div class="tarjeta-info-alumno" style="background-image: none; background-color: #2c2c2c; color: white;">
+                <div class="avatar-gris" style="background-color: rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" fill="white" width="28"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
+                <div class="datos-info-alumno">
+                    <h2 id="detalle-nombre-pack" style="color: white; font-weight: 600;">Nombre del Pack</h2>
+                    <p style="color: rgba(255,255,255,0.7);">Ejercicios predefinidos</p>
+                </div>
+            </div>
+
+            <div id="lista-ejercicios-pack" class="contenedor-ejercicios"></div>
+            <div class="contenedor-fab"><button class="btn-fab-amarillo" onclick="abrirModalEjercicioPack()">+</button></div>
+
+            <nav class="bottom-nav">
+                <button class="nav-item activo" onclick="abrirPantallaRutinas()" style="width: 100%; flex-direction: row; gap: 10px; color: #2c2c2c;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <span style="font-size: 1rem; border:none;">Volver a mis Rutinas</span>
+                </button>
+            </nav>
+        </div>
+
+        <div id="modal-crear-pack" class="modal-overlay" style="display: none;">
+            <div class="modal-contenido">
+                <h3>Crear nueva rutina</h3>
+                <div class="campo-detalle">
+                    <input type="text" id="input-pack-nombre" class="input-modal" placeholder="Ej: Día de Pierna">
+                </div>
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="cerrarModalCrearPack()">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarPackNuevo()">Crear</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-ejercicio-pack" class="modal-overlay" style="display: none;">
+            <div class="modal-contenido">
+                <h3>Añadir al Pack</h3>
+                <div class="campo-detalle"><select id="select-pack-ej-zona" class="input-modal" onchange="actualizarListaEjerciciosPack()"><option value="">Zona muscular...</option><option value="Pecho">Pecho</option><option value="Espalda">Espalda</option><option value="Hombros">Hombros</option><option value="Piernas">Piernas</option><option value="Glúteos">Glúteos</option><option value="Brazos">Brazos</option><option value="Core">Core / Abdominales</option></select></div>
+                <div class="campo-detalle"><select id="select-pack-ej-nombre" class="input-modal"><option value="">Elegí zona primero...</option></select></div>
+                <div class="campo-detalle"><input type="text" id="input-pack-ej-series" class="input-modal" placeholder="Series y Reps"></div>
+                <div class="campo-detalle"><input type="text" id="input-pack-ej-descanso" class="input-modal" placeholder="Descanso"></div>
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="document.getElementById('modal-ejercicio-pack').style.display='none'">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarEjercicioEnPack()">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-seleccionar-pack" class="modal-overlay" style="display: none; z-index: 2000;">
+            <div class="modal-contenido" style="max-height: 80vh; overflow-y: auto;">
+                <h3>Elegí un pack</h3>
+                <div id="lista-seleccionar-packs" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;"></div>
+                <button class="btn-cancelar" onclick="document.getElementById('modal-seleccionar-pack').style.display='none'" style="width: 100%; margin-top: 15px;">Cancelar</button>
             </div>
         </div>
 
