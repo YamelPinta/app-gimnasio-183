@@ -291,7 +291,10 @@ async function cargarAlumnos() {
                     <div class="info-central">
                         <h3>${alumno.nombre} ${alumno.apellido}</h3>
                         <div class="info-detalle"><div class="punto-naranja"></div> ${actividadReal}</div>
-                        <div class="info-detalle">🎯 ${objetivoReal}</div>
+                        <div class="info-detalle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 5px;"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                            ${objetivoReal}
+                        </div>
                     </div>
 
                     <div class="estado-derecha">
