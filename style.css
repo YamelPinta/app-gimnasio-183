@@ -1,0 +1,1040 @@
+
+/* --- 1. RESETEO Y BASE --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-image: url('imagenes/fonfo.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: #f7f7f7;
+    color: #333333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.contenedor-app {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px 20px;
+}
+
+/* --- 2. LOGOS Y PANTALLA DE LOGIN --- */
+.login-moderno {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.login-header {
+    width: 100%;
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.img-logo {
+    width: 90%;
+    max-width: 250px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.titulo-app-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    justify-content: flex-start;
+}
+
+.subtitulo-app {
+    font-size: 0.85rem;
+    color: #555;
+    padding-left: 20px;
+    margin-bottom: 10px;
+}
+
+/* ARREGLADO: se sacó el transform: scale(0.6) y los márgenes negativos que lo achicaban */
+.logo-container-small {
+    text-align: center;
+    margin-bottom: 5px;
+    margin-top: 0;
+}
+
+/* ARREGLADO: tamaño del logo en pantalla de perfiles ahora es visible */
+.img-logo-small {
+    width: 80%;
+    max-width: 250px;
+    height: auto;
+}
+
+.barra-vertical {
+    width: 3px;
+    height: 16px;
+    background-color: #f39c12;
+    margin-right: 8px;
+}
+
+.titulo-app {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #444;
+}
+
+.tarjeta-login {
+    background-color: #ffffff;
+    width: 100%;
+    border-radius: 16px;
+    padding: 20px 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+}
+
+.grupo-input {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.icono-input, .icono-ojo {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: #555;
+}
+
+.icono-input { left: 5px; }
+
+.icono-ojo {
+    right: 5px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+
+.grupo-input input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #dcdcdc;
+    padding: 10px 10px 10px 30px;
+    font-size: 0.95rem;
+    color: #333;
+    background: transparent;
+    outline: none;
+}
+
+.grupo-input input:focus {
+    border-bottom: 2px solid #f39c12;
+}
+
+.opciones-login {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    color: #444;
+}
+
+.checkbox-container input {
+    margin-right: 8px;
+    accent-color: #f39c12;
+}
+
+.link-olvido {
+    color: #f39c12;
+    text-decoration: none;
+}
+
+.btn-iniciar-sesion {
+    width: 100%;
+    background-color: #f39c12;
+    color: #1a1a1a;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.footer-login {
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+}
+
+.footer-login a {
+    color: #f39c12;
+    text-decoration: none;
+}
+
+/* --- 3. PANTALLA DE SELECCIÓN DE PERFIL --- */
+
+.pantalla-perfiles {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.textos-perfiles {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.textos-perfiles h2 {
+    font-family: "Oswald", sans-serif !important; 
+    font-size: 1.6rem;
+    color: #2c2c2c;
+    font-weight: 400;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+}
+ 
+.textos-perfiles p {
+    font-size: 0.75rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* ARREGLADO: sin justify-items: center para que las tarjetas llenen la columna correctamente */
+.grilla-perfiles-moderna {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+/* ARREGLADO: width: 100% en vez de 160px fijo — en mobile de 360px las tarjetas se desbordaban */
+.tarjeta-perfil-moderna {
+    width: 100%;
+    height: auto;
+    min-height: 175px;
+    padding: 14px 8px;
+    background-color: white;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.13);
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.tarjeta-perfil-moderna:hover {
+    border-color: #f39c12;
+}
+
+.avatar-circulo {
+    width: 90px;
+    height: 90px;
+    background-color: #efefef;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 2.5rem;
+    color: #333;
+}
+
+.nombre-perfil {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.tarjeta-perfil-moderna.seleccionado {
+    border-color: #f39c12;
+}
+
+.footer-perfiles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-top: auto;
+}
+
+.btn-footer-icono {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #555;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-footer-icono svg {
+    width: 18px;
+    height: 18px;
+}
+
+.separador-vertical {
+    width: 1px;
+    height: 18px;
+    background-color: #ccc;
+}
+
+/* avatar de los perfiles de los profes, que puede ser una imagen o un icono */
+.avatar-profe {
+    width: 125px !important;
+    height: 125px !important;
+    min-width: 125px;
+    min-height: 125px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: none !important;
+    display: block;
+    margin: 0 auto 15px auto;
+}
+
+/* --- PANTALLA FILA DE ALUMNOS --- */
+.pantalla-dashboard-moderna {
+    /* 1. Aplicamos tu nuevo fondo exclusivamente a esta pantalla */
+    background-image: url('imagenes/fonfo.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    
+    /* CAMBIOS AQUÍ: Cambiamos a 'center top' y fijamos el fondo */
+    background-position: center top; 
+    background-attachment: fixed; /* <<-- ESTO HACE QUE EL FONDO SE QUEDE QUIETO */
+    
+    /* 2. Eliminamos el color de fondo sólido que hacía el efecto de caja */
+    background-color: transparent;
+    
+    /* 3. Truco de márgenes negativos para expandirse a toda la pantalla */
+    margin: -30px -20px; 
+    padding: 40px 20px 80px 20px; /* Restauramos el espacio interior */
+    
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.header-dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo-dash { width: 100px; }
+.icono-campana { width: 24px; color: #333; }
+
+.titulo-dashboard h2 {
+    font-size: 2rem;
+    font-weight: 650;
+    color: #2c2c2c;
+    margin-bottom: 5px;
+}
+
+.titulo-dashboard p {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.contenedor-buscador {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 25px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border: 1px solid #eee;
+}
+
+.contenedor-buscador input {
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    margin: 0 10px;
+    font-size: 0.95rem;
+}
+
+.icono-buscar, .icono-filtros { width: 20px; }
+
+.contenedor-chips {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    scrollbar-width: none; /* Oculta scrollbar en Firefox */
+}
+.contenedor-chips::-webkit-scrollbar { display: none; } /* Oculta scrollbar en Chrome */
+
+.chip {
+    white-space: nowrap;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #555;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.chip.activo {
+    background: #f39c12;
+    color: white;
+    border-color: #f39c12;
+    font-weight: 600;
+}
+
+/* Tarjetas de Alumnos */
+.lista-alumnos-moderna {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card-alumno {
+    background: white;
+    border-radius: 16px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+
+.avatar-actividad {
+    width: 60px;
+    height: 60px;
+    background: #2c2c2c; /* Círculo negro */
+    border-radius: 50%;
+    margin-right: 15px;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.info-central { flex-grow: 1; }
+
+.info-central h3 {
+    font-size: 1.1rem;
+    color: #2c2c2c;
+    margin-bottom: 4px;
+}
+
+.info-detalle {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #777;
+    margin-bottom: 2px;
+}
+
+.punto-naranja {
+    width: 8px; height: 8px;
+    background: #f39c12;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.estado-derecha {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    padding-left: 10px;
+    border-left: 1px solid #eee;
+
+    flex-shrink: 0;
+}
+
+.badge-estado {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.badge-aldia { background: #e8f5e9; color: #2e7d32; }
+.badge-vencepronto { background: #fff3e0; color: #f57c00; }
+.badge-vencida { background: #ffebee; color: #c62828; }
+
+.texto-rutina { font-size: 0.7rem; color: #999; margin-bottom: 5px; white-space: nowrap; }
+.icono-flecha { color: #ccc; font-size: 1.2rem; }
+
+/* Menú Inferior */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 15px 0;
+    box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+    z-index: 100;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #888;
+    cursor: pointer;
+}
+
+.nav-item svg { width: 24px; margin-bottom: 4px; }
+.nav-item span { font-size: 0.75rem; }
+
+.nav-item.activo { color: #2c2c2c; font-weight: 600; }
+.nav-item.activo span { border-bottom: 2px solid #f39c12; padding-bottom: 2px; }
+
+/* --- BOTÓN AGREGAR ALUMNO MODERNO --- */
+.contenedor-agregar-alumno {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end; /* Alinea el botón a la derecha */
+    margin-bottom: 15px;
+}
+
+.btn-agregar-moderno {
+    background-color: #f39c12; /* Color naranja/amarillo de tu diseño */
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espacio entre el ícono y el texto */
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.btn-agregar-moderno svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-agregar-moderno:active {
+    transform: scale(0.95); /* Pequeño efecto al tocar el botón */
+}
+
+/* --- BOTONES DE REGISTRO DE PAGO EN TARJETAS --- */
+.contenedor-accion-pago {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.btn-pago-status {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+/* Estado: No pagó / Pendiente */
+.btn-pago-pendiente {
+    background-color: #f0f0f0;
+    color: #666;
+    border: 1px dashed #ccc;
+}
+.btn-pago-pendiente:active {
+    background-color: #e0e0e0;
+}
+
+/* Estado: Sí pagó / Al día */
+.btn-pago-realizado {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+.btn-pago-realizado:active {
+    background-color: #ffd8d8; /* Al mantener apretado para deshacer se tiñe sutilmente */
+    color: #c62828;
+}
+
+/* --- PANTALLA INDIVIDUAL ALUMNO (NUEVO DISEÑO) --- */
+.pantalla-fondo-claro {
+    background-color: transparent;
+    min-height: 100vh;
+    margin: -30px -20px;
+    padding: 40px 20px 100px 20px;
+    
+    min-height: 100vh;
+    position: relative;
+}
+
+.header-logo-centrado {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.logo-top {
+    height: 50px; /* Ajusta según el tamaño real de tu logo */
+}
+
+/* Tarjeta principal con fondo personalizado */
+.tarjeta-info-alumno {
+    background-image: url('imagenes/nombre.png'); 
+    background-size: cover;
+    background-position: right center; 
+    background-repeat: no-repeat;
+    background-color: #e0e0e0; 
+    
+    border-radius: 20px; /* Bordes apenitas menos curvos para acompañar el formato rectangular */
+    padding: 8px 8px; /* CAMBIO: Menos alto (de 25 pasó a 15) y empuja la foto más a la izquierda */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* CAMBIO: Acerca los textos a la foto (antes estaba en 15px) */
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden; 
+}
+
+.avatar-gris {
+    width: 60px; /* CAMBIO: Círculo más chico (antes era de 70px) */
+    height: 60px; /* CAMBIO: Círculo más chico */
+    background-color: #c2c2c2;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.avatar-gris svg { 
+    width: 30px; /* Achicamos también el ícono de adentro para que no quede apretado */
+    height: 30px; 
+}
+.datos-info-alumno h2 {
+    font-size: 1.5rem;
+    color: #2c2c2c;
+    margin-bottom: 5px;
+    font-weight: 648;
+
+}
+.datos-info-alumno p {
+    font-size: 0.75rem;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+/* Título de la rutina */
+.titulo-seccion-rutina {
+    margin-bottom: 15px;
+}
+.titulo-seccion-rutina h3 {
+    font-size: 1rem;
+    color: #2c2c2c;
+    font-weight: 600;
+}
+.subrayado-amarillo {
+    position: relative;
+}
+.subrayado-amarillo::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #f39c12;
+    border-radius: 2px;
+}
+
+/* Tarjetas de Ejercicios */
+.contenedor-ejercicios {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-ejercicio {
+    background: white;
+    border-radius: 15px;
+    padding: 12px 15px 12px 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.icono-arrastre { color: #ccc; cursor: grab; margin-right: 2px; }
+.img-ejercicio { width: 50px; height: 50px; object-fit: contain; }
+
+.info-ejercicio { flex-grow: 1; }
+.info-ejercicio h4 {
+    font-size: 0.81rem;
+    color: #2c2c2c;
+    margin-bottom: 4px;
+    font-weight: 640;
+}
+.detalle-ejercicio {
+    font-size: 0.75rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.punto-ama {
+    width: 6px; height: 6px;
+    background-color: #f39c12;
+    border-radius: 50%;
+}
+.separador { color: #ccc; }
+
+.acciones-ejercicio {
+    display: flex;
+    gap: 10px;
+    color: #888;
+}
+.acciones-ejercicio svg { width: 18px; cursor: pointer; }
+
+/* Botón Flotante */
+.contenedor-fab {
+    position: fixed;
+    bottom: 85px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
+}
+.texto-fab {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.btn-fab-amarillo {
+    width: 42px;  /* CAMBIO: Antes era 50px, ahora es más chiquito */
+    height: 42px; /* CAMBIO: Antes era 50px */
+    border-radius: 50%;
+    background-color: #f39c12;
+    color: white;
+    
+    /* Ajustes para el centrado perfecto del + */
+    font-size: 1.5rem; /* Achicamos un poco el + para que entre bien */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 0; /* TRUCO: Fuerza a ignorar los espacios invisibles de la tipografía */
+    padding-bottom: 2px; /* TRUCO 2: Compensa el centro visual exacto del símbolo + */
+    
+    border: none;
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.4);
+    cursor: pointer;
+}
+
+/* Estado activo del menú (Fondo amarillo) */
+.nav-item.activo-amarillo {
+    background-color: #f39c12;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+}
+.nav-item.activo-amarillo span { border: none; padding: 0; }
+
+/* --- TÍTULO DE RUTINA INTERACTIVO --- */
+.encabezado-rutina-interactivo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap; /* Evita que se rompa en pantallas muy finitas */
+}
+
+.encabezado-rutina-interactivo h3 {
+    margin-bottom: 0; /* Anulamos el margen para alinear con los inputs */
+}
+
+/* El desplegable invisible */
+.selector-dia {
+    font-size: 1.1rem;
+    color: #2c2c2c;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+}
+
+.separador-punto {
+    font-size: 1.1rem;
+    color: #2c2c2c;
+    font-weight: 600;
+}
+
+/* El campo de texto para escribir la zona muscular */
+.input-zona {
+    font-size: 1.1rem;
+    color: #2c2c2c;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    outline: none;
+    flex-grow: 1; /* Ocupa el resto de la pantalla */
+    min-width: 120px;
+    font-family: inherit;
+    border-bottom: 1px dashed transparent; /* Borde invisible */
+    transition: all 0.2s ease;
+}
+
+/* Cuando tocas para escribir, aparece un subrayado sutil naranja */
+.input-zona:focus {
+    border-bottom: 1px dashed #f39c12; 
+}
+
+/* --- MODAL PARA AGREGAR EJERCICIO --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); /* Fondo oscuro transparente */
+    display: flex; justify-content: center; align-items: center;
+    z-index: 1000;
+}
+
+.modal-contenido {
+    background: white; 
+    padding: 25px 20px; 
+    border-radius: 20px; 
+    width: 90%; max-width: 350px;
+    display: flex; flex-direction: column; gap: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-contenido h3 { margin: 0; color: #2c2c2c; font-size: 1.3rem; }
+
+.modal-botones { 
+    display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; 
+}
+
+.btn-cancelar { 
+    background: none; border: none; color: #888; font-weight: 600; 
+    cursor: pointer; padding: 8px 15px; font-size: 0.9rem;
+}
+
+.btn-guardar { 
+    background: #f39c12; border: none; color: white; font-weight: 600; 
+    cursor: pointer; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem;
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+}
+
+/* Estilos para los campos adentro de las ventanas emergentes */
+.input-modal {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #333;
+    outline: none;
+    font-family: inherit;
+    background-color: #fafafa;
+}
+.input-modal:focus {
+    border-color: #f39c12;
+    background-color: white;
+}
+.label-modal {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 5px;
+    display: block;
+    font-weight: 600;
+}
+
+.contenedor-admin-acciones {
+    display: flex;
+    justify-content: center; /* Centra los botones */
+    gap: 4px;              /* Espacio pequeño entre botones */
+    margin: 20px 0px;     /* Margen superior y laterales */
+    flex-wrap: nowrap;       /* Por si la pantalla es muy chica, que se acomoden */
+}
+
+.btn-accion-admin {
+    background: #f0f0f0;
+    border: 1px solid #555;
+    padding: 6px 10px;      /* Más chiquitos */
+    border-radius: 15px;
+    font-size: 0.70rem;     /* Fuente más pequeña */
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;    /* Evita que el texto salte de línea */
+}
+
+/* Estado Rojo (Por defecto) */
+.btn-accion-admin.peligro {
+    color: #d32f2f;
+    background-color: #ffebee;
+    border: 1px solid #ffcdd2;
+}
+
+/* Estado Gris (Modo "No borrar") */
+.btn-accion-admin.gris {
+    background-color: #666 !important;
+    color: white !important;
+    border: 1px solid #444 !important;
+}
+
+/* Blindaje contra cambios de color al tocar */
+.btn-accion-admin.peligro:active, 
+.btn-accion-admin.gris:active {
+    transform: none !important;
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Le decimos a la tarjeta que permita que el botón flote adentro de ella */
+.tarjeta-info-alumno {
+    position: relative;
+}
+
+/* El nuevo botoncito del lápiz */
+.btn-editar-alumno-card {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.65); /* Fondo blanco semitransparente */
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #444;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+}
+
+.btn-editar-alumno-card:active {
+    transform: scale(0.9);
+    background: white;
+}
+
+.btn-editar-alumno-card svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* 1. LA TARJETA QUE TENÉS AGARRADA CON EL DEDO */
+.tarjeta-arrastrando {
+    border: 2px solid #f39c12 !important; /* Contorno amarillo/naranja de tu app */
+    box-shadow: 0 12px 25px rgba(243, 156, 18, 0.3) !important; /* Sombra del mismo color */
+    background-color: white !important;
+    transform: scale(1.03); /* Se agranda apenitas para dar el efecto de que "flota" hacia vos */
+    z-index: 9999 !important;
+    opacity: 1 !important;
+}
+
+/* 2. EL LUGAR DONDE VA A CAER (El indicador visual) */
+.tarjeta-indicador-caida {
+    opacity: 1 !important;
+    background-color: #fff8e1 !important; /* Un fondo amarillo muy clarito */
+    border: 2px dashed #f39c12 !important; /* Borde de líneas punteadas amarillas */
+    box-shadow: none !important;
+}
+
+/* --- IMÁGENES ANIMADAS DE EJERCICIOS --- */
+
+/* Estilo base para el cuadradito de la imagen */
+.img-animada {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    background-color: #ffffff; /* Fondo negro por si la imagen tarda en cargar */
+    flex-shrink: 0;
+}
+
+/* Animación específica para Vuelos Laterales */
+.anim-vuelos-laterales {
+    animation: swapLaterales 1.5s infinite;
+}
+
+/* El motor de la animación: cambia entre las dos fotos nuevas */
+@keyframes swapLaterales {
+    0%, 49.9% { background-image: url('imagenes/lateralesx500.jpg'); }
+    50%, 100% { background-image: url('imagenes/laterales2x500.jpg'); }
+}
+
+/* Animación para Press de Banca */
+.anim-press-banca {
+    animation: swapPress 1.5s infinite;
+}
+@keyframes swapPress {
+    0%, 49.9% { background-image: url('imagenes/PRESS1.jpg'); }
+    50%, 100% { background-image: url('imagenes/PRESS2.jpg'); }
+}
+
+/* Animación para Back Squat (Sentadilla) */
+.anim-back-squat {
+    animation: swapBacksquat 1.5s infinite;
+}
+@keyframes swapBacksquat {
+    0%, 49.9% { background-image: url('imagenes/BACKSQUAT.jpg'); }
+    50%, 100% { background-image: url('imagenes/BACKSQUAT2.jpg'); }
+}
+
+/* Animación para Peso Muerto */
+.anim-peso-muerto {
+    animation: swapPesoMuerto 1.5s infinite;
+}
+@keyframes swapPesoMuerto {
+    0%, 49.9% { background-image: url('imagenes/PESOMUERTO1.jpg'); }
+    50%, 100% { background-image: url('imagenes/PESOMUERTO2.jpg'); }
+}
+
+.anim-press-banca {
+    animation: swapPressBanca 1.5s infinite;
+}
+@keyframes swapPressBanca {
+    0%, 49.9% { background-image: url('imagenes/PRESSDEBANCA1.jpg'); }
+    50%, 100% { background-image: url('imagenes/PRESSDEBANCA2.jpg'); }
+}
