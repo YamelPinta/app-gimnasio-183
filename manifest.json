@@ -2,20 +2,22 @@
   "name": "Gimnasio 18.3",
   "short_name": "18.3",
   "description": "App de gestión de alumnos y rutinas",
-  "start_url": "./index.html",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#1e1e1e",
   "theme_color": "#f39c12",
   "icons": [
     {
-      "src": "./imagenes/icono.png",
+      "src": "./imagenes/icono-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "./imagenes/icono.png",
+      "src": "./imagenes/icono-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
