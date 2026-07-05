@@ -312,6 +312,13 @@ body {
     border: none !important;
     display: block;
     margin: 0 auto 15px auto;
+
+   /* --- EFECTO HISTORIA DE INSTAGRAM --- */
+    padding: 4px; /* Le damos más espacio porque la foto es más grande */
+    border: 3px solid transparent !important; /* Aro más grueso */
+    background: 
+        linear-gradient(white, white) padding-box, 
+        linear-gradient(45deg, #f39c12, #e74c3c) border-box; 
 }
 
 /* --- PANTALLA FILA DE ALUMNOS --- */
@@ -433,6 +440,8 @@ body {
     margin-right: 15px;
     flex-shrink: 0;
     object-fit: cover;
+
+    
 }
 
 .info-central { flex-grow: 1; }
@@ -1037,4 +1046,147 @@ body {
 @keyframes swapPressBanca {
     0%, 49.9% { background-image: url('imagenes/PRESSDEBANCA1.jpg'); }
     50%, 100% { background-image: url('imagenes/PRESSDEBANCA2.jpg'); }
+}
+
+/* =========================================
+   NUEVO DISEÑO DE LOGIN (EFECTO GLASS) - TAMAÑO COMPACTO
+   ========================================= */
+
+.login-visual {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100vh;
+    background-image: url('imagenes/FONDO.jpg');
+    background-size: cover;
+    background-position: center;
+    background-color: #111; 
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.login-header-visual {
+    text-align: center;
+    margin-top: -50px; /* Empuja el logo más arriba */
+    margin-bottom: 35px; /* Lo separa más de la caja de login */
+    z-index: 2;
+    padding: 0 20px;
+}
+
+.logo-visual {
+    width: 170px; /* Logo más pequeño (antes era 220px) */
+    margin-bottom: 10px;
+    filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8));
+}
+
+.titulo-visual {
+    color: white;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.95rem; /* Texto más chico */
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+}
+
+.subtitulo-visual {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem; /* Texto más chico */
+    max-width: 250px;
+    margin: 0 auto;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+}
+
+/* La caja de vidrio ahora es más compacta */
+.tarjeta-login-visual {
+    background: rgba(10, 10, 10, 0.45); 
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px); 
+    border: 2px solid #f39c12; 
+    border-radius: 20px; 
+    padding: 40px 20px; /* Más alta (40px de espacio arriba y abajo) */
+    width: 85%;
+    max-width: 280px; /* Más angosta (antes era 320px) */
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Más separación entre los renglones */
+    box-shadow: 0 15px 30px rgba(0,0,0,0.7);
+}
+
+.grupo-input-visual {
+    position: relative;
+    width: 100%;
+}
+
+/* Campos de texto más finos */
+.grupo-input-visual input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #f39c12;
+    border-radius: 18px; /* Puntas suavemente redondeadas, no circulares */
+    padding: 14px 18px; /* Un poquito más altos */
+    color: white;
+    font-size: 0.95rem; 
+    outline: none;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.grupo-input-visual input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Brillo intenso al tocar para escribir */
+.grupo-input-visual input:focus {
+    /* Hacemos que el borde se vuelva de un naranja/amarillo más vibrante */
+    border-color: #ffb732; 
+    
+    /* Doble sombra para el efecto neón: una difuminada y otra más concentrada */
+    box-shadow: 0 0 18px rgba(243, 156, 18, 0.9), 0 0 8px rgba(243, 156, 18, 0.8);
+    
+    /* Aclaramos apenitas el fondo negro y le damos un pequeñísimo tinte naranja */
+    background: rgba(243, 156, 18, 0.15); 
+}
+
+.contenedor-ojo-visual {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.contenedor-ojo-visual svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Botón más fino */
+.btn-iniciar-visual {
+    width: 100%;
+    background-image: url('imagenes/boton.png');
+    background-size: cover;
+    background-position: center;
+    background-color: #f39c12; 
+    border: none;
+    border-radius: 12px; /* Puntas suavemente redondeadas */
+    padding: 14px 20px; 
+    color: #1a1a1a;
+    font-weight: 800;
+    font-size: 0.95rem; 
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.btn-iniciar-visual:active {
+    transform: scale(0.95);
 }
