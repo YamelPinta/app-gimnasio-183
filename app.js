@@ -759,24 +759,47 @@ function abrirModalEditar(id, zona, nombre, series, descanso) {
 }
 
 // --- EDICIÓN DE PROFESOR ---
-// --- EDICIÓN DE PROFESOR ---
-function editarProfe() {
-    let nombreActual = document.getElementById("nombre-profe-activo").innerText;
-    nombreActual = nombreActual.replace("Profe ", "");
+// Abrir ventana y cargar los datos
+async function editarProfe() {
+    try {
+        // En vez de adivinar el nombre mirando la pantalla, le pedimos a Supabase TODOS los datos exactos del profe
+        const { data: profe, error } = await clienteSupabase
+            .from('profesores')
+            .select('*')
+            .eq('id', profeActivoId)
+            .single();
+        
+        if (error) throw error;
 
-    document.getElementById("input-edit-nombre").value = nombreActual;
-    document.getElementById("input-edit-apellido").value = ""; 
+        // Rellenamos todos los campos con la info real
+        document.getElementById("input-edit-nombre").value = profe.nombre || "";
+        document.getElementById("input-edit-apellido").value = profe.apellido || ""; 
+        
+        // Asignamos la foto que ya tenía guardada en la base de datos
+        if (profe.foto_url) {
+            document.getElementById("select-edit-profe-avatar").value = profe.foto_url;
+        } else {
+            document.getElementById("select-edit-profe-avatar").value = "imagenes/perfil1.png";
+        }
 
-    document.getElementById("modal-editar-profe").style.display = "flex";
+        document.getElementById("modal-editar-profe").style.display = "flex";
+        
+    } catch (error) {
+        alert("Error al cargar los datos del perfil: " + error.message);
+    }
 }
 
+// Ventana de cerrar
 function cerrarModalEditarProfe() {
     document.getElementById("modal-editar-profe").style.display = "none";
 }
 
+// Guardar los cambios nuevos
 async function guardarEdicionProfe() {
     const nuevoNombre = document.getElementById("input-edit-nombre").value.trim();
     const nuevoApellido = document.getElementById("input-edit-apellido").value.trim();
+    // AHORA LEEMOS LA NUEVA FOTO ELEGIDA:
+    const nuevaFoto = document.getElementById("select-edit-profe-avatar").value;
     
     if (!nuevoNombre) {
         alert("El nombre no puede estar vacío.");
@@ -784,26 +807,29 @@ async function guardarEdicionProfe() {
     }
 
     try {
-        // 1. Mandamos la orden y exigimos que nos devuelva la data (.select)
+        // Le mandamos a Supabase la orden de actualizar los 3 datos
         const { data: profeActualizado, error } = await clienteSupabase
             .from('profesores')
-            .update({ nombre: nuevoNombre, apellido: nuevoApellido })
+            .update({ 
+                nombre: nuevoNombre, 
+                apellido: nuevoApellido,
+                foto_url: nuevaFoto // Agregamos la foto al guardado
+            })
             .eq('id', profeActivoId)
             .select();
         
         if (error) throw error;
 
-        // 2. Si la data viene vacía, Supabase nos bloqueó silenciosamente
         if (!profeActualizado || profeActualizado.length === 0) {
             alert("¡Supabase bloqueó el cambio! Te falta crear la política UPDATE para la tabla 'profesores'.");
             return;
         }
 
-        // 3. Si todo salió bien, cerramos la ventana y actualizamos el nombre en pantalla
+        // Cerramos la ventana y actualizamos el nombre
         cerrarModalEditarProfe();
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nuevoNombre;
         
-        // Opcional: Actualizamos la lista de fondo por si el usuario vuelve atrás
+        // Actualizamos la lista de fondo por si el profe vuelve atrás a ver su foto cambiada
         cargarProfesores(); 
 
     } catch (e) { 
@@ -811,7 +837,6 @@ async function guardarEdicionProfe() {
         console.error(e);
     }
 }
-
 
 function borrarAlumno(id) {
     pedirConfirmacion(
