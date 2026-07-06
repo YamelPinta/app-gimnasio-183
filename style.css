@@ -1200,3 +1200,81 @@ body {
 .btn-iniciar-visual:active {
     transform: scale(0.95);
 }
+
+/* --- BOTÓN FLOTANTE DEL TEMA --- */
+.btn-tema {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: rgba(10, 10, 10, 0.45);
+    backdrop-filter: blur(5px);
+    border: 2px solid #f39c12;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #f39c12;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.btn-tema svg { width: 22px; height: 22px; }
+
+/* =========================================
+   REGLAS DEL MODO CLARO ACTIVADO
+   ========================================= */
+
+/* 1. Cambia el fondo general */
+.login-visual.modo-claro {
+    background-image: url('imagenes/FONDOBLANO1.jpg');
+}
+
+/* 2. Cambia la caja a vidrio blanco transparente */
+.login-visual.modo-claro .tarjeta-login-visual,
+.login-visual.modo-claro .btn-tema {
+    background: rgba(255, 255, 255, 0.534); /* Blanco transparente */
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15); /* Sombra más suave */
+}
+
+/* 3. Contenedor esmerilado con degradado radial para el modo claro */
+.login-visual.modo-claro .contenedor-texto-visual {
+    /* 1. El color: Blanco fuerte en el centro, transparente en los bordes */
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.945) 20%, rgba(255, 255, 255, 0.212) 100%);
+    
+    
+    
+    /* Bordes bien marcados y definidos como en tu foto */
+    border-radius: 25px; 
+    padding: 20px 30px; 
+    
+    /* Sombrita suave para despegarlo de la pared */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); 
+    
+    display: inline-block;
+}
+
+/* Devolvemos las letras a color negro puro y borramos los contornos/sombras */
+.login-visual.modo-claro .titulo-visual {
+    color: #111; 
+    -webkit-text-stroke: 0; 
+    text-shadow: none; 
+}
+
+.login-visual.modo-claro .subtitulo-visual {
+    color: #333; 
+    -webkit-text-stroke: 0; 
+    text-shadow: none;
+}
+
+/* 4. Aclara los campos de texto e invierte sus letras */
+.login-visual.modo-claro .grupo-input-visual input {
+    background: rgba(255, 255, 255, 0.651);
+    color: #1a1a1a;
+}
+.login-visual.modo-claro .grupo-input-visual input::placeholder,
+.login-visual.modo-claro .contenedor-ojo-visual {
+    color: rgba(0, 0, 0, 0.6);
+}
