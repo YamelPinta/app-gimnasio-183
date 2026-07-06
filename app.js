@@ -1251,3 +1251,22 @@ async function importarPackAAlumno(packId) {
         
     } catch(e) { alert("Error al importar: " + e.message); }
 }
+
+// --- SISTEMA DE TEMA CLARO/OSCURO PARA EL LOGIN ---
+function alternarTemaLogin() {
+    const pantallaLogin = document.getElementById('pantalla-login');
+    const iconoSol = document.getElementById('icono-sol');
+    const iconoLuna = document.getElementById('icono-luna');
+
+    // Agrega o saca la clase "modo-claro" como si fuera un interruptor
+    pantallaLogin.classList.toggle('modo-claro');
+
+    // Cambia el dibujito del botón
+    if (pantallaLogin.classList.contains('modo-claro')) {
+        iconoSol.style.display = 'none'; // Esconde el sol
+        iconoLuna.style.display = 'block'; // Muestra la luna
+    } else {
+        iconoSol.style.display = 'block'; // Muestra el sol
+        iconoLuna.style.display = 'none'; // Esconde la luna
+    }
+}
