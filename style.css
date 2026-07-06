@@ -1201,6 +1201,23 @@ body {
     transform: scale(0.95);
 }
 
+/* --- CONTENEDOR DE TEXTO (MODO OSCURO / PANTALLA NEGRA) --- */
+.contenedor-texto-visual {
+    /* Fondo negro concentrado en el centro y más transparente en los bordes */
+    background: radial-gradient(ellipse at center, rgb(10, 10, 10) 20%, rgba(10, 10, 10, 0.288) 100%); 
+    
+
+    border-radius: 25px; 
+    padding: 20px 30px; 
+    
+    /* Sombra oscura para darle profundidad */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5); 
+    
+    display: inline-block; 
+    width: 90%;
+    max-width: 260px;
+}
+
 /* --- BOTÓN FLOTANTE DEL TEMA --- */
 .btn-tema {
     position: absolute;
@@ -1248,12 +1265,15 @@ body {
     
     /* Bordes bien marcados y definidos como en tu foto */
     border-radius: 25px; 
-    padding: 20px 30px; 
+    padding: 20px 15px; 
     
     /* Sombrita suave para despegarlo de la pared */
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); 
     
     display: inline-block;
+
+    width: 90%;
+    max-width: 260px;
 }
 
 /* Devolvemos las letras a color negro puro y borramos los contornos/sombras */
