@@ -190,93 +190,243 @@ body {
     text-decoration: none;
 }
 
-/* --- 3. PANTALLA DE SELECCIÓN DE PERFIL --- */
+/* --- 3. PANTALLA DE SELECCIÓN DE PERFIL (MODO OSCURO Y CLARO) --- */
+
+/* =========================================
+   LOGOS DINÁMICOS (PANTALLA PERFILES)
+   ========================================= */
+
+/* Comportamiento por defecto (Fondo Oscuro) */
+.pantalla-perfiles .logo-modo-oscuro {
+    display: inline-block; /* Mostramos el nuevo logo blanco/naranja */
+}
+.pantalla-perfiles .logo-modo-claro {
+    display: none; /* Escondemos el logo negro */
+}
+
+/* Comportamiento al tocar el solcito (Fondo Claro) */
+.pantalla-perfiles.modo-claro .logo-modo-oscuro {
+    display: none; /* Escondemos el logo blanco/naranja */
+}
+.pantalla-perfiles.modo-claro .logo-modo-claro {
+    display: inline-block; /* Mostramos el logo negro original */
+}
 
 .pantalla-perfiles {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100vh;
+    
+    /* LA SOLUCIÓN REAL: Le damos permiso a TODA la pantalla de scrollear */
+    overflow-y: auto; 
+    
+    background-image: url('imagenes/fondo-profes-oscuro.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-color: #111; 
+    
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
+    z-index: 2000;
 }
 
-.textos-perfiles {
+/* Regla para el cambio de fondo en modo claro */
+.pantalla-perfiles.modo-claro {
+    background-image: url('imagenes/fondo-profes-claro.jpeg');
+}
+
+/* CAJA DE TEXTOS (Ahora transparente) */
+.textos-perfiles-caja {
+    background: transparent; /* Quitamos el blanco */
+    width: 90%;
+    max-width: 320px;
+    padding: 20px;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 4vh;
+    box-shadow: none; /* Quitamos la sombra */
 }
 
-.textos-perfiles h2 {
-    font-family: "Oswald", sans-serif !important; 
-    font-size: 1.6rem;
-    color: #2c2c2c;
-    font-weight: 400;
-    margin-bottom: 5px;
+/* Sombra a los textos para que se lean sobre cualquier fondo */
+.textos-perfiles-caja h2, 
+.textos-perfiles-caja p {
+    text-shadow: 0px 2px 4px rgba(0,0,0,0.5);
+    color: white; /* Ponemos el texto en blanco para que resalte en ambos modos */
+}
+
+.textos-perfiles-caja h2 {
+    position: relative; /* CLAVE: Necesario para que la rayita se posicione sobre este texto */
+    font-family: "Oswald", sans-serif; 
+    font-size: 1.8rem; 
+    color: white; 
+    font-weight: 500;
+    
+    /* Ajustamos el espacio para hacerle lugar a la rayita en el medio */
+    padding-bottom: 10px; 
+    margin-bottom: 18px; 
+    
     letter-spacing: 0.5px;
+    text-shadow: 0px 2px 4px rgba(0,0,0,0.6); 
+}
+
+/* --- LA LÍNEA AMARILLA SEPARADORA --- */
+.textos-perfiles-caja h2::after {
+    content: ""; /* Esto crea un elemento invisible que podemos pintar */
+    position: absolute;
+    bottom: 0; /* Lo empujamos bien abajo del título */
+    left: 50%; /* Lo empujamos al centro... */
+    transform: translateX(-50%); /* ...y lo centramos perfectamente */
+    
+    width: 35px; /* El largo de la línea */
+    height: 3px; /* El grosor de la línea */
+    background-color: #f39c12; /* Tu naranja/amarillo característico */
+    border-radius: 2px; /* Puntas un poquitito redondeadas */
 }
  
-.textos-perfiles p {
-    font-size: 0.75rem;
-    color: #666;
+.textos-perfiles-caja p {
+    font-size: 1.05rem;
+    color: #eaeaea; /* CAMBIO: Blanco un poquito más apagado para que no encandile */
     line-height: 1.4;
+    text-shadow: 0px 2px 4px rgba(0,0,0,0.6);
 }
 
-/* ARREGLADO: sin justify-items: center para que las tarjetas llenen la columna correctamente */
+/* GRILLA */
 .grilla-perfiles-moderna {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
-    width: 100%;
-    margin-bottom: 30px;
+    width: 90%;
+    max-width: 380px;
+    margin-bottom: 20px;
+   
 }
 
-/* ARREGLADO: width: 100% en vez de 160px fijo — en mobile de 360px las tarjetas se desbordaban */
+/* =========================================
+   ESTILO TARJETAS: MODO OSCURO (POR DEFECTO)
+   ========================================= */
 .tarjeta-perfil-moderna {
     width: 100%;
-    height: auto;
-    min-height: 175px;
-    padding: 14px 8px;
-    background-color: white;
-    border-radius: 20px;
+    
+    /* ACÁ ESTÁ LA MAGIA DEL TAMAÑO: Esto las hace casi cuadradas como en tu diseño */
+    aspect-ratio: 1 / 1.15; 
+    padding: 15px 10px;
+    
+    /* El degradado de tu diseño: Resplandor dorado/naranja arriba que se funde a negro abajo */
+    background: radial-gradient(circle at top, rgba(120, 80, 15, 0.4) 0%, rgba(10, 10, 10, 0.651) 65%);
+    
+    border: 1px solid #f39c12; /* Borde naranja */
+    border-radius: 12px;
+    
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.13);
     cursor: pointer;
-    border: 2px solid transparent;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease;
 }
 
-.tarjeta-perfil-moderna:hover {
-    border-color: #f39c12;
+.tarjeta-perfil-moderna:active {
+    transform: scale(0.95);
 }
 
-.avatar-circulo {
-    width: 90px;
-    height: 90px;
-    background-color: #efefef;
+/* --- LA FOTO DEL PROFE (El anillo naranja) --- */
+.tarjeta-perfil-moderna .avatar-profe {
+    /* ACÁ AGRANDAMOS EL CÍRCULO COMPLETO: Pasamos de 80px a 110px */
+    width: 110px;  
+    height: 110px;
+    
     border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 15px;
-    font-size: 2.5rem;
-    color: #333;
+    object-fit: cover;
+    
+    /* El anillo crece junto con la foto automáticamente */
+    border: 3px solid #f39c12; 
+    padding: 4px; /* Le di un milímetro más de espacio interior para que respire mejor al ser más grande */
+    
+    margin-bottom: 12px;
+    background-color: #2c2c2c; 
 }
 
-.nombre-perfil {
-    font-size: 1.2rem;
-    color: #333;
+/* --- EL TEXTO DEL NOMBRE --- */
+.tarjeta-perfil-moderna p {
+    font-family: "Oswald", sans-serif;
+    font-size: 0.95rem;
+    color: white; 
+    text-align: center;
+    
+    /* ESTO ES CLAVE: Transforma dinámicamente cualquier nombre a MAYÚSCULAS */
+    text-transform: uppercase; 
+    
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.2;
 }
 
-.tarjeta-perfil-moderna.seleccionado {
-    border-color: #f39c12;
+
+/* =========================================
+   ESTILO TARJETAS: MODO CLARO
+   ========================================= */
+.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna {
+    /* Fondo color crema clarito y cálido como tu diseño */
+    background: radial-gradient(circle at top, rgb(255, 255, 255) 0%, rgba(255, 229, 205, 0.603) 65%);
+    
+    /* Borde amarillo/naranja sutil */
+    border: 1px solid #f39c12; 
+    
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
 }
 
-.footer-perfiles {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
+/* Mantenemos el fondo de la foto claro por si tarda en cargar */
+.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna .avatar-profe {
+    background-color: #f0f0f0;
+}
+
+/* El texto se vuelve oscuro y sin sombras para que se lea perfecto */
+.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna p {
+    color: #111; 
+    text-shadow: none; 
+}
+
+/* FOOTER (Ahora transparente) */
+.footer-perfiles-blanco {
+    background: transparent; /* Quitamos el blanco */
+    width: 100%;
+    padding: 18px 0;
     margin-top: auto;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 15px;
+
+    box-shadow: none; /* Quitamos la sombra */
+}
+
+/* --- TEXTOS: MODO CLARO --- */
+.pantalla-perfiles.modo-claro .textos-perfiles-caja h2 {
+    color: #111; /* Se vuelve negro */
+    text-shadow: none; /* Le sacamos la sombra */
+}
+
+.pantalla-perfiles.modo-claro .textos-perfiles-caja p {
+    color: #444; /* Se vuelve gris oscuro */
+    text-shadow: none;
+}
+
+/* Ajustamos los botones del footer para que se vean bien sobre el fondo */
+.btn-footer-icono span {
+    color: white !important; /* Texto blanco */
+    text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+}
+
+.btn-footer-icono svg {
+    stroke: white !important; /* Íconos blancos */
+    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8));
+}
+
+.separador-vertical {
+    background-color: rgba(255,255,255,0.3); /* Separador sutil */
 }
 
 .btn-footer-icono {
@@ -285,40 +435,55 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #555;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
+    font-weight: 500;
     cursor: pointer;
 }
 
 .btn-footer-icono svg {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
 }
 
 .separador-vertical {
     width: 1px;
-    height: 18px;
-    background-color: #ccc;
+    height: 20px;
+    
 }
 
-/* avatar de los perfiles de los profes, que puede ser una imagen o un icono */
-.avatar-profe {
-    width: 125px !important;
-    height: 125px !important;
-    min-width: 125px;
-    min-height: 125px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: none !important;
-    display: block;
-    margin: 0 auto 15px auto;
+/* Si activan el modo claro, el texto se pone oscuro para contrastar */
+.pantalla-perfiles.modo-claro .textos-perfiles-caja h2, 
+.pantalla-perfiles.modo-claro .textos-perfiles-caja p,
+.pantalla-perfiles.modo-claro .btn-footer-icono span {
+    color: #111 !important;
+    text-shadow: none !important;
+}
 
-   /* --- EFECTO HISTORIA DE INSTAGRAM --- */
-    padding: 4px; /* Le damos más espacio porque la foto es más grande */
-    border: 3px solid transparent !important; /* Aro más grueso */
-    background: 
-        linear-gradient(white, white) padding-box, 
-        linear-gradient(45deg, #f39c12, #e74c3c) border-box; 
+.pantalla-perfiles.modo-claro .btn-footer-icono svg {
+    stroke: #333 !important;
+    filter: none !important;
+}
+
+/* --- ARREGLO DE AVATARES DE PERFIL --- */
+
+.avatar-circulo {
+    width: 100px;       /* Tamaño del círculo */
+    height: 100px;      /* Tamaño del círculo */
+    border-radius: 50%; /* Esto lo hace redondo */
+    overflow: hidden;   /* LA CLAVE: Todo lo que se salga del círculo se corta */
+    border: 3px solid #f39c12; /* El bordecito naranja */
+    flex-shrink: 0;
+    margin-bottom: 10px;
+    background-color: #ddd; /* Fondo gris por si la imagen tarda en cargar */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar-profe {
+    width: 100%;        /* Ocupa el 100% del contenedor */
+    height: 100%;       /* Ocupa el 100% del contenedor */
+    object-fit: cover;  /* LA CLAVE: Ajusta la imagen para que llene el círculo sin deformarse */
 }
 
 /* --- PANTALLA FILA DE ALUMNOS --- */
@@ -834,64 +999,113 @@ body {
     border-bottom: 1px dashed #f39c12; 
 }
 
-/* --- MODAL PARA AGREGAR EJERCICIO --- */
+/* --- MODALES: EFECTO CRISTAL Y BOTONES NEÓN --- */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); /* Fondo oscuro transparente */
+    
+    /* Fondo negro un poco más oscuro para que resalte el brillo del cristal */
+    background: rgba(0,0,0,0.7); 
     display: flex; justify-content: center; align-items: center;
-    z-index: 1000;
+    z-index: 3000;
 }
 
+/* EFECTO GLASSMORPHISM (Cristal opaco) */
 .modal-contenido {
-    background: white; 
+    background: rgba(30, 30, 30, 0.65); /* Cristal oscuro semi-transparente */
+    backdrop-filter: blur(16px); /* Esto hace el efecto de difuminar lo de atrás */
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Borde de luz sutil */
+    
     padding: 25px 20px; 
     border-radius: 20px; 
     width: 90%; max-width: 350px;
     display: flex; flex-direction: column; gap: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
 }
 
-.modal-contenido h3 { margin: 0; color: #2c2c2c; font-size: 1.3rem; }
+.modal-contenido h3 { 
+    margin: 0; 
+    color: white; /* Texto blanco para contrastar */
+    font-size: 1.3rem; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
 
 .modal-botones { 
     display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; 
 }
 
 .btn-cancelar { 
-    background: none; border: none; color: #888; font-weight: 600; 
+    background: none; border: none; 
+    color: rgba(255,255,255,0.6); /* Gris claro */
+    font-weight: 600; 
     cursor: pointer; padding: 8px 15px; font-size: 0.9rem;
+    transition: color 0.2s;
 }
 
+.btn-cancelar:active {
+    color: white;
+}
+
+/* BOTONES QUE BRILLAN (Efecto Neón) */
 .btn-guardar { 
-    background: #f39c12; border: none; color: white; font-weight: 600; 
+    background: #f39c12; border: none; 
+    color: #111; /* Texto oscuro para que resalte en el botón claro */
+    font-weight: 700; 
     cursor: pointer; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem;
-    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+    
+    /* LA MAGIA DEL BRILLO EXTERIOR */
+    box-shadow: 0 0 12px rgba(243, 156, 18, 0.6), 0 0 25px rgba(243, 156, 18, 0.4);
+    transition: all 0.2s ease;
 }
 
-/* Estilos para los campos adentro de las ventanas emergentes */
+.btn-guardar:active {
+    transform: scale(0.95);
+    /* Al apretar, el brillo se vuelve más concentrado */
+    box-shadow: 0 0 8px rgba(243, 156, 18, 0.8), 0 0 15px rgba(243, 156, 18, 0.5);
+}
+
+/* INPUTS ADAPTADOS AL CRISTAL */
 .input-modal {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #ddd;
+    border: 1px solid rgba(255,255,255,0.2);
     border-radius: 12px;
     font-size: 0.95rem;
-    color: #333;
+    color: white;
+    
+    background-color: rgba(0,0,0,0.4); /* Input semi-transparente */
     outline: none;
     font-family: inherit;
-    background-color: #fafafa;
+    transition: all 0.3s ease;
 }
+
+.input-modal::placeholder {
+    color: rgba(255,255,255,0.4);
+}
+
 .input-modal:focus {
     border-color: #f39c12;
-    background-color: white;
+    background-color: rgba(0,0,0,0.6);
+    /* Brillo interno cuando tocás para escribir */
+    box-shadow: 0 0 10px rgba(243, 156, 18, 0.3); 
 }
+
+/* Menús desplegables para que no queden blancos */
+.input-modal option {
+    background-color: #2c2c2c;
+    color: white;
+}
+
 .label-modal {
     font-size: 0.8rem;
-    color: #666;
+    color: rgba(255,255,255,0.8);
     margin-bottom: 5px;
     display: block;
     font-weight: 600;
 }
+
+
 
 .contenedor-admin-acciones {
     display: flex;
@@ -1280,4 +1494,78 @@ body {
 .login-visual.modo-claro .grupo-input-visual input::placeholder,
 .login-visual.modo-claro .contenedor-ojo-visual {
     color: rgba(0, 0, 0, 0.6);
+}
+
+/* 6. Brillo especial al tocar los campos en el modo claro */
+.login-visual.modo-claro .grupo-input-visual input:focus {
+    /* Mantenemos el resplandor de neón naranja por fuera */
+    box-shadow: 0 0 18px rgba(243, 156, 18, 0.8), 0 0 8px rgba(243, 156, 18, 0.6);
+    
+    /* Hacemos que el fondo se vuelva blanco brillante y sólido */
+    background: rgba(255, 255, 255, 0.95); 
+}
+
+
+/* --- ESTILO EFECTO VIDRIO PARA EL MODAL DE ERROR DEL LOGIN--- */
+#modal-error-login .modal-contenido {
+    /* Fondo blanco al 75% de opacidad (se transparenta un poco) */
+    background: rgba(255, 255, 255, 0.568); 
+    
+    /* Efecto de difuminado (blur) para lo que queda por detrás */
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px);
+    
+    /* Un bordecito blanco muy fino para darle brillo al cristal */
+    border: 1px solid rgba(255, 255, 255, 0.541); 
+    
+    /* Sombra un poco más pronunciada para que "flote" mejor */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+
+/* --- ESTILOS PARA SUBIR FOTO DE PERFIL --- */
+.preview-avatar-profe {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    border: 2px solid #f39c12;
+    overflow: hidden;
+    background-color: rgba(0,0,0,0.5);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.preview-avatar-profe img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-subir-foto {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-subir-foto:active {
+    background: rgba(243, 156, 18, 0.3);
+    border-color: #f39c12;
+    transform: scale(0.97);
+}
+
+.btn-subir-foto svg {
+    width: 16px;
+    height: 16px;
 }

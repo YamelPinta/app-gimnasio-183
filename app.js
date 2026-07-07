@@ -97,8 +97,14 @@ function iniciarSesion() {
         document.getElementById("pantalla-login").style.display = "none";
         document.getElementById("pantalla-perfiles").style.display = "flex";
     } else {
-        alert("Correo o contraseña incorrectos. Por favor, intentá de nuevo.");
+        // EN VEZ DEL ALERT FEO, ENCENDEMOS NUESTRA VENTANA HERMOSA
+        document.getElementById("modal-error-login").style.display = "flex";
     }
+}
+
+// Función para cerrar la ventanita de error
+function cerrarModalErrorLogin() {
+    document.getElementById("modal-error-login").style.display = "none";
 }
 
 function cerrarSesion() {
@@ -112,7 +118,7 @@ function cerrarSesion() {
 
 // --- 4. GESTIÓN DE PROFESORES (PERFILES) ---
 async function cargarProfesores() {
-    const contenedor = document.getElementById("contenedor-profesores");
+    const contenedor = document.getElementById("grilla-profesores");
     contenedor.innerHTML = "";
 
     // 1. Perfil fijo del Administrador
@@ -147,41 +153,87 @@ async function cargarProfesores() {
 
 // --- LÓGICA PARA CREAR PROFESOR CON VENTANA EMERGENTE ---
 
+let fotoProfeElegida = "imagenes/perfil1.png"; // Memoria para guardar temporalmente la foto
+
 function abrirModalProfe() {
     document.getElementById("modal-profe").style.display = "flex";
+    
     // Limpiamos los campos al abrir
     document.getElementById("input-profe-nombre").value = "";
     document.getElementById("select-profe-avatar").value = "imagenes/perfil1.png";
+    document.getElementById("input-foto-profe").value = ""; 
+    
+    // Reseteamos la foto visual
+    fotoProfeElegida = "imagenes/perfil1.png";
+    document.getElementById("img-preview-profe").src = fotoProfeElegida;
 }
 
 function cerrarModalProfe() {
     document.getElementById("modal-profe").style.display = "none";
 }
 
+// Si el usuario elige un avatar de la lista
+function cambiarPreviewAvatar() {
+    fotoProfeElegida = document.getElementById("select-profe-avatar").value;
+    document.getElementById("img-preview-profe").src = fotoProfeElegida;
+    document.getElementById("input-foto-profe").value = ""; // Borra la foto real si se arrepiente y elige avatar
+}
+
+// Si el usuario saca una foto o elige de la galería (COMPRESIÓN AUTOMÁTICA)
+function procesarFotoSubida(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // Magia para comprimir la foto y que la base de datos no explote
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 300; // Tamaño perfecto y liviano para perfil
+            const scaleSize = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scaleSize;
+            
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Convertimos la imagen a código texto para guardarla fácil en Supabase
+            fotoProfeElegida = canvas.toDataURL("image/jpeg", 0.7); 
+            
+            // Actualizamos el circulito de la pantalla
+            document.getElementById("img-preview-profe").src = fotoProfeElegida;
+            // Ponemos el selector en blanco porque ahora está usando su foto
+            document.getElementById("select-profe-avatar").value = ""; 
+        }
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+// Guardar finalmente en Supabase
 async function guardarProfeEnBD() {
     const nombreCompleto = document.getElementById("input-profe-nombre").value.trim();
-    const fotoElegida = document.getElementById("select-profe-avatar").value;
 
     if (!nombreCompleto) {
         alert("Por favor, ingresá el nombre y apellido del profesor.");
         return;
     }
 
-    // Separamos el nombre del apellido
     const partes = nombreCompleto.split(" ");
     const nombre = partes[0];
     const apellido = partes.slice(1).join(" ") || ""; 
 
     try {
+        // Enviamos todo a la base de datos
         const { error } = await clienteSupabase.from('profesores').insert([{ 
             nombre: nombre, 
             apellido: apellido, 
-            foto_url: fotoElegida 
+            foto_url: fotoProfeElegida // Acá viaja el Avatar o la Selfie real
         }]); 
         
         if (error) throw error;
 
-        // Si se guardó bien, cerramos la ventana y recargamos la lista
         cerrarModalProfe();
         cargarProfesores(); 
 
@@ -784,10 +836,12 @@ function abrirModalEditar(id, zona, nombre, series, descanso) {
 }
 
 // --- EDICIÓN DE PROFESOR ---
+
+let fotoEditProfeElegida = ""; // Guarda temporalmente la foto durante la edición
+
 // Abrir ventana y cargar los datos
 async function editarProfe() {
     try {
-        // En vez de adivinar el nombre mirando la pantalla, le pedimos a Supabase TODOS los datos exactos del profe
         const { data: profe, error } = await clienteSupabase
             .from('profesores')
             .select('*')
@@ -796,16 +850,17 @@ async function editarProfe() {
         
         if (error) throw error;
 
-        // Rellenamos todos los campos con la info real
+        // Rellenamos los textos
         document.getElementById("input-edit-nombre").value = profe.nombre || "";
         document.getElementById("input-edit-apellido").value = profe.apellido || ""; 
         
-        // Asignamos la foto que ya tenía guardada en la base de datos
-        if (profe.foto_url) {
-            document.getElementById("select-edit-profe-avatar").value = profe.foto_url;
-        } else {
-            document.getElementById("select-edit-profe-avatar").value = "imagenes/perfil1.png";
-        }
+        // Cargamos la foto que ya tenía en la base de datos
+        fotoEditProfeElegida = profe.foto_url || "imagenes/perfil1.png";
+        document.getElementById("img-preview-edit-profe").src = fotoEditProfeElegida;
+        
+        // Reseteamos los selectores
+        document.getElementById("select-edit-profe-avatar").value = "";
+        document.getElementById("input-foto-edit-profe").value = "";
 
         document.getElementById("modal-editar-profe").style.display = "flex";
         
@@ -819,12 +874,50 @@ function cerrarModalEditarProfe() {
     document.getElementById("modal-editar-profe").style.display = "none";
 }
 
+// Si en la edición elige cambiar por un avatar de la lista
+function cambiarPreviewEditAvatar() {
+    const avatarElegido = document.getElementById("select-edit-profe-avatar").value;
+    if (avatarElegido) {
+        fotoEditProfeElegida = avatarElegido;
+        document.getElementById("img-preview-edit-profe").src = fotoEditProfeElegida;
+        document.getElementById("input-foto-edit-profe").value = ""; // Descartamos la foto subida
+    }
+}
+
+// Si se saca una selfie nueva o sube de galería (Compresión automática)
+function procesarFotoEditSubida(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 300; 
+            const scaleSize = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scaleSize;
+            
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Guardamos la foto comprimida
+            fotoEditProfeElegida = canvas.toDataURL("image/jpeg", 0.7); 
+            
+            // Actualizamos la vista previa visual
+            document.getElementById("img-preview-edit-profe").src = fotoEditProfeElegida;
+            document.getElementById("select-edit-profe-avatar").value = ""; // Limpiamos el avatar
+        }
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
 // Guardar los cambios nuevos
 async function guardarEdicionProfe() {
     const nuevoNombre = document.getElementById("input-edit-nombre").value.trim();
     const nuevoApellido = document.getElementById("input-edit-apellido").value.trim();
-    // AHORA LEEMOS LA NUEVA FOTO ELEGIDA:
-    const nuevaFoto = document.getElementById("select-edit-profe-avatar").value;
     
     if (!nuevoNombre) {
         alert("El nombre no puede estar vacío.");
@@ -832,13 +925,12 @@ async function guardarEdicionProfe() {
     }
 
     try {
-        // Le mandamos a Supabase la orden de actualizar los 3 datos
         const { data: profeActualizado, error } = await clienteSupabase
             .from('profesores')
             .update({ 
                 nombre: nuevoNombre, 
                 apellido: nuevoApellido,
-                foto_url: nuevaFoto // Agregamos la foto al guardado
+                foto_url: fotoEditProfeElegida // Acá viaja la nueva foto (o la vieja si no la tocó)
             })
             .eq('id', profeActivoId)
             .select();
@@ -850,11 +942,9 @@ async function guardarEdicionProfe() {
             return;
         }
 
-        // Cerramos la ventana y actualizamos el nombre
         cerrarModalEditarProfe();
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nuevoNombre;
         
-        // Actualizamos la lista de fondo por si el profe vuelve atrás a ver su foto cambiada
         cargarProfesores(); 
 
     } catch (e) { 
@@ -1268,5 +1358,22 @@ function alternarTemaLogin() {
     } else {
         iconoSol.style.display = 'block'; // Muestra el sol
         iconoLuna.style.display = 'none'; // Esconde la luna
+    }
+}
+
+// --- SISTEMA DE TEMA CLARO/OSCURO PARA PERFILES ---
+function alternarTemaPerfiles() {
+    const pantallaPerfiles = document.getElementById('pantalla-perfiles');
+    const iconoSol = document.getElementById('icono-sol-perfiles');
+    const iconoLuna = document.getElementById('icono-luna-perfiles');
+
+    pantallaPerfiles.classList.toggle('modo-claro');
+
+    if (pantallaPerfiles.classList.contains('modo-claro')) {
+        iconoSol.style.display = 'none'; 
+        iconoLuna.style.display = 'block'; 
+    } else {
+        iconoSol.style.display = 'block'; 
+        iconoLuna.style.display = 'none'; 
     }
 }

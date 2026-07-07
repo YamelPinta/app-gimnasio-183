@@ -58,52 +58,43 @@
 
         <div id="pantalla-perfiles" class="pantalla-perfiles" style="display: none;">
             
-            <div class="logo-container-small">
-                <img src="imagenes/logo.png" alt="Logo 18.3 Clubhouse" class="img-logo-small">
+            <button id="btn-tema-perfiles" class="btn-tema" onclick="alternarTemaPerfiles()">
+                <svg id="icono-sol-perfiles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg id="icono-luna-perfiles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+
+            <div class="logo-container-small" style="margin-top: 8vh; margin-bottom: 3vh;">
+                
+                <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="img-logo-small logo-modo-oscuro" style="width: 220px;">
+                
+                <img src="imagenes/LOGOFULLCOLOR.png" alt="18.3 Clubhouse" class="img-logo-small logo-modo-claro" style="width: 220px;">
+                
             </div>
 
-            <div class="textos-perfiles">
+            <div class="textos-perfiles-caja">
                 <h2>Seleccioná tu perfil</h2>
                 <p>Ingresaste con el acceso de docentes.<br>Elegí tu perfil para continuar.</p>
             </div>
 
-            <div class="grilla-perfiles-moderna" id="contenedor-profesores"></div>
-
-            <div class="footer-perfiles">
-                <button onclick="abrirModalProfe()" class="btn-footer-icono">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    Agregar profesor
-                </button>
-                <div class="separador-vertical"></div>
-                <button onclick="cerrarSesion()" class="btn-footer-icono">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    Cerrar sesión
-                </button>
-            </div>
-
-            <div id="modal-profe" class="modal-overlay" style="display: none;">
-                <div class="modal-contenido">
-                    <h3>Añadir Profesor</h3>
-                    
-                    <div class="campo-detalle">
-                        <input type="text" id="input-profe-nombre" class="input-modal" placeholder="Nombre y Apellido">
-                    </div>
-                    
-                    <div class="campo-detalle">
-                        <label class="label-modal">Elegí el avatar:</label>
-                        <select id="select-profe-avatar" class="input-modal">
-                            <option value="imagenes/perfil1.png">Mujer (Perfil 1)</option>
-                            <option value="imagenes/perfil2.png">Hombre (Perfil 2)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="modal-botones">
-                        <button class="btn-cancelar" onclick="cerrarModalProfe()">Cancelar</button>
-                        <button class="btn-guardar" onclick="guardarProfeEnBD()">Guardar</button>
-                    </div>
+            <div id="grilla-profesores" class="grilla-perfiles-moderna">
                 </div>
+
+            <div class="footer-perfiles-blanco">
+                <button class="btn-footer-icono" onclick="abrirModalProfe()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> 
+                    <span style="color: #333;">Agregar profesor</span>
+                </button>
+                
+                <div class="separador-vertical"></div>
+                
+                <button class="btn-footer-icono" onclick="cerrarSesion()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 
+                    <span style="color: #333;">Cerrar sesión</span>
+                </button>
             </div>
-            
+        </div>
+
+          
         </div> <div id="pantalla-dashboard" class="pantalla-dashboard-moderna" style="display: none;">
             <div class="decoracion-top-right"></div>
 
@@ -354,11 +345,28 @@
                 </div>
 
                 <div class="campo-detalle">
-                    <label class="label-modal">Elegí el avatar:</label>
-                    <select id="select-edit-profe-avatar" class="input-modal">
-                        <option value="imagenes/perfil1.png">Mujer (Perfil 1)</option>
-                        <option value="imagenes/perfil2.png">Hombre (Perfil 2)</option>
-                    </select>
+                    <label class="label-modal">Foto de perfil:</label>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
+                        <div class="preview-avatar-profe">
+                            <img id="img-preview-edit-profe" src="imagenes/perfil1.png" alt="Preview">
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
+                            
+                            <label for="input-foto-edit-profe" class="btn-subir-foto">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                Cambiar mi foto
+                            </label>
+                            <input type="file" id="input-foto-edit-profe" accept="image/*" style="display: none;" onchange="procesarFotoEditSubida(event)">
+                            
+                            <select id="select-edit-profe-avatar" class="input-modal" style="padding: 8px 10px; font-size: 0.85rem;" onchange="cambiarPreviewEditAvatar()">
+                                <option value="">O elegí un avatar...</option>
+                                <option value="imagenes/perfil1.png">Avatar Mujer</option>
+                                <option value="imagenes/perfil2.png">Avatar Hombre</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="modal-botones">
@@ -489,6 +497,64 @@
                 <h3>Elegí un pack</h3>
                 <div id="lista-seleccionar-packs" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;"></div>
                 <button class="btn-cancelar" onclick="document.getElementById('modal-seleccionar-pack').style.display='none'" style="width: 100%; margin-top: 15px;">Cancelar</button>
+            </div>
+        </div>
+
+        <div id="modal-error-login" class="modal-overlay" style="display: none; z-index: 9999;">
+            <div class="modal-contenido" style="text-align: center; max-width: 300px;">
+                
+                <div style="display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2.5" width="44" height="44">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                
+                <h3 style="margin-bottom: 8px; color: #2c2c2c; font-size: 1.4rem;">¡Ups!</h3>
+                <p style="font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.5;">El correo o la contraseña son incorrectos. Por favor, revisalos e intentá de nuevo.</p>
+                
+                <button class="btn-guardar" onclick="cerrarModalErrorLogin()" style="width: 100%; font-size: 1.05rem; padding: 12px;">Entendido</button>
+            </div>
+        </div>
+
+        <div id="modal-profe" class="modal-overlay" style="display: none;">
+            <div class="modal-contenido">
+                <h3>Añadir Profesor</h3>
+                
+                <div class="campo-detalle">
+                    <label class="label-modal">Nombre y Apellido:</label>
+                    <input type="text" id="input-profe-nombre" class="input-modal" placeholder="Ej: Juan Pérez">
+                </div>
+                
+                <div class="campo-detalle">
+                    <label class="label-modal">Foto de perfil:</label>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
+                        <div class="preview-avatar-profe">
+                            <img id="img-preview-profe" src="imagenes/perfil1.png" alt="Preview">
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
+                            
+                            <label for="input-foto-profe" class="btn-subir-foto">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                Subir mi foto
+                            </label>
+                            <input type="file" id="input-foto-profe" accept="image/*" style="display: none;" onchange="procesarFotoSubida(event)">
+                            
+                            <select id="select-profe-avatar" class="input-modal" style="padding: 8px 10px; font-size: 0.85rem;" onchange="cambiarPreviewAvatar()">
+                                <option value="imagenes/perfil1.png">Avatar Mujer</option>
+                                <option value="imagenes/perfil2.png">Avatar Hombre</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="cerrarModalProfe()">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarProfeEnBD()">Guardar</button>
+                </div>
             </div>
         </div>
 
