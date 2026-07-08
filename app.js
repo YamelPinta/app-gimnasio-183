@@ -67,20 +67,63 @@ document.getElementById("btn-confirmar-accion").addEventListener("click", () => 
     }
 });
 
-// --- 2. ARRANQUE DE LA APP Y MEMORIA ---
+// --- 2. ARRANQUE DE LA APP, MEMORIA Y NAVEGACIÓN INICIAL ---
 document.addEventListener("DOMContentLoaded", () => {
-    // Revisamos la memoria del celular al abrir la app
     const sesionGuardada = localStorage.getItem('sesionGimnasio');
 
     if (sesionGuardada === 'activa') {
-        // Si ya había iniciado sesión, pasamos directo a los perfiles
+        // Si hay sesión, salta todo y va al dashboard de profes
+        document.getElementById("pantalla-inicio").style.display = "none";
         document.getElementById("pantalla-login").style.display = "none";
         document.getElementById("pantalla-perfiles").style.display = "flex";
+    } else {
+        // Si es la primera vez, arranca en la nueva Pantalla de Inicio
+        document.getElementById("pantalla-inicio").style.display = "flex";
+        document.getElementById("pantalla-login").style.display = "none";
     }
     
-    // Siempre cargamos los profesores en segundo plano por si entra
     cargarProfesores();
 });
+
+// Botón "PROFESOR": Te lleva al login
+function irPantallaLoginProfe() {
+    document.getElementById("pantalla-inicio").style.display = "none";
+    document.getElementById("pantalla-login").style.display = "flex";
+}
+
+// Botón "ALUMNO": Te lleva a la futura pantalla de alumnos
+function irPantallaAlumno() {
+    document.getElementById("pantalla-inicio").style.display = "none";
+    document.getElementById("pantalla-alumno-proximamente").style.display = "flex";
+}
+
+// Botones para volver atrás a la selección de roles
+function volverDesdeLoginAInicio() {
+    document.getElementById("pantalla-login").style.display = "none";
+    document.getElementById("pantalla-inicio").style.display = "flex";
+}
+
+function volverDesdeAlumnoAInicio() {
+    document.getElementById("pantalla-alumno-proximamente").style.display = "none";
+    document.getElementById("pantalla-inicio").style.display = "flex";
+}
+
+// Sistema de cambio de tema para la nueva pantalla
+function alternarTemaInicio() {
+    const pantallaInicio = document.getElementById('pantalla-inicio');
+    const iconoSol = document.getElementById('icono-sol-inicio');
+    const iconoLuna = document.getElementById('icono-luna-inicio');
+
+    pantallaInicio.classList.toggle('modo-claro');
+
+    if (pantallaInicio.classList.contains('modo-claro')) {
+        iconoSol.style.display = 'none';
+        iconoLuna.style.display = 'block';
+    } else {
+        iconoSol.style.display = 'block';
+        iconoLuna.style.display = 'none';
+    }
+}
 
 
 // --- 3. LOGIN Y LOGOUT ---

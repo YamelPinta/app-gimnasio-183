@@ -27,6 +27,162 @@ body {
     padding: 30px 20px;
 }
 
+/* =========================================
+   PANTALLA DE INICIO (SELECCIÓN DE ROL)
+   ========================================= */
+.pantalla-inicio {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100vh;
+    background-image: url('imagenes/fondo-profes-oscuro.jpeg'); /* Mismo fondo de la pared que el login */
+    background-size: cover;
+    background-position: center;
+    background-color: #111; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 10vh;
+    z-index: 2500; /* Aseguramos que tape todo al entrar */
+}
+
+.pantalla-inicio.modo-claro {
+    background-image: url('imagenes/FONDOBLANO1.jpg');
+}
+
+.logo-container-inicio {
+    margin-bottom: 8vh;
+    text-align: center;
+}
+
+.img-logo-inicio {
+    width: 250px;
+    filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8));
+}
+
+
+.contenedor-botones-rol {
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+
+    margin-top: 6vh;
+
+    width: 85%;
+    max-width: 310px;
+}
+
+/* Estilo de los botones grandes */
+.tarjeta-rol {
+    position: relative;
+    width: 100%;
+    height: 130px; 
+    border-radius: 20px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+
+.tarjeta-rol:active {
+    transform: scale(0.96);
+    box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+}
+
+/* --- TAMAÑO ESPECIAL PARA EL BOTÓN DE PROFESOR --- */
+.tarjeta-profe {
+    height: 95px; /* Lo hacemos más petiso (El de alumno tiene 130px) */
+}
+
+.tarjeta-profe .textos-rol h2 {
+    font-size: 2rem; /* Achicamos un poquito la letra para que encaje perfecto */
+    margin-bottom: 0px;
+}
+
+.tarjeta-profe .textos-rol p {
+    font-size: 1rem; /* Subtítulo apenitas más chico */
+}
+
+
+
+.fondo-tarjeta-rol {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-size: 100% 100%; /* Estira tu imagen BOTON GRANDE para que encaje perfecto */
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+.contenido-rol {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.icono-rol {
+    width: 55px;
+    height: auto;
+    margin-right: 15px;
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+}
+
+.textos-rol {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.textos-rol h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 2rem;
+    color: white;
+    margin: 0 0 2px 0;
+    line-height: 1;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+}
+
+.textos-rol p {
+    font-size: 1rem;
+    color: #eaeaea;
+    margin: 0;
+    line-height: 1.3;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+}
+
+.flecha-rol {
+    width: 24px;
+    height: 24px;
+    margin-left: 10px;
+    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8));
+}
+
+/* Botoncito sutil para volver desde el login */
+.btn-volver-atras {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    background: rgba(10, 10, 10, 0.45);
+    border: 2px solid rgba(243, 156, 18, 0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+}
+.login-visual.modo-claro .btn-volver-atras {
+    background: rgba(255, 255, 255, 0.5);
+    color: #111;
+}
+
 /* --- 2. LOGOS Y PANTALLA DE LOGIN --- */
 .login-moderno {
     display: flex;
@@ -1465,7 +1621,7 @@ body {
 /* 2. Cambia la caja a vidrio blanco transparente */
 .login-visual.modo-claro .tarjeta-login-visual,
 .login-visual.modo-claro .btn-tema {
-    background: rgba(255, 255, 255, 0.534); 
+    background: rgba(255, 255, 255, 0.20); 
     box-shadow: 0 15px 30px rgba(0,0,0,0.15); 
 }
 
@@ -1488,7 +1644,7 @@ body {
 
 /* 5. Aclara los campos de texto e invierte sus letras */
 .login-visual.modo-claro .grupo-input-visual input {
-    background: rgba(255, 255, 255, 0.651);
+    background: rgba(255, 255, 255, 0.42);
     color: #1a1a1a;
 }
 .login-visual.modo-claro .grupo-input-visual input::placeholder,
@@ -1502,7 +1658,7 @@ body {
     box-shadow: 0 0 18px rgba(243, 156, 18, 0.8), 0 0 8px rgba(243, 156, 18, 0.6);
     
     /* Hacemos que el fondo se vuelva blanco brillante y sólido */
-    background: rgba(255, 255, 255, 0.95); 
+    background: rgba(255, 255, 255, 0.678); 
 }
 
 
