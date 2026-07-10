@@ -1591,3 +1591,29 @@ function alternarTemaPerfiles() {
         iconoLuna.style.display = 'none'; 
     }
 }
+
+// ==========================================
+// SISTEMA GLOBAL DE VIBRACIÓN (FEEDBACK HÁPTICO)
+// ==========================================
+document.addEventListener('click', function(e) {
+    // Verificamos si el navegador del celular soporta vibración
+    if (!navigator.vibrate) return; 
+
+    // 1. Buscamos si lo que tocó el usuario es algo interactivo
+    const elementoTocado = e.target.closest('button, .card-alumno, .tarjeta-perfil-moderna, .tarjeta-rol, .chip, svg[onclick]');
+    
+    // Si tocó algo interactivo, hacemos una vibración cortita y elegante (15 milisegundos)
+    if (elementoTocado) {
+        navigator.vibrate(15); 
+    }
+});
+
+// También podemos mejorar nuestra alerta visual para que vibre fuerte cuando hay un error
+const funcionAlertaOriginal = mostrarAlerta;
+mostrarAlerta = function(titulo, mensaje) {
+    if (navigator.vibrate) {
+        // Vibra dos veces rápido para llamar la atención (Alerta)
+        navigator.vibrate([50, 50, 50]); 
+    }
+    funcionAlertaOriginal(titulo, mensaje); // Llama a tu alerta gráfica normal
+};
