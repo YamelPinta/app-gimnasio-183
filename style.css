@@ -1,5 +1,19 @@
 
-/* --- 1. RESETEO Y BASE --- */
+/* ==========================================================================
+   ÍNDICE DEL ARCHIVO (Guía de navegación)
+   1. RESETEO Y BASE GLOBAL
+   2. ANIMACIONES Y EFECTOS GLOBALES
+   3. ELEMENTOS GLOBALES (Modales, Botones, Menú Inferior)
+   4. PANTALLA 1: INICIO (Selección de Rol)
+   5. PANTALLA 2: LOGIN (Diseño Glass)
+   6. PANTALLA 3: SELECCIÓN DE PERFILES (Profesores)
+   7. PANTALLA 4: DASHBOARD (Lista de Alumnos)
+   8. PANTALLA 5: DETALLE DEL ALUMNO Y RUTINAS
+========================================================================== */
+
+/* =========================================
+   1. RESETEO Y BASE GLOBAL
+   ========================================= */
 * {
     margin: 0;
     padding: 0;
@@ -28,1151 +42,73 @@ body {
 }
 
 /* =========================================
-   PANTALLA DE INICIO (SELECCIÓN DE ROL)
-   ========================================= */
-.pantalla-inicio {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100vh;
-    background-image: url('imagenes/fondo-profes-oscuro.jpeg'); /* Mismo fondo de la pared que el login */
-    background-size: cover;
-    background-position: center;
-    background-color: #111; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 10vh;
-    z-index: 2500; /* Aseguramos que tape todo al entrar */
-}
-
-.pantalla-inicio.modo-claro {
-    background-image: url('imagenes/FONDOBLANO1.jpg');
-}
-
-.logo-container-inicio {
-    margin-bottom: 8vh;
-    text-align: center;
-}
-
-.img-logo-inicio {
-    width: 250px;
-    filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8));
-}
-
-
-.contenedor-botones-rol {
-    display: flex;
-    flex-direction: column;
-    gap: 35px;
-
-    margin-top: 6vh;
-
-    width: 85%;
-    max-width: 310px;
-}
-
-/* Estilo de los botones grandes */
-.tarjeta-rol {
-    position: relative;
-    width: 100%;
-    height: 130px; 
-    border-radius: 20px;
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-}
-
-.tarjeta-rol:active {
-    transform: scale(0.96);
-    box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
-}
-
-/* --- TAMAÑO ESPECIAL PARA EL BOTÓN DE PROFESOR --- */
-.tarjeta-profe {
-    height: 95px; /* Lo hacemos más petiso (El de alumno tiene 130px) */
-}
-
-.tarjeta-profe .textos-rol h2 {
-    font-size: 2rem; /* Achicamos un poquito la letra para que encaje perfecto */
-    margin-bottom: 0px;
-}
-
-.tarjeta-profe .textos-rol p {
-    font-size: 1rem; /* Subtítulo apenitas más chico */
-}
-
-
-
-.fondo-tarjeta-rol {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-size: 100% 100%; /* Estira tu imagen BOTON GRANDE para que encaje perfecto */
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: 1;
-}
-
-.contenido-rol {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-}
-
-.icono-rol {
-    width: 55px;
-    height: auto;
-    margin-right: 15px;
-    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
-}
-
-.textos-rol {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.textos-rol h2 {
-    font-family: 'Oswald', sans-serif;
-    font-size: 2rem;
-    color: white;
-    margin: 0 0 2px 0;
-    line-height: 1;
-    letter-spacing: 1px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-}
-
-.textos-rol p {
-    font-size: 1rem;
-    color: #eaeaea;
-    margin: 0;
-    line-height: 1.3;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
-}
-
-.flecha-rol {
-    width: 24px;
-    height: 24px;
-    margin-left: 10px;
-    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8));
-}
-
-/* Botoncito sutil para volver desde el login */
-.btn-volver-atras {
-    position: absolute;
-    top: 30px;
-    left: 20px;
-    background: rgba(10, 10, 10, 0.45);
-    border: 2px solid rgba(243, 156, 18, 0.5);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    cursor: pointer;
-    z-index: 10;
-}
-.login-visual.modo-claro .btn-volver-atras {
-    background: rgba(255, 255, 255, 0.5);
-    color: #111;
-}
-
-/* --- 2. LOGOS Y PANTALLA DE LOGIN --- */
-.login-moderno {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-
-.login-header {
-    width: 100%;
-    margin-bottom: 20px;
-    padding-left: 20px;
-}
-
-.logo-container {
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.img-logo {
-    width: 90%;
-    max-width: 250px;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-}
-
-.titulo-app-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    justify-content: flex-start;
-}
-
-.subtitulo-app {
-    font-size: 0.85rem;
-    color: #555;
-    padding-left: 20px;
-    margin-bottom: 10px;
-}
-
-/* ARREGLADO: se sacó el transform: scale(0.6) y los márgenes negativos que lo achicaban */
-.logo-container-small {
-    text-align: center;
-    margin-bottom: 5px;
-    margin-top: 0;
-}
-
-/* ARREGLADO: tamaño del logo en pantalla de perfiles ahora es visible */
-.img-logo-small {
-    width: 80%;
-    max-width: 250px;
-    height: auto;
-}
-
-.barra-vertical {
-    width: 3px;
-    height: 16px;
-    background-color: #f39c12;
-    margin-right: 8px;
-}
-
-.titulo-app {
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    color: #444;
-}
-
-.tarjeta-login {
-    background-color: #ffffff;
-    width: 100%;
-    border-radius: 16px;
-    padding: 20px 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    margin-bottom: 15px;
-}
-
-.grupo-input {
-    position: relative;
-    margin-bottom: 15px;
-}
-
-.icono-input, .icono-ojo {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    color: #555;
-}
-
-.icono-input { left: 5px; }
-
-.icono-ojo {
-    right: 5px;
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-}
-
-.grupo-input input {
-    width: 100%;
-    border: none;
-    border-bottom: 1px solid #dcdcdc;
-    padding: 10px 10px 10px 30px;
-    font-size: 0.95rem;
-    color: #333;
-    background: transparent;
-    outline: none;
-}
-
-.grupo-input input:focus {
-    border-bottom: 2px solid #f39c12;
-}
-
-.opciones-login {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    font-size: 0.85rem;
-}
-
-.checkbox-container {
-    display: flex;
-    align-items: center;
-    color: #444;
-}
-
-.checkbox-container input {
-    margin-right: 8px;
-    accent-color: #f39c12;
-}
-
-.link-olvido {
-    color: #f39c12;
-    text-decoration: none;
-}
-
-.btn-iniciar-sesion {
-    width: 100%;
-    background-color: #f39c12;
-    color: #1a1a1a;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-.footer-login {
-    font-size: 0.85rem;
-    color: #666;
-    text-align: center;
-}
-
-.footer-login a {
-    color: #f39c12;
-    text-decoration: none;
-}
-
-/* --- 3. PANTALLA DE SELECCIÓN DE PERFIL (MODO OSCURO Y CLARO) --- */
-
-/* =========================================
-   LOGOS DINÁMICOS (PANTALLA PERFILES)
+   2. ANIMACIONES Y EFECTOS GLOBALES
    ========================================= */
 
-/* Comportamiento por defecto (Fondo Oscuro) */
-.pantalla-perfiles .logo-modo-oscuro {
-    display: inline-block; /* Mostramos el nuevo logo blanco/naranja */
-}
-.pantalla-perfiles .logo-modo-claro {
-    display: none; /* Escondemos el logo negro */
+/* Transición suave para todos los elementos interactivos */
+button, .card-alumno, .card-ejercicio, .tarjeta-perfil-moderna, 
+.tarjeta-rol, .chip, .nav-item, .btn-footer-icono, svg[onclick] {
+    transition: transform 0.2s ease !important;
 }
 
-/* Comportamiento al tocar el solcito (Fondo Claro) */
-.pantalla-perfiles.modo-claro .logo-modo-oscuro {
-    display: none; /* Escondemos el logo blanco/naranja */
-}
-.pantalla-perfiles.modo-claro .logo-modo-claro {
-    display: inline-block; /* Mostramos el logo negro original */
-}
-
-.pantalla-perfiles {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100vh;
-    
-    /* LA SOLUCIÓN REAL: Le damos permiso a TODA la pantalla de scrollear */
-    overflow-y: auto; 
-    
-    background-image: url('imagenes/fondo-profes-oscuro.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-color: #111; 
-    
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 2000;
+/* Efecto "Squish" (hundimiento) al tocar un botón o tarjeta */
+button:active, .card-alumno:active, .card-ejercicio:active, 
+.tarjeta-perfil-moderna:active, .tarjeta-rol:active, .chip:active,
+.nav-item:active, .btn-footer-icono:active, svg[onclick]:active {
+    transform: scale(0.92) !important; 
 }
 
-/* Regla para el cambio de fondo en modo claro */
-.pantalla-perfiles.modo-claro {
-    background-image: url('imagenes/fondo-profes-claro.jpeg');
+/* Excepción: El botón del login tiene su propio rebote sutil */
+.login-visual .btn-iniciar-visual:active {
+    transform: scale(0.96) !important; 
 }
 
-/* CAJA DE TEXTOS (Ahora transparente) */
-.textos-perfiles-caja {
-    background: transparent; /* Quitamos el blanco */
-    width: 98%;
-    max-width: 400px;
-    padding: 20px 2px;
-    text-align: center;
-    margin-bottom: 4vh;
-    box-shadow: none; /* Quitamos la sombra */
+/* Entrada fluida (Aparición de tarjetas desde abajo) */
+@keyframes aparecerDesdeAbajo {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.card-alumno, .card-ejercicio, .tarjeta-perfil-moderna {
+    animation: aparecerDesdeAbajo 0.4s ease-out forwards;
 }
 
-/* Sombra a los textos para que se lean sobre cualquier fondo */
-.textos-perfiles-caja h2, 
-.textos-perfiles-caja p {
-    text-shadow: 0px 2px 4px rgba(0,0,0,0.5);
-    color: white; /* Ponemos el texto en blanco para que resalte en ambos modos */
+/* Aparición con efecto Pop-in para los Modales */
+@keyframes popIn {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.modal-contenido {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.textos-perfiles-caja h2 {
-    position: relative; /* CLAVE: Necesario para que la rayita se posicione sobre este texto */
-    font-family: "Oswald", sans-serif; 
-    font-size: 1.8rem; 
-    color: white; 
-    font-weight: 500;
-    
-    /* Ajustamos el espacio para hacerle lugar a la rayita en el medio */
-    padding-bottom: 10px; 
-    margin-bottom: 18px; 
-    
-    letter-spacing: 0.5px;
-    text-shadow: 0px 2px 4px rgba(0,0,0,0.6); 
+/* Latido de alerta (Cuotas Vencidas) */
+@keyframes latidoRojo {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(198, 40, 40, 0); }
+    50% { transform: scale(1.05); box-shadow: 0 0 10px rgba(198, 40, 40, 0.4); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(198, 40, 40, 0); }
 }
-
-/* --- LA LÍNEA AMARILLA SEPARADORA --- */
-.textos-perfiles-caja h2::after {
-    content: ""; /* Esto crea un elemento invisible que podemos pintar */
-    position: absolute;
-    bottom: 0; /* Lo empujamos bien abajo del título */
-    left: 50%; /* Lo empujamos al centro... */
-    transform: translateX(-50%); /* ...y lo centramos perfectamente */
-    
-    width: 35px; /* El largo de la línea */
-    height: 3px; /* El grosor de la línea */
-    background-color: #f39c12; /* Tu naranja/amarillo característico */
-    border-radius: 2px; /* Puntas un poquitito redondeadas */
-}
- 
-.textos-perfiles-caja p {
-    font-size: 1.05rem;
-    color: #eaeaea; /* CAMBIO: Blanco un poquito más apagado para que no encandile */
-    line-height: 1.4;
-    text-shadow: 0px 2px 4px rgba(0,0,0,0.6);
-}
-
-/* GRILLA */
-.grilla-perfiles-moderna {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    width: 90%;
-    max-width: 380px;
-    margin-bottom: 20px;
-   
-}
-
-/* =========================================
-   ESTILO TARJETAS: MODO OSCURO (POR DEFECTO)
-   ========================================= */
-.tarjeta-perfil-moderna {
-    width: 100%;
-    
-    /* ACÁ ESTÁ LA MAGIA DEL TAMAÑO: Esto las hace casi cuadradas como en tu diseño */
-    aspect-ratio: 1 / 1.15; 
-    padding: 15px 10px;
-    
-    /* El degradado de tu diseño: Resplandor dorado/naranja arriba que se funde a negro abajo */
-    background: radial-gradient(circle at top, rgba(120, 80, 15, 0.4) 0%, rgba(10, 10, 10, 0.651) 65%);
-    
-    border: 1px solid #f39c12; /* Borde naranja */
-    border-radius: 12px;
-    
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease;
-}
-
-.tarjeta-perfil-moderna:active {
-    transform: scale(0.95);
-}
-
-/* --- LA FOTO DEL PROFE (El anillo naranja) --- */
-.tarjeta-perfil-moderna .avatar-profe {
-    /* ACÁ AGRANDAMOS EL CÍRCULO COMPLETO: Pasamos de 80px a 110px */
-    width: 110px;  
-    height: 110px;
-    
-    border-radius: 50%;
-    object-fit: cover;
-    
-    /* El anillo crece junto con la foto automáticamente */
-    border: 3px solid #f39c12; 
-    padding: 4px; /* Le di un milímetro más de espacio interior para que respire mejor al ser más grande */
-    
-    margin-bottom: 12px;
-    background-color: #2c2c2c; 
-}
-
-/* --- EL TEXTO DEL NOMBRE --- */
-.tarjeta-perfil-moderna p {
-    font-family: "Oswald", sans-serif;
-    font-size: 0.95rem;
-    color: white; 
-    text-align: center;
-    
-    /* ESTO ES CLAVE: Transforma dinámicamente cualquier nombre a MAYÚSCULAS */
-    text-transform: uppercase; 
-    
-    letter-spacing: 0.5px;
-    font-weight: 500;
-    margin: 0;
-    line-height: 1.2;
-}
+.badge-vencida { animation: latidoRojo 2s infinite ease-in-out; }
 
 
 /* =========================================
-   ESTILO TARJETAS: MODO CLARO
+   3. ELEMENTOS GLOBALES (Modales, Menú)
    ========================================= */
-.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna {
-    /* Fondo color crema clarito y cálido como tu diseño */
-    background: radial-gradient(circle at top, rgb(255, 255, 255) 0%, rgba(255, 229, 205, 0.603) 65%);
-    
-    /* Borde amarillo/naranja sutil */
-    border: 1px solid #f39c12; 
-    
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
-}
 
-/* Mantenemos el fondo de la foto claro por si tarda en cargar */
-.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna .avatar-profe {
-    background-color: #f0f0f0;
-}
-
-/* El texto se vuelve oscuro y sin sombras para que se lea perfecto */
-.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna p {
-    color: #111; 
-    text-shadow: none; 
-}
-
-/* FOOTER (Ahora transparente) */
-.footer-perfiles-blanco {
-    background: transparent; /* Quitamos el blanco */
-    width: 100%;
-    padding: 18px 0;
-    margin-top: auto;
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    gap: 15px;
-
-    box-shadow: none; /* Quitamos la sombra */
-}
-
-/* --- TEXTOS: MODO CLARO --- */
-.pantalla-perfiles.modo-claro .textos-perfiles-caja h2 {
-    color: #111; /* Se vuelve negro */
-    text-shadow: none; /* Le sacamos la sombra */
-}
-
-.pantalla-perfiles.modo-claro .textos-perfiles-caja p {
-    color: #444; /* Se vuelve gris oscuro */
-    text-shadow: none;
-}
-
-/* Ajustamos los botones del footer para que se vean bien sobre el fondo */
-.btn-footer-icono span {
-    color: white !important; /* Texto blanco */
-    text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
-}
-
-.btn-footer-icono svg {
-    stroke: white !important; /* Íconos blancos */
-    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8));
-}
-
-.separador-vertical {
-    background-color: rgba(255,255,255,0.3); /* Separador sutil */
-}
-
-.btn-footer-icono {
-    background: none;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-.btn-footer-icono svg {
-    width: 24px;
-    height: 24px;
-}
-
-.separador-vertical {
-    width: 1px;
-    height: 20px;
-    
-}
-
-/* Si activan el modo claro, el texto se pone oscuro para contrastar */
-.pantalla-perfiles.modo-claro .textos-perfiles-caja h2, 
-.pantalla-perfiles.modo-claro .textos-perfiles-caja p,
-.pantalla-perfiles.modo-claro .btn-footer-icono span {
-    color: #111 !important;
-    text-shadow: none !important;
-}
-
-.pantalla-perfiles.modo-claro .btn-footer-icono svg {
-    stroke: #333 !important;
-    filter: none !important;
-}
-
-/* --- ARREGLO DE AVATARES DE PERFIL --- */
-
-.avatar-circulo {
-    width: 100px;       /* Tamaño del círculo */
-    height: 100px;      /* Tamaño del círculo */
-    border-radius: 50%; /* Esto lo hace redondo */
-    overflow: hidden;   /* LA CLAVE: Todo lo que se salga del círculo se corta */
-    border: 3px solid #f39c12; /* El bordecito naranja */
-    flex-shrink: 0;
-    margin-bottom: 10px;
-    background-color: #ddd; /* Fondo gris por si la imagen tarda en cargar */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.avatar-profe {
-    width: 100%;        /* Ocupa el 100% del contenedor */
-    height: 100%;       /* Ocupa el 100% del contenedor */
-    object-fit: cover;  /* LA CLAVE: Ajusta la imagen para que llene el círculo sin deformarse */
-}
-
-/* --- PANTALLA FILA DE ALUMNOS --- */
-.pantalla-dashboard-moderna {
-    /* 1. Aplicamos tu nuevo fondo exclusivamente a esta pantalla */
-    background-image: url('imagenes/fonfo.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-    
-    /* CAMBIOS AQUÍ: Cambiamos a 'center top' y fijamos el fondo */
-    background-position: center top; 
-    background-attachment: fixed; /* <<-- ESTO HACE QUE EL FONDO SE QUEDE QUIETO */
-    
-    /* 2. Eliminamos el color de fondo sólido que hacía el efecto de caja */
-    background-color: transparent;
-    
-    /* 3. Truco de márgenes negativos para expandirse a toda la pantalla */
-    margin: -30px -20px; 
-    padding: 40px 20px 80px 20px; /* Restauramos el espacio interior */
-    
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-}
-
-.header-dashboard {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.logo-dash { width: 100px; }
-.icono-campana { width: 24px; color: #333; }
-
-.titulo-dashboard h2 {
-    font-size: 2rem;
-    font-weight: 650;
-    color: #2c2c2c;
-    margin-bottom: 5px;
-}
-
-.titulo-dashboard p {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-}
-
-.contenedor-buscador {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: 25px;
-    padding: 10px 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    border: 1px solid #eee;
-}
-
-.contenedor-buscador input {
-    border: none;
-    outline: none;
-    flex-grow: 1;
-    margin: 0 10px;
-    font-size: 0.95rem;
-}
-
-.icono-buscar, .icono-filtros { width: 20px; }
-
-.contenedor-chips {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    scrollbar-width: none; /* Oculta scrollbar en Firefox */
-}
-.contenedor-chips::-webkit-scrollbar { display: none; } /* Oculta scrollbar en Chrome */
-
-.chip {
-    white-space: nowrap;
-    padding: 6px 16px;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    background: white;
-    color: #555;
-    font-size: 0.85rem;
-    cursor: pointer;
-}
-
-.chip.activo {
-    background: #f39c12;
-    color: white;
-    border-color: #f39c12;
-    font-weight: 600;
-}
-
-/* Tarjetas de Alumnos */
-.lista-alumnos-moderna {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.card-alumno {
-    background: white;
-    border-radius: 16px;
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-}
-
-.avatar-actividad {
-    width: 60px;
-    height: 60px;
-    background: #2c2c2c; /* Círculo negro */
-    border-radius: 50%;
-    margin-right: 15px;
-    flex-shrink: 0;
-    object-fit: cover;
-
-    
-}
-
-.info-central { flex-grow: 1; }
-
-.info-central h3 {
-    font-size: 1.1rem;
-    color: #2c2c2c;
-    margin-bottom: 4px;
-}
-
-.info-detalle {
-    display: flex;
-    align-items: center;
-    font-size: 0.8rem;
-    color: #777;
-    margin-bottom: 2px;
-}
-
-.punto-naranja {
-    width: 8px; height: 8px;
-    background: #f39c12;
-    border-radius: 50%;
-    margin-right: 6px;
-}
-
-.estado-derecha {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    padding-left: 10px;
-    border-left: 1px solid #eee;
-
-    flex-shrink: 0;
-}
-
-.badge-estado {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.badge-aldia { background: #e8f5e9; color: #2e7d32; }
-.badge-vencepronto { background: #fff3e0; color: #f57c00; }
-.badge-vencida { background: #ffebee; color: #c62828; }
-
-.texto-rutina { font-size: 0.7rem; color: #999; margin-bottom: 5px; white-space: nowrap; }
-.icono-flecha { color: #ccc; font-size: 1.2rem; }
-
-/* Menú Inferior */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: white;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0 15px 0;
-    box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
-    z-index: 100;
-}
-
-.nav-item {
-    background: none;
-    border: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #888;
-    cursor: pointer;
-}
-
-.nav-item svg { width: 24px; margin-bottom: 4px; }
-.nav-item span { font-size: 0.75rem; }
-
-.nav-item.activo { color: #2c2c2c; font-weight: 600; }
-.nav-item.activo span { border-bottom: 2px solid #f39c12; padding-bottom: 2px; }
-
-/* --- BOTÓN AGREGAR ALUMNO MODERNO --- */
-.contenedor-agregar-alumno {
-    display: flex;
-    width: 100%;
-    justify-content: flex-end; /* Alinea el botón a la derecha */
-    margin-bottom: 15px;
-}
-
-.btn-agregar-moderno {
-    background-color: #f39c12; /* Color naranja/amarillo de tu diseño */
-    color: white;
-    border: none;
-    border-radius: 25px;
-    padding: 10px 20px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px; /* Espacio entre el ícono y el texto */
-    width: 100%;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
-    transition: transform 0.2s ease;
-}
-
-.btn-agregar-moderno svg {
-    width: 18px;
-    height: 18px;
-}
-
-.btn-agregar-moderno:active {
-    transform: scale(0.95); /* Pequeño efecto al tocar el botón */
-}
-
-/* --- BOTONES DE REGISTRO DE PAGO EN TARJETAS --- */
-.contenedor-accion-pago {
-    margin-top: 8px;
-    width: 100%;
-}
-
-.btn-pago-status {
-    border: none;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s ease;
-    width: 100%;
-    justify-content: center;
-}
-
-/* Estado: No pagó / Pendiente */
-.btn-pago-pendiente {
-    background-color: #f0f0f0;
-    color: #666;
-    border: 1px dashed #ccc;
-}
-.btn-pago-pendiente:active {
-    background-color: #e0e0e0;
-}
-
-/* Estado: Sí pagó / Al día */
-.btn-pago-realizado {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
-}
-.btn-pago-realizado:active {
-    background-color: #ffd8d8; /* Al mantener apretado para deshacer se tiñe sutilmente */
-    color: #c62828;
-}
-
-/* --- PANTALLA INDIVIDUAL ALUMNO (NUEVO DISEÑO) --- */
-.pantalla-fondo-claro {
-    background-color: transparent;
-    min-height: 100vh;
-    margin: -30px -20px;
-    padding: 40px 20px 100px 20px;
-    
-    min-height: 100vh;
-    position: relative;
-}
-
-.header-logo-centrado {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.logo-top {
-    height: 50px; /* Ajusta según el tamaño real de tu logo */
-}
-
-/* Tarjeta principal con fondo personalizado */
-.tarjeta-info-alumno {
-    background-image: url('imagenes/nombre.png'); 
-    background-size: cover;
-    background-position: right center; 
-    background-repeat: no-repeat;
-    background-color: #e0e0e0; 
-    
-    border-radius: 20px; /* Bordes apenitas menos curvos para acompañar el formato rectangular */
-    padding: 8px 8px; /* CAMBIO: Menos alto (de 25 pasó a 15) y empuja la foto más a la izquierda */
-    display: flex;
-    align-items: center;
-    gap: 10px; /* CAMBIO: Acerca los textos a la foto (antes estaba en 15px) */
-    margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    overflow: hidden; 
-}
-
-.avatar-gris {
-    width: 60px; /* CAMBIO: Círculo más chico (antes era de 70px) */
-    height: 60px; /* CAMBIO: Círculo más chico */
-    background-color: #c2c2c2;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.avatar-gris svg { 
-    width: 30px; /* Achicamos también el ícono de adentro para que no quede apretado */
-    height: 30px; 
-}
-.datos-info-alumno h2 {
-    font-size: 1.5rem;
-    color: #2c2c2c;
-    margin-bottom: 5px;
-    font-weight: 648;
-
-}
-.datos-info-alumno p {
-    font-size: 0.75rem;
-    color: #333;
-    margin-bottom: 2px;
-}
-
-/* Título de la rutina */
-.titulo-seccion-rutina {
-    margin-bottom: 15px;
-}
-.titulo-seccion-rutina h3 {
-    font-size: 1rem;
-    color: #2c2c2c;
-    font-weight: 600;
-}
-.subrayado-amarillo {
-    position: relative;
-}
-.subrayado-amarillo::after {
-    content: "";
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background-color: #f39c12;
-    border-radius: 2px;
-}
-
-/* Tarjetas de Ejercicios */
-.contenedor-ejercicios {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.card-ejercicio {
-    background: white;
-    border-radius: 15px;
-    padding: 12px 15px 12px 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-}
-
-.icono-arrastre { color: #ccc; cursor: grab; margin-right: 2px; }
-.img-ejercicio { width: 50px; height: 50px; object-fit: contain; }
-
-.info-ejercicio { flex-grow: 1; }
-.info-ejercicio h4 {
-    font-size: 0.81rem;
-    color: #2c2c2c;
-    margin-bottom: 4px;
-    font-weight: 640;
-}
-.detalle-ejercicio {
-    font-size: 0.75rem;
-    color: #666;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.punto-ama {
-    width: 6px; height: 6px;
-    background-color: #f39c12;
-    border-radius: 50%;
-}
-.separador { color: #ccc; }
-
-.acciones-ejercicio {
-    display: flex;
-    gap: 10px;
-    color: #888;
-}
-.acciones-ejercicio svg { width: 18px; cursor: pointer; }
-
-/* Botón Flotante */
-.contenedor-fab {
-    position: fixed;
-    bottom: 85px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    z-index: 100;
-}
-.texto-fab {
-    font-size: 0.85rem;
-    color: #666;
-}
-
-.btn-fab-amarillo {
-    width: 42px;  /* CAMBIO: Antes era 50px, ahora es más chiquito */
-    height: 42px; /* CAMBIO: Antes era 50px */
-    border-radius: 50%;
-    background-color: #f39c12;
-    color: white;
-    
-    /* Ajustes para el centrado perfecto del + */
-    font-size: 1.5rem; /* Achicamos un poco el + para que entre bien */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    line-height: 0; /* TRUCO: Fuerza a ignorar los espacios invisibles de la tipografía */
-    padding-bottom: 2px; /* TRUCO 2: Compensa el centro visual exacto del símbolo + */
-    
-    border: none;
-    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.4);
-    cursor: pointer;
-}
-
-/* Estado activo del menú (Fondo amarillo) */
-.nav-item.activo-amarillo {
-    background-color: #f39c12;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 15px;
-}
-.nav-item.activo-amarillo span { border: none; padding: 0; }
-
-/* --- TÍTULO DE RUTINA INTERACTIVO --- */
-.encabezado-rutina-interactivo {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap; /* Evita que se rompa en pantallas muy finitas */
-}
-
-.encabezado-rutina-interactivo h3 {
-    margin-bottom: 0; /* Anulamos el margen para alinear con los inputs */
-}
-
-/* El desplegable invisible */
-.selector-dia {
-    font-size: 1.1rem;
-    color: #2c2c2c;
-    font-weight: 600;
-    border: none;
-    background: transparent;
-    outline: none;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 0;
-}
-
-.separador-punto {
-    font-size: 1.1rem;
-    color: #2c2c2c;
-    font-weight: 600;
-}
-
-/* El campo de texto para escribir la zona muscular */
-.input-zona {
-    font-size: 1.1rem;
-    color: #2c2c2c;
-    font-weight: 600;
-    border: none;
-    background: transparent;
-    outline: none;
-    flex-grow: 1; /* Ocupa el resto de la pantalla */
-    min-width: 120px;
-    font-family: inherit;
-    border-bottom: 1px dashed transparent; /* Borde invisible */
-    transition: all 0.2s ease;
-}
-
-/* Cuando tocas para escribir, aparece un subrayado sutil naranja */
-.input-zona:focus {
-    border-bottom: 1px dashed #f39c12; 
-}
-
-/* --- MODALES: EFECTO CRISTAL Y BOTONES NEÓN --- */
+/* --- Ventanas Emergentes (Modales) --- */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    
-    /* Fondo negro un poco más oscuro para que resalte el brillo del cristal */
     background: rgba(0,0,0,0.7); 
     display: flex; justify-content: center; align-items: center;
     z-index: 3000;
 }
 
-/* EFECTO GLASSMORPHISM (Cristal opaco) */
+/* Efecto Glassmorphism (Cristal) */
 .modal-contenido {
-    background: rgba(30, 30, 30, 0.65); /* Cristal oscuro semi-transparente */
-    backdrop-filter: blur(16px); /* Esto hace el efecto de difuminar lo de atrás */
+    background: rgba(30, 30, 30, 0.65); 
+    backdrop-filter: blur(16px); 
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15); /* Borde de luz sutil */
-    
+    border: 1px solid rgba(255, 255, 255, 0.15); 
     padding: 25px 20px; 
     border-radius: 20px; 
     width: 90%; max-width: 350px;
@@ -1181,547 +117,491 @@ body {
 }
 
 .modal-contenido h3 { 
-    margin: 0; 
-    color: white; /* Texto blanco para contrastar */
-    font-size: 1.3rem; 
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    margin: 0; color: white; font-size: 1.3rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-.modal-botones { 
-    display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; 
-}
+.modal-botones { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
 
 .btn-cancelar { 
-    background: none; border: none; 
-    color: rgba(255,255,255,0.6); /* Gris claro */
-    font-weight: 600; 
-    cursor: pointer; padding: 8px 15px; font-size: 0.9rem;
-    transition: color 0.2s;
+    background: none; border: none; color: rgba(255,255,255,0.6); 
+    font-weight: 600; cursor: pointer; padding: 8px 15px; font-size: 0.9rem; transition: color 0.2s;
 }
+.btn-cancelar:active { color: white; }
 
-.btn-cancelar:active {
-    color: white;
-}
-
-/* BOTONES QUE BRILLAN (Efecto Neón) */
 .btn-guardar { 
-    background: #f39c12; border: none; 
-    color: #111; /* Texto oscuro para que resalte en el botón claro */
-    font-weight: 700; 
-    cursor: pointer; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem;
-    
-    /* LA MAGIA DEL BRILLO EXTERIOR */
+    background: #f39c12; border: none; color: #111; 
+    font-weight: 700; cursor: pointer; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem;
     box-shadow: 0 0 12px rgba(243, 156, 18, 0.6), 0 0 25px rgba(243, 156, 18, 0.4);
     transition: all 0.2s ease;
 }
-
 .btn-guardar:active {
-    transform: scale(0.95);
-    /* Al apretar, el brillo se vuelve más concentrado */
     box-shadow: 0 0 8px rgba(243, 156, 18, 0.8), 0 0 15px rgba(243, 156, 18, 0.5);
 }
 
-/* INPUTS ADAPTADOS AL CRISTAL */
+/* Inputs dentro de los modales */
 .input-modal {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    color: white;
-    
-    background-color: rgba(0,0,0,0.4); /* Input semi-transparente */
-    outline: none;
-    font-family: inherit;
-    transition: all 0.3s ease;
+    width: 100%; padding: 12px 15px;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;
+    font-size: 0.95rem; color: white; background-color: rgba(0,0,0,0.4); 
+    outline: none; font-family: inherit; transition: all 0.3s ease;
 }
-
-.input-modal::placeholder {
-    color: rgba(255,255,255,0.4);
-}
-
+.input-modal::placeholder { color: rgba(255,255,255,0.4); }
 .input-modal:focus {
-    border-color: #f39c12;
-    background-color: rgba(0,0,0,0.6);
-    /* Brillo interno cuando tocás para escribir */
+    border-color: #f39c12; background-color: rgba(0,0,0,0.6);
     box-shadow: 0 0 10px rgba(243, 156, 18, 0.3); 
 }
-
-/* Menús desplegables para que no queden blancos */
-.input-modal option {
-    background-color: #2c2c2c;
-    color: white;
-}
+.input-modal option { background-color: #2c2c2c; color: white; }
 
 .label-modal {
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.8);
-    margin-bottom: 5px;
-    display: block;
-    font-weight: 600;
+    font-size: 0.8rem; color: rgba(255,255,255,0.8);
+    margin-bottom: 5px; display: block; font-weight: 600;
 }
 
-
-
-.contenedor-admin-acciones {
-    display: flex;
-    justify-content: center; /* Centra los botones */
-    gap: 4px;              /* Espacio pequeño entre botones */
-    margin: 20px 0px;     /* Margen superior y laterales */
-    flex-wrap: nowrap;       /* Por si la pantalla es muy chica, que se acomoden */
+/* Estilos de subida de fotos y avatares */
+.preview-avatar-profe {
+    width: 75px; height: 75px; border-radius: 50%;
+    border: 2px solid #f39c12; overflow: hidden; background-color: rgba(0,0,0,0.5);
+    flex-shrink: 0; display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
+.preview-avatar-profe img { width: 100%; height: 100%; object-fit: cover; }
 
-.btn-accion-admin {
-    background: #f0f0f0;
-    border: 1px solid #555;
-    padding: 6px 10px;      /* Más chiquitos */
-    border-radius: 15px;
-    font-size: 0.70rem;     /* Fuente más pequeña */
-    color: #555;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    white-space: nowrap;    /* Evita que el texto salte de línea */
-}
-
-/* Estado Rojo (Por defecto) */
-.btn-accion-admin.peligro {
-    color: #d32f2f;
-    background-color: #ffebee;
-    border: 1px solid #ffcdd2;
-}
-
-/* Estado Gris (Modo "No borrar") */
-.btn-accion-admin.gris {
-    background-color: #666 !important;
-    color: white !important;
-    border: 1px solid #444 !important;
-}
-
-/* Blindaje contra cambios de color al tocar */
-.btn-accion-admin.peligro:active, 
-.btn-accion-admin.gris:active {
-    transform: none !important;
-    outline: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-}
-
-/* Le decimos a la tarjeta que permita que el botón flote adentro de ella */
-.tarjeta-info-alumno {
-    position: relative;
-}
-
-/* El nuevo botoncito del lápiz */
-.btn-editar-alumno-card {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(255, 255, 255, 0.65); /* Fondo blanco semitransparente */
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    color: #444;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+.btn-subir-foto {
+    background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.3);
+    color: white; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
     transition: all 0.2s ease;
 }
+.btn-subir-foto:active { background: rgba(243, 156, 18, 0.3); border-color: #f39c12; }
+.btn-subir-foto svg { width: 16px; height: 16px; }
 
-.btn-editar-alumno-card:active {
-    transform: scale(0.9);
-    background: white;
-}
-
-.btn-editar-alumno-card svg {
-    width: 15px;
-    height: 15px;
-}
-
-/* 1. LA TARJETA QUE TENÉS AGARRADA CON EL DEDO */
-.tarjeta-arrastrando {
-    border: 2px solid #f39c12 !important; /* Contorno amarillo/naranja de tu app */
-    box-shadow: 0 12px 25px rgba(243, 156, 18, 0.3) !important; /* Sombra del mismo color */
-    background-color: white !important;
-    transform: scale(1.03); /* Se agranda apenitas para dar el efecto de que "flota" hacia vos */
-    z-index: 9999 !important;
-    opacity: 1 !important;
+/* El modal de error de login tiene un cristal más clarito */
+#modal-error-login .modal-contenido {
+    background: rgba(255, 255, 255, 0.568); 
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.541); 
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
-/* 2. EL LUGAR DONDE VA A CAER (El indicador visual) */
-.tarjeta-indicador-caida {
-    opacity: 1 !important;
-    background-color: #fff8e1 !important; /* Un fondo amarillo muy clarito */
-    border: 2px dashed #f39c12 !important; /* Borde de líneas punteadas amarillas */
-    box-shadow: none !important;
+/* --- Menú Inferior (Bottom Nav) --- */
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: white; display: flex; justify-content: space-around;
+    padding: 10px 0 15px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+    z-index: 100;
 }
+.nav-item {
+    background: none; border: none; display: flex; flex-direction: column;
+    align-items: center; color: #888; cursor: pointer;
+}
+.nav-item svg { width: 24px; margin-bottom: 4px; }
+.nav-item span { font-size: 0.75rem; }
+.nav-item.activo { color: #2c2c2c; font-weight: 600; }
+.nav-item.activo span { border-bottom: 2px solid #f39c12; padding-bottom: 2px; }
 
-/* --- IMÁGENES ANIMADAS DE EJERCICIOS --- */
-
-/* Estilo base para el cuadradito de la imagen */
-.img-animada {
-    width: 45px;
-    height: 45px;
-    border-radius: 8px;
-    background-size: cover;
-    background-position: center;
-    background-color: #ffffff; /* Fondo negro por si la imagen tarda en cargar */
-    flex-shrink: 0;
-}
-
-/* Animación específica para Vuelos Laterales */
-.anim-vuelos-laterales {
-    animation: swapLaterales 1.5s infinite;
-}
-
-/* El motor de la animación: cambia entre las dos fotos nuevas */
-@keyframes swapLaterales {
-    0%, 49.9% { background-image: url('imagenes/lateralesx500.jpg'); }
-    50%, 100% { background-image: url('imagenes/laterales2x500.jpg'); }
-}
-
-/* Animación para Press de Banca */
-.anim-press-banca {
-    animation: swapPress 1.5s infinite;
-}
-@keyframes swapPress {
-    0%, 49.9% { background-image: url('imagenes/PRESS1.jpg'); }
-    50%, 100% { background-image: url('imagenes/PRESS2.jpg'); }
-}
-
-/* Animación para Back Squat (Sentadilla) */
-.anim-back-squat {
-    animation: swapBacksquat 1.5s infinite;
-}
-@keyframes swapBacksquat {
-    0%, 49.9% { background-image: url('imagenes/BACKSQUAT.jpg'); }
-    50%, 100% { background-image: url('imagenes/BACKSQUAT2.jpg'); }
-}
-
-/* Animación para Peso Muerto */
-.anim-peso-muerto {
-    animation: swapPesoMuerto 1.5s infinite;
-}
-@keyframes swapPesoMuerto {
-    0%, 49.9% { background-image: url('imagenes/PESOMUERTO1.jpg'); }
-    50%, 100% { background-image: url('imagenes/PESOMUERTO2.jpg'); }
-}
-
-.anim-press-banca {
-    animation: swapPressBanca 1.5s infinite;
-}
-@keyframes swapPressBanca {
-    0%, 49.9% { background-image: url('imagenes/PRESSDEBANCA1.jpg'); }
-    50%, 100% { background-image: url('imagenes/PRESSDEBANCA2.jpg'); }
-}
 
 /* =========================================
-   NUEVO DISEÑO DE LOGIN (EFECTO GLASS) - TAMAÑO COMPACTO
+   4. PANTALLA 1: INICIO (Selección Rol)
    ========================================= */
+.pantalla-inicio {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+    background-image: url('imagenes/fondo-profes-oscuro.jpeg'); 
+    background-size: cover; background-position: center; background-color: #111; 
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    padding-top: 10vh; z-index: 2500;
+}
+.pantalla-inicio.modo-claro { background-image: url('imagenes/FONDOBLANO1.jpg'); }
 
-/* 1. ASEGURAMOS QUE EL CONTENEDOR ESTÉ ANCLADO AL TECHO */
+.logo-container-inicio { margin-bottom: 8vh; text-align: center; }
+.img-logo-inicio { width: 250px; filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8)); }
+
+.contenedor-botones-rol {
+    display: flex; flex-direction: column; gap: 35px; margin-top: 6vh;
+    width: 85%; max-width: 310px;
+}
+
+.tarjeta-rol {
+    position: relative; width: 100%; height: 130px; border-radius: 20px;
+    cursor: pointer; overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+.tarjeta-rol:active { box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4); }
+
+.tarjeta-profe { height: 95px; } /* Más petisa */
+.tarjeta-profe .textos-rol h2 { font-size: 2rem; margin-bottom: 0px; }
+.tarjeta-profe .textos-rol p { font-size: 1rem; }
+
+.fondo-tarjeta-rol {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-size: 100% 100%; background-position: center; background-repeat: no-repeat; z-index: 1;
+}
+
+.contenido-rol {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 2; display: flex; align-items: center; padding: 0 20px;
+}
+.icono-rol { width: 55px; height: auto; margin-right: 15px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5)); }
+
+.textos-rol { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+.textos-rol h2 {
+    font-family: 'Oswald', sans-serif; font-size: 2rem; color: white; margin: 0 0 2px 0;
+    line-height: 1; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+}
+.textos-rol p {
+    font-size: 1rem; color: #eaeaea; margin: 0; line-height: 1.3; text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+}
+.flecha-rol { width: 24px; height: 24px; margin-left: 10px; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8)); }
+
+/* Botón flotante para cambiar tema global */
+.btn-tema {
+    position: absolute; top: 25px; right: 25px;
+    background: rgba(10, 10, 10, 0.45); backdrop-filter: blur(5px);
+    border: 2px solid #f39c12; border-radius: 50%; width: 45px; height: 45px;
+    display: flex; justify-content: center; align-items: center; color: #f39c12; cursor: pointer; z-index: 10;
+}
+.btn-tema svg { width: 22px; height: 22px; }
+
+
+/* =========================================
+   5. PANTALLA 2: LOGIN (Glassmorphism)
+   ========================================= */
 .login-visual {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100vh;
-    background-image: url('imagenes/FONDO.jpg');
-    background-size: cover;
-    background-position: center;
-    background-color: #111; 
-    
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    
-    /* LA MAGIA: Forzamos que se ancle arriba para que NADA se mueva */
-    justify-content: flex-start !important; 
-    padding-top: 12vh !important; 
-    z-index: 2000;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+    background-image: url('imagenes/FONDO.jpg'); background-size: cover; background-position: center; background-color: #111; 
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start !important; 
+    padding-top: 12vh !important; z-index: 2000;
 }
 
-.login-header-visual {
-    text-align: center;
-    /* Separación entre los textos y la caja de vidrio (5% de la pantalla) */
-    margin-bottom: 4vh; 
-    z-index: 2;
-    padding: 0 20px;
-}
+.login-header-visual { text-align: center; margin-bottom: 4vh; z-index: 2; padding: 0 20px; }
 
 .logo-visual {
-    width: 200px; /* Logo más grande (antes estaba en 170px) */
-    
-    margin-top: 0; 
-    margin-bottom: 15vh; /* Hueco más grande para bajar los textos (antes 10vh) */
-    
+    width: 200px; margin-top: 0; margin-bottom: 15vh; 
     filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8));
 }
 
-
+.contenedor-texto-visual {
+    background: radial-gradient(ellipse at center, rgb(10, 10, 10) 20%, rgba(10, 10, 10, 0.288) 100%); 
+    border-radius: 25px; padding: 20px 15px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5); 
+    display: inline-block; width: 90%; max-width: 260px;
+}
 .titulo-visual {
-    color: white;
-    font-family: 'Oswald', sans-serif;
-    font-size: 0.95rem; /* Texto más chico */
-    letter-spacing: 1px;
-    margin-bottom: 3px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    color: white; font-family: 'Oswald', sans-serif; font-size: 0.95rem; 
+    letter-spacing: 1px; margin-bottom: 3px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
 }
-
 .subtitulo-visual {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.75rem; /* Texto más chico */
-    max-width: 250px;
-    margin: 0 auto;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
-    
+    color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; 
+    max-width: 250px; margin: 0 auto; text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
 }
 
-/* La caja de vidrio ahora es más compacta */
 .tarjeta-login-visual {
-    background: rgba(10, 10, 10, 0.45); 
-    backdrop-filter: blur(10px); 
-    -webkit-backdrop-filter: blur(10px); 
-    border: 2px solid #f39c12; 
-    border-radius: 20px; 
-    padding: 40px 20px; /* Más alta (40px de espacio arriba y abajo) */
-    width: 85%;
-    max-width: 315px; /* Más angosta (antes era 320px) */
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* Más separación entre los renglones */
+    background: rgba(10, 10, 10, 0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
+    border: 2px solid #f39c12; border-radius: 20px; padding: 40px 20px; 
+    width: 85%; max-width: 315px; display: flex; flex-direction: column; gap: 20px; 
     box-shadow: 0 15px 30px rgba(0,0,0,0.7);
 }
 
-.grupo-input-visual {
-    position: relative;
-    width: 100%;
-}
-
-/* Campos de texto más finos */
+.grupo-input-visual { position: relative; width: 100%; }
 .grupo-input-visual input {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid #f39c12;
-    border-radius: 18px; /* Puntas suavemente redondeadas, no circulares */
-    padding: 14px 18px; /* Un poquito más altos */
-    color: white;
-    font-size: 0.95rem; 
-    outline: none;
+    width: 100%; background: rgba(0, 0, 0, 0.7); border: 2px solid #f39c12; border-radius: 18px; 
+    padding: 14px 18px; color: white; font-size: 0.95rem; outline: none;
     transition: box-shadow 0.3s ease, background 0.3s ease;
 }
-
-.grupo-input-visual input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* Brillo intenso al tocar para escribir */
+.grupo-input-visual input::placeholder { color: rgba(255, 255, 255, 0.5); }
 .grupo-input-visual input:focus {
-    /* Hacemos que el borde se vuelva de un naranja/amarillo más vibrante */
     border-color: #ffb732; 
-    
-    /* Doble sombra para el efecto neón: una difuminada y otra más concentrada */
     box-shadow: 0 0 18px rgba(243, 156, 18, 0.9), 0 0 8px rgba(243, 156, 18, 0.8);
-    
-    /* Aclaramos apenitas el fondo negro y le damos un pequeñísimo tinte naranja */
     background: rgba(243, 156, 18, 0.15); 
 }
 
 .contenedor-ojo-visual {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255, 255, 255, 0.5);
+    position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.5);
 }
+.contenedor-ojo-visual svg { width: 18px; height: 18px; }
 
-.contenedor-ojo-visual svg {
-    width: 18px;
-    height: 18px;
-}
-
-/* Botón más fino */
 .btn-iniciar-visual {
-    width: 100%;
-    background-image: url('imagenes/boton.png');
-    background-size: cover;
-    background-position: center;
-    background-color: #f39c12; 
-    border: none;
-    border-radius: 12px; /* Puntas suavemente redondeadas */
-    padding: 14px 20px; 
-    color: #1a1a1a;
-    font-weight: 800;
-    font-size: 0.95rem; 
-    text-transform: uppercase;
-    cursor: pointer;
-    margin-top: 10px;
-    box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
-    transition: transform 0.2s ease;
+    width: 100%; background-image: url('imagenes/boton.png'); background-size: cover; background-position: center;
+    background-color: #f39c12; border: none; border-radius: 12px; padding: 14px 20px; 
+    color: #1a1a1a; font-weight: 800; font-size: 0.95rem; text-transform: uppercase;
+    cursor: pointer; margin-top: 10px; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
 }
 
-.btn-iniciar-visual:active {
-    transform: scale(0.95);
+/* Flecha para volver al inicio */
+.btn-volver-atras {
+    position: absolute; top: 30px; left: 20px; background: rgba(10, 10, 10, 0.45);
+    border: 2px solid rgba(243, 156, 18, 0.5); border-radius: 50%; width: 40px; height: 40px;
+    display: flex; justify-content: center; align-items: center; color: white; cursor: pointer; z-index: 10;
 }
 
-/* --- CONTENEDOR DE TEXTO (MODO OSCURO / PANTALLA NEGRA) --- */
-.contenedor-texto-visual {
-    /* Fondo negro concentrado en el centro y más transparente en los bordes */
-    background: radial-gradient(ellipse at center, rgb(10, 10, 10) 20%, rgba(10, 10, 10, 0.288) 100%); 
-    
-
-    border-radius: 25px; 
-    padding: 20px 15px; 
-    
-    /* Sombra oscura para darle profundidad */
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5); 
-    
-    display: inline-block; 
-    width: 90%;
-    max-width: 260px;
-}
-
-/* --- BOTÓN FLOTANTE DEL TEMA --- */
-.btn-tema {
-    position: absolute;
-    top: 25px;
-    right: 25px;
-    background: rgba(10, 10, 10, 0.45);
-    backdrop-filter: blur(5px);
-    border: 2px solid #f39c12;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #f39c12;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s ease;
-}
-
-.btn-tema svg { width: 22px; height: 22px; }
-
-/* =========================================
-   REGLAS DEL MODO CLARO ACTIVADO (LIMPIO)
-   ========================================= */
-
-/* 1. Cambia el fondo general */
-.login-visual.modo-claro {
-    background-image: url('imagenes/FONDOBLANO1.jpg');
-}
-
-/* 2. Cambia la caja a vidrio blanco transparente */
+/* MODO CLARO DEL LOGIN */
+.login-visual.modo-claro { background-image: url('imagenes/FONDOBLANO1.jpg'); }
 .login-visual.modo-claro .tarjeta-login-visual,
-.login-visual.modo-claro .btn-tema {
-    background: rgba(255, 255, 255, 0.20); 
-    box-shadow: 0 15px 30px rgba(0,0,0,0.15); 
-}
-
-/* 3. Contenedor de texto: SOLO cambia color y sombra */
-.login-visual.modo-claro .contenedor-texto-visual {
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 15%, rgba(255, 255, 255, 0.3) 100%);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); 
-}
-
-/* 4. Textos: Borramos la orden del contorno que hacía saltar la letra */
-.login-visual.modo-claro .titulo-visual {
-    color: #111; 
-    text-shadow: none; 
-}
-
-.login-visual.modo-claro .subtitulo-visual {
-    color: #333; 
-    text-shadow: none;
-}
-
-/* 5. Aclara los campos de texto e invierte sus letras */
-.login-visual.modo-claro .grupo-input-visual input {
-    background: rgba(255, 255, 255, 0.42);
-    color: #1a1a1a;
-}
+.login-visual.modo-claro .btn-tema { background: rgba(255, 255, 255, 0.20); box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
+.login-visual.modo-claro .contenedor-texto-visual { background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 15%, rgba(255, 255, 255, 0.3) 100%); }
+.login-visual.modo-claro .titulo-visual { color: #111; text-shadow: none; }
+.login-visual.modo-claro .subtitulo-visual { color: #333; text-shadow: none; }
+.login-visual.modo-claro .grupo-input-visual input { background: rgba(255, 255, 255, 0.42); color: #1a1a1a; }
 .login-visual.modo-claro .grupo-input-visual input::placeholder,
-.login-visual.modo-claro .contenedor-ojo-visual {
-    color: rgba(0, 0, 0, 0.6);
-}
-
-/* 6. Brillo especial al tocar los campos en el modo claro */
+.login-visual.modo-claro .contenedor-ojo-visual { color: rgba(0, 0, 0, 0.6); }
 .login-visual.modo-claro .grupo-input-visual input:focus {
-    /* Mantenemos el resplandor de neón naranja por fuera */
     box-shadow: 0 0 18px rgba(243, 156, 18, 0.8), 0 0 8px rgba(243, 156, 18, 0.6);
-    
-    /* Hacemos que el fondo se vuelva blanco brillante y sólido */
     background: rgba(255, 255, 255, 0.678); 
 }
+.login-visual.modo-claro .btn-volver-atras { background: rgba(255, 255, 255, 0.5); color: #111; }
 
 
-/* --- ESTILO EFECTO VIDRIO PARA EL MODAL DE ERROR DEL LOGIN--- */
-#modal-error-login .modal-contenido {
-    /* Fondo blanco al 75% de opacidad (se transparenta un poco) */
-    background: rgba(255, 255, 255, 0.568); 
-    
-    /* Efecto de difuminado (blur) para lo que queda por detrás */
-    backdrop-filter: blur(12px); 
-    -webkit-backdrop-filter: blur(12px);
-    
-    /* Un bordecito blanco muy fino para darle brillo al cristal */
-    border: 1px solid rgba(255, 255, 255, 0.541); 
-    
-    /* Sombra un poco más pronunciada para que "flote" mejor */
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+/* =========================================
+   6. PANTALLA 3: PERFILES (Profesores)
+   ========================================= */
+.pantalla-perfiles {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh; overflow-y: auto; 
+    background-image: url('imagenes/fondo-profes-oscuro.jpeg'); background-size: cover; background-position: center; background-color: #111; 
+    display: flex; flex-direction: column; align-items: center; z-index: 2000;
+}
+.pantalla-perfiles.modo-claro { background-image: url('imagenes/fondo-profes-claro.jpeg'); }
+
+/* Alternar logos en modo oscuro/claro */
+.pantalla-perfiles .logo-modo-oscuro { display: inline-block; }
+.pantalla-perfiles .logo-modo-claro { display: none; }
+.pantalla-perfiles.modo-claro .logo-modo-oscuro { display: none; }
+.pantalla-perfiles.modo-claro .logo-modo-claro { display: inline-block; }
+
+.logo-container-small { text-align: center; margin-bottom: 5px; margin-top: 0; }
+.img-logo-small { width: 80%; max-width: 250px; height: auto; }
+
+.textos-perfiles-caja { width: 98%; max-width: 400px; padding: 20px 2px; text-align: center; margin-bottom: 4vh; }
+.textos-perfiles-caja h2 {
+    position: relative; font-family: "Oswald", sans-serif; font-size: 1.8rem; color: white; font-weight: 500;
+    padding-bottom: 10px; margin-bottom: 18px; letter-spacing: 0.5px; text-shadow: 0px 2px 4px rgba(0,0,0,0.6); 
+}
+/* Línea amarilla debajo del título */
+.textos-perfiles-caja h2::after {
+    content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 35px; height: 3px; background-color: #f39c12; border-radius: 2px;
+}
+.textos-perfiles-caja p { font-size: 1.05rem; color: #eaeaea; line-height: 1.4; text-shadow: 0px 2px 4px rgba(0,0,0,0.6); }
+
+.grilla-perfiles-moderna {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 90%; max-width: 380px; margin-bottom: 20px;
 }
 
-
-/* --- ESTILOS PARA SUBIR FOTO DE PERFIL --- */
-.preview-avatar-profe {
-    width: 75px;
-    height: 75px;
-    border-radius: 50%;
-    border: 2px solid #f39c12;
-    overflow: hidden;
-    background-color: rgba(0,0,0,0.5);
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+/* Tarjeta Perfil (Modo Oscuro Default) */
+.tarjeta-perfil-moderna {
+    width: 100%; aspect-ratio: 1 / 1.15; padding: 15px 10px;
+    background: radial-gradient(circle at top, rgba(120, 80, 15, 0.4) 0%, rgba(10, 10, 10, 0.651) 65%);
+    border: 1px solid #f39c12; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.5); 
+}
+.tarjeta-perfil-moderna .avatar-profe {
+    width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+    border: 3px solid #f39c12; padding: 4px; margin-bottom: 12px; background-color: #2c2c2c; 
+}
+.tarjeta-perfil-moderna p {
+    font-family: "Oswald", sans-serif; font-size: 0.95rem; color: white; text-align: center;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin: 0; line-height: 1.2;
 }
 
-.preview-avatar-profe img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+/* Tarjeta Perfil (Modo Claro) */
+.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna {
+    background: radial-gradient(circle at top, rgb(255, 255, 255) 0%, rgba(255, 229, 205, 0.603) 65%);
+    border: 1px solid #f39c12; box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+}
+.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna .avatar-profe { background-color: #f0f0f0; }
+.pantalla-perfiles.modo-claro .tarjeta-perfil-moderna p { color: #111; text-shadow: none; }
+
+/* Menú de abajo transparente (Footer) */
+.footer-perfiles-blanco {
+    background: transparent; width: 100%; padding: 18px 0; margin-top: auto;
+    display: flex; align-items: center; justify-content: center; gap: 15px;
+}
+.btn-footer-icono {
+    background: none; border: none; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 500; cursor: pointer;
+}
+.btn-footer-icono span { color: white !important; text-shadow: 0px 2px 4px rgba(0,0,0,0.8); }
+.btn-footer-icono svg { width: 24px; height: 24px; stroke: white !important; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8)); }
+.separador-vertical { width: 1px; height: 20px; background-color: rgba(255,255,255,0.3); }
+
+/* Adaptación del footer al modo claro */
+.pantalla-perfiles.modo-claro .textos-perfiles-caja h2, 
+.pantalla-perfiles.modo-claro .textos-perfiles-caja p,
+.pantalla-perfiles.modo-claro .btn-footer-icono span { color: #111 !important; text-shadow: none !important; }
+.pantalla-perfiles.modo-claro .btn-footer-icono svg { stroke: #333 !important; filter: none !important; }
+
+
+/* =========================================
+   7. PANTALLA 4: DASHBOARD (Alumnos)
+   ========================================= */
+.pantalla-dashboard-moderna {
+    background-image: url('imagenes/fonfo.png'); background-size: cover; background-repeat: no-repeat;
+    background-position: center top; background-attachment: fixed; background-color: transparent;
+    margin: -30px -20px; padding: 40px 20px 80px 20px; min-height: 100vh; position: relative; overflow-x: hidden;
 }
 
-.btn-subir-foto {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
+.header-dashboard { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.logo-dash { width: 130px; }
+.iconos-derecha-header { display: flex; gap: 16px; align-items: center; color: #333; }
+.icono-header { width: 24px; cursor: pointer; transition: transform 0.2s ease; }
+.icono-header:active { transform: scale(0.85); }
+
+.titulo-dashboard h2 { font-size: 2rem; font-weight: 650; color: #2c2c2c; margin-bottom: 5px; }
+.titulo-dashboard p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+
+/* Botón flotante para agregar alumno */
+.contenedor-agregar-alumno { display: flex; width: 100%; justify-content: flex-end; margin-bottom: 15px; }
+.btn-agregar-moderno {
+    background-color: #f39c12; color: white; border: none; border-radius: 25px; padding: 10px 20px;
+    font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; 
+    width: 100%; cursor: pointer; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+}
+.btn-agregar-moderno svg { width: 18px; height: 18px; }
+
+/* Botones modo borrar */
+.contenedor-admin-acciones { display: flex; justify-content: center; gap: 4px; margin: 20px 0px; flex-wrap: nowrap; }
+.btn-accion-admin {
+    background: #f0f0f0; border: 1px solid #555; padding: 6px 10px; border-radius: 15px;
+    font-size: 0.70rem; color: #555; display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;
+}
+.btn-accion-admin.peligro { color: #d32f2f; background-color: #ffebee; border: 1px solid #ffcdd2; }
+.btn-accion-admin.gris { background-color: #666 !important; color: white !important; border: 1px solid #444 !important; }
+
+/* Buscador y Chips */
+.contenedor-buscador {
+    display: flex; align-items: center; background: white; border-radius: 25px; padding: 10px 15px; margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #eee;
+}
+.contenedor-buscador input { border: none; outline: none; flex-grow: 1; margin: 0 10px; font-size: 0.95rem; }
+.icono-buscar, .icono-filtros { width: 20px; }
+
+.contenedor-chips { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
+.contenedor-chips::-webkit-scrollbar { display: none; }
+.chip { white-space: nowrap; padding: 6px 16px; border-radius: 20px; border: 1px solid #ddd; background: white; color: #555; font-size: 0.85rem; cursor: pointer; }
+.chip.activo { background: #f39c12; color: white; border-color: #f39c12; font-weight: 600; }
+
+/* Lista y Tarjetas de Alumno */
+.lista-alumnos-moderna { display: flex; flex-direction: column; gap: 12px; }
+.card-alumno { background: white; border-radius: 16px; padding: 15px; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+.avatar-actividad { width: 60px; height: 60px; background: #2c2c2c; border-radius: 50%; margin-right: 15px; flex-shrink: 0; object-fit: cover; }
+.info-central { flex-grow: 1; }
+.info-central h3 { font-size: 1.1rem; color: #2c2c2c; margin-bottom: 4px; }
+.info-detalle { display: flex; align-items: center; font-size: 0.8rem; color: #777; margin-bottom: 2px; }
+.punto-naranja { width: 8px; height: 8px; background: #f39c12; border-radius: 50%; margin-right: 6px; }
+
+.estado-derecha { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding-left: 10px; border-left: 1px solid #eee; flex-shrink: 0; }
+.badge-estado { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; }
+.badge-aldia { background: #e8f5e9; color: #2e7d32; }
+.badge-vencepronto { background: #fff3e0; color: #f57c00; }
+.badge-vencida { background: #ffebee; color: #c62828; }
+
+.contenedor-accion-pago { margin-top: 8px; width: 100%; }
+.btn-pago-status {
+    border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; gap: 4px; transition: all 0.2s ease; width: 100%; justify-content: center;
+}
+.btn-pago-pendiente { background-color: #f0f0f0; color: #666; border: 1px dashed #ccc; }
+.btn-pago-realizado { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+
+
+/* =========================================
+   8. PANTALLA 5: DETALLE ALUMNO Y RUTINAS
+   ========================================= */
+.pantalla-fondo-claro {
+    background-color: transparent; min-height: 100vh; margin: -30px -20px; padding: 40px 20px 100px 20px; position: relative;
+}
+.header-logo-centrado { display: flex; justify-content: center; margin-bottom: 20px; }
+.logo-top { height: 50px; }
+
+/* Tarjeta de Información Superior */
+.tarjeta-info-alumno {
+    background-image: url('imagenes/nombre.png'); background-size: cover; background-position: right center; background-repeat: no-repeat;
+    background-color: #e0e0e0; border-radius: 20px; padding: 8px 8px; display: flex; align-items: center; gap: 10px; margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; position: relative;
+}
+.avatar-gris { width: 60px; height: 60px; background-color: #c2c2c2; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+.avatar-gris svg { width: 30px; height: 30px; }
+.datos-info-alumno h2 { font-size: 1.5rem; color: #2c2c2c; margin-bottom: 5px; font-weight: 648; }
+.datos-info-alumno p { font-size: 0.75rem; color: #333; margin-bottom: 2px; }
+
+.btn-editar-alumno-card {
+    position: absolute; bottom: 10px; right: 10px; background: rgba(255, 255, 255, 0.65); border: none; border-radius: 50%;
+    width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #444; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.btn-editar-alumno-card svg { width: 15px; height: 15px; }
+
+/* Encabezado e Inputs de Rutinas */
+.titulo-seccion-rutina { margin-bottom: 15px; }
+.titulo-seccion-rutina h3 { font-size: 1rem; color: #2c2c2c; font-weight: 600; }
+.subrayado-amarillo { position: relative; }
+.subrayado-amarillo::after { content: ""; position: absolute; bottom: -4px; left: 0; width: 100%; height: 3px; background-color: #f39c12; border-radius: 2px; }
+
+.encabezado-rutina-interactivo { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.encabezado-rutina-interactivo h3 { margin-bottom: 0; }
+.selector-dia { font-size: 1.1rem; color: #2c2c2c; font-weight: 600; border: none; background: transparent; outline: none; cursor: pointer; font-family: inherit; padding: 0; }
+.separador-punto { font-size: 1.1rem; color: #2c2c2c; font-weight: 600; }
+.input-zona { font-size: 1.1rem; color: #2c2c2c; font-weight: 600; border: none; background: transparent; outline: none; flex-grow: 1; min-width: 120px; border-bottom: 1px dashed transparent; }
+.input-zona:focus { border-bottom: 1px dashed #f39c12; }
+
+/* Tarjetas de Ejercicios y Arrastre */
+.contenedor-ejercicios { display: flex; flex-direction: column; gap: 10px; }
+.card-ejercicio {
+    background: white; border-radius: 15px; padding: 12px 15px 12px 8px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.icono-arrastre { color: #ccc; cursor: grab; margin-right: 2px; }
+.info-ejercicio { flex-grow: 1; }
+.info-ejercicio h4 { font-size: 0.81rem; color: #2c2c2c; margin-bottom: 4px; font-weight: 640; }
+.detalle-ejercicio { font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 6px; }
+.punto-ama { width: 6px; height: 6px; background-color: #f39c12; border-radius: 50%; }
+.separador { color: #ccc; }
+
+.acciones-ejercicio { 
+    display: flex; 
+    gap: 2px; /* Achicamos el hueco visual porque el botón ahora es más ancho invisiblemente */
+    color: #888; 
 }
 
-.btn-subir-foto:active {
-    background: rgba(243, 156, 18, 0.3);
-    border-color: #f39c12;
-    transform: scale(0.97);
+/* LA MAGIA: Creamos un botón invisible grande (40x40) con el dibujo chiquito en el medio */
+.acciones-ejercicio svg { 
+    width: 40px !important;  /* Tamaño gigante del área para el dedo */
+    height: 40px !important;
+    padding: 11px !important; /* Empuja el dibujito hacia el centro exacto */
+    cursor: pointer; 
+    border-radius: 50%; /* Hace que el efecto visual sea un círculo perfecto */
+    transition: all 0.2s ease !important;
 }
 
-.btn-subir-foto svg {
-    width: 16px;
-    height: 16px;
+/* Bonus: Feedback visual para que sepas que le acertaste al botón */
+.acciones-ejercicio svg:active {
+    background-color: rgba(0, 0, 0, 0.08); /* Se pinta de un gris muy clarito al apretarlo */
+    transform: scale(0.85) !important;
+}
+
+/* Estilos de Arrastre Dinámico */
+.tarjeta-arrastrando {
+    border: 2px solid #f39c12 !important; box-shadow: 0 12px 25px rgba(243, 156, 18, 0.3) !important;
+    background-color: white !important; transform: scale(1.03); z-index: 9999 !important; opacity: 1 !important;
+}
+.tarjeta-indicador-caida {
+    opacity: 1 !important; background-color: #fff8e1 !important; border: 2px dashed #f39c12 !important; box-shadow: none !important;
+}
+
+/* Animación y Cuadros de Ejercicios (Gifs Simulados) */
+.img-animada { width: 45px; height: 45px; border-radius: 8px; background-size: cover; background-position: center; background-color: #ffffff; flex-shrink: 0; }
+
+.anim-vuelos-laterales { animation: swapLaterales 1.5s infinite; }
+@keyframes swapLaterales { 0%, 49.9% { background-image: url('imagenes/lateralesx500.jpg'); } 50%, 100% { background-image: url('imagenes/laterales2x500.jpg'); } }
+
+.anim-press-banca { animation: swapPressBanca 1.5s infinite; }
+@keyframes swapPressBanca { 0%, 49.9% { background-image: url('imagenes/PRESSDEBANCA1.jpg'); } 50%, 100% { background-image: url('imagenes/PRESSDEBANCA2.jpg'); } }
+
+.anim-back-squat { animation: swapBacksquat 1.5s infinite; }
+@keyframes swapBacksquat { 0%, 49.9% { background-image: url('imagenes/BACKSQUAT.jpg'); } 50%, 100% { background-image: url('imagenes/BACKSQUAT2.jpg'); } }
+
+.anim-peso-muerto { animation: swapPesoMuerto 1.5s infinite; }
+@keyframes swapPesoMuerto { 0%, 49.9% { background-image: url('imagenes/PESOMUERTO1.jpg'); } 50%, 100% { background-image: url('imagenes/PESOMUERTO2.jpg'); } }
+
+/* Botón flotante para añadir ejercicios (+) */
+.contenedor-fab { position: fixed; bottom: 85px; right: 20px; display: flex; align-items: center; gap: 10px; z-index: 100; }
+.btn-fab-amarillo {
+    width: 42px; height: 42px; border-radius: 50%; background-color: #f39c12; color: white;
+    font-size: 1.5rem; display: flex; justify-content: center; align-items: center; line-height: 0; padding-bottom: 2px; 
+    border: none; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.4); cursor: pointer;
 }

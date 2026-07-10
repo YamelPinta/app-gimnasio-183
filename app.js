@@ -59,6 +59,7 @@ function cerrarModalConfirmacion() {
     accionPendiente = null; // Limpiamos la memoria
 }
 
+
 // Escuchamos el clic del botón rojo del modal
 document.getElementById("btn-confirmar-accion").addEventListener("click", () => {
     if (accionPendiente) {
@@ -66,6 +67,17 @@ document.getElementById("btn-confirmar-accion").addEventListener("click", () => 
         cerrarModalConfirmacion(); // Cierra el modal
     }
 });
+
+// --- SISTEMA DE ALERTA VISUAL (Reemplaza al alert común) ---
+function mostrarAlerta(titulo, mensaje) {
+    document.getElementById("titulo-alerta").innerText = titulo;
+    document.getElementById("texto-alerta").innerText = mensaje;
+    document.getElementById("modal-alerta").style.display = "flex";
+}
+
+function cerrarModalAlerta() {
+    document.getElementById("modal-alerta").style.display = "none";
+}
 
 // --- 2. ARRANQUE DE LA APP, MEMORIA Y NAVEGACIÓN INICIAL ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -174,7 +186,11 @@ async function cargarProfesores() {
 
     // 2. Cargamos profes desde la base de datos
     try {
-        const { data: profesores, error } = await clienteSupabase.from('profesores').select('*');
+        const { data: profesores, error } = await clienteSupabase
+            .from('profesores')
+            .select('*')
+            .order('creado_en', { ascending: true });
+
         if (error) throw error;
         
         profesores.forEach(profe => {
@@ -259,7 +275,7 @@ async function guardarProfeEnBD() {
     const nombreCompleto = document.getElementById("input-profe-nombre").value.trim();
 
     if (!nombreCompleto) {
-        alert("Por favor, ingresá el nombre y apellido del profesor.");
+        mostrarAlerta("Faltan datos","Por favor, ingresá el nombre y apellido del profesor.");
         return;
     }
 
@@ -281,12 +297,18 @@ async function guardarProfeEnBD() {
         cargarProfesores(); 
 
     } catch (error) {
-        alert("Error al guardar el profesor: " + error.message);
+        mostrarAlerta("Error al guardar el profesor: " + error.message);
     }
 }
 
 // --- 5. NAVEGACIÓN Y DASHBOARD DE ALUMNOS ---
 function entrarPerfil(id, nombre, apellido) {
+
+    if (id === 'admin') {
+        abrirPantallaAdmin();
+        return; 
+    }
+
     profeActivoId = id; 
     document.getElementById("nombre-profe-activo").innerText = "Profe " + nombre;
     
@@ -300,6 +322,136 @@ function entrarPerfil(id, nombre, apellido) {
     document.getElementById("pantalla-dashboard").style.display = "block";
     
     cargarAlumnos(); 
+}
+
+// ==========================================
+// FUNCIONES EXCLUSIVAS DEL PANEL DE ADMIN
+// ==========================================
+
+function abrirPantallaAdmin() {
+    // Apagamos todas las demás pantallas operativas
+    document.getElementById("pantalla-perfiles").style.display = "none";
+    document.getElementById("pantalla-dashboard").style.display = "none";
+    document.getElementById("pantalla-detalle-alumno").style.display = "none";
+    document.getElementById("pantalla-rutinas").style.display = "none";
+    document.getElementById("pantalla-detalle-pack").style.display = "none";
+    
+    // Encendemos Admin
+    document.getElementById("pantalla-admin").style.display = "block";
+    cargarPanelAdmin();
+}
+
+function volverDesdeAdminAPerfiles() {
+    document.getElementById("pantalla-admin").style.display = "none";
+    document.getElementById("pantalla-perfiles").style.display = "flex";
+}
+
+async function cargarPanelAdmin() {
+    const contenedor = document.getElementById("contenedor-admin-general");
+    contenedor.innerHTML = "<p style='text-align:center;'>Cargando base de datos...</p>";
+    
+    try {
+        // Traemos toda la info de golpe
+        const { data: profes } = await clienteSupabase.from('profesores').select('*');
+        const { data: alumnos } = await clienteSupabase.from('alumnos').select('*');
+        const { data: rutinas } = await clienteSupabase.from('rutinas_planificadas').select('*');
+        
+        contenedor.innerHTML = "";
+        
+        if (!profes || profes.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#888;'>No hay profesores registrados.</p>";
+            return;
+        }
+
+        // Armamos la tarjeta por cada profe
+        profes.forEach(profe => {
+            const alumnosDelProfe = alumnos.filter(a => a.profesor_id === profe.id);
+            let htmlAlumnos = "";
+            
+            if (alumnosDelProfe.length === 0) {
+                htmlAlumnos = "<p style='font-size:0.85rem; color:#888; margin-top: 10px;'>Aún no tiene alumnos asignados.</p>";
+            } else {
+                // Por cada alumno, buscamos sus ejercicios
+                alumnosDelProfe.forEach(alumno => {
+                    const rutinasAlumno = rutinas.filter(r => r.alumno_id === alumno.id);
+                    // Juntamos los nombres de los ejercicios sin repetir
+                    let listaEjercicios = [...new Set(rutinasAlumno.map(r => r.ejercicio_nombre))].join(", ");
+                    if(!listaEjercicios) listaEjercicios = "Sin rutina configurada";
+                    
+                    htmlAlumnos += `
+                        <div style="margin-top: 10px; padding: 12px; background: #f9f9f9; border-radius: 10px; border-left: 4px solid #f39c12;">
+                            <strong style="font-size: 0.95rem; color: #2c2c2c;">${alumno.nombre} ${alumno.apellido}</strong> 
+                            <span style="font-size:0.75rem; color:#666; background: #eee; padding: 2px 6px; border-radius: 8px; margin-left: 5px;">${alumno.actividad}</span>
+                            <p style="font-size: 0.8rem; margin-top:5px; color:#555; line-height: 1.4;">
+                                <strong>Ejercicios activos:</strong> ${listaEjercicios}
+                            </p>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Dibujamos la caja blanca que envuelve al profe y a sus alumnos
+            contenedor.innerHTML += `
+                <div style="background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:12px;">
+                        
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <img src="${profe.foto_url || 'imagenes/perfil1.png'}" style="width: 45px; height: 45px; border-radius: 50%; object-fit:cover; border: 2px solid #f39c12;" onerror="this.src='imagenes/perfil1.png'">
+                            <div>
+                                <h3 style="font-size: 1.1rem; color:#2c2c2c; margin-bottom: 2px;">${profe.nombre} ${profe.apellido}</h3>
+                                <p style="font-size: 0.75rem; color:#888;">${alumnosDelProfe.length} alumnos asignados</p>
+                            </div>
+                        </div>
+
+                        <button class="btn-accion-admin peligro" onclick="darDeBajaProfe('${profe.id}')" style="margin:0;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="margin-right: 4px;"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Borrar
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 5px;">
+                        ${htmlAlumnos}
+                    </div>
+                </div>
+            `;
+        });
+        
+    } catch (e) {
+        console.error(e);
+        contenedor.innerHTML = "<p>Error al cargar el panel.</p>";
+    }
+}
+
+// ESTA FUNCIÓN REEMPLAZA A TU "darDeBajaProfe" VIEJA
+function darDeBajaProfe(idAEliminar) {
+    pedirConfirmacion(
+        "Eliminar Profesor",
+        "Se borrará permanentemente este profesor, todos sus alumnos y sus rutinas.",
+        "Eliminar definitivamente",
+        async () => {
+            try {
+                // Buscamos a todos sus alumnos
+                const { data: alumnos } = await clienteSupabase.from('alumnos').select('id').eq('profesor_id', idAEliminar);
+                
+                if (alumnos && alumnos.length > 0) {
+                    const idsAlumnos = alumnos.map(a => a.id);
+                    // Borramos todas las rutinas de esos alumnos
+                    await clienteSupabase.from('rutinas_planificadas').delete().in('alumno_id', idsAlumnos);
+                    // Borramos a los alumnos
+                    await clienteSupabase.from('alumnos').delete().eq('profesor_id', idAEliminar);
+                }
+                
+                // Finalmente borramos al profesor
+                const { error } = await clienteSupabase.from('profesores').delete().eq('id', idAEliminar);
+                if (error) throw error;
+                
+                // Actualizamos las listas al instante
+                cargarPanelAdmin(); // Refresca la pantalla que estamos viendo
+                cargarProfesores(); // Refresca la grilla principal de forma invisible
+                
+            } catch (e) { mostrarAlerta("Error al dar de baja: " + e.message); }
+        }
+    );
 }
 
 function volverAPerfiles() {
@@ -442,45 +594,40 @@ async function cargarAlumnos() {
 function abrirModalAlumno() {
     document.getElementById("modal-alumno").style.display = "flex";
     
-    // Limpiamos los campos cada vez que abrimos la ventana
+    // Limpiamos los campos
     document.getElementById("input-alumno-nombre").value = "";
     document.getElementById("select-alumno-actividad").value = "Musculación";
     document.getElementById("input-alumno-objetivo").value = "";
-    
-    // Limpiamos los nuevos campos
     document.getElementById("input-alumno-edad").value = "";
     document.getElementById("input-alumno-condicion").value = "";
-}
 
-function cerrarModalAlumno() {
-    document.getElementById("modal-alumno").style.display = "none";
+    // NUEVO: Sugerimos un vencimiento de 1 mes por defecto
+    const fecha = new Date();
+    fecha.setMonth(fecha.getMonth() + 1);
+    document.getElementById("input-alumno-vencimiento").value = fecha.toISOString().split('T')[0];
 }
 
 async function guardarAlumnoEnBD() {
     const nombreCompleto = document.getElementById("input-alumno-nombre").value.trim();
     const actividad = document.getElementById("select-alumno-actividad").value;
     let objetivo = document.getElementById("input-alumno-objetivo").value.trim();
-    
-    // CAPTURAMOS LOS NUEVOS DATOS
     const edad = document.getElementById("input-alumno-edad").value.trim();
     let condicion = document.getElementById("input-alumno-condicion").value.trim();
+    
+    // NUEVO: Capturamos la fecha que eligió el profe
+    let vencimientoCuota = document.getElementById("input-alumno-vencimiento").value;
 
     if (!nombreCompleto) {
-        alert("Por favor, ingresá el nombre y apellido del alumno.");
+        mostrarAlerta("Faltan datos", "Por favor, ingresá el nombre y apellido del alumno.");
         return;
     }
 
-    // Valores por defecto si el profe los deja en blanco
     if (!objetivo) objetivo = "General"; 
     if (!condicion) condicion = "Sin observaciones.";
 
     const partes = nombreCompleto.split(" ");
     const nombre = partes[0];
     const apellido = partes.slice(1).join(" "); 
-
-    const fecha = new Date();
-    fecha.setMonth(fecha.getMonth() + 1);
-    const vencimientoInicial = fecha.toISOString().split('T')[0];
 
     try {
         const { error } = await clienteSupabase
@@ -489,10 +636,9 @@ async function guardarAlumnoEnBD() {
                 nombre: nombre, 
                 apellido: apellido, 
                 profesor_id: profeActivoId, 
-                vencimiento_cuota: vencimientoInicial,
+                vencimiento_cuota: vencimientoCuota || null, // ACA GUARDAMOS LA FECHA MANUAL
                 actividad: actividad,
                 objetivo: objetivo,
-                // Agregamos los datos a la base de datos
                 edad: edad ? parseInt(edad) : null,
                 condicion_medica: condicion
             }]); 
@@ -503,9 +649,14 @@ async function guardarAlumnoEnBD() {
         cargarAlumnos(); 
         
     } catch (error) {
-        alert("Error al añadir alumno: " + error.message);
+        mostrarAlerta("Error", "Error al añadir alumno: " + error.message);
     }
 }
+
+function cerrarModalAlumno() {
+    document.getElementById("modal-alumno").style.display = "none";
+}
+
 
 async function registrarPago(idAlumno, nombreAlumno) {
     const confirmar = confirm(`¿Querés registrar el pago de este mes para ${nombreAlumno}?`);
@@ -524,7 +675,7 @@ async function registrarPago(idAlumno, nombreAlumno) {
         if (error) throw error;
         cargarAlumnos();
     } catch (error) {
-        alert("Error al registrar el pago: " + error.message);
+        mostrarAlerta("Error al registrar el pago: " + error.message);
     }
 }
 
@@ -545,7 +696,7 @@ async function anularPago(idAlumno, nombreAlumno, fechaVencimientoActual) {
         if (error) throw error;
         cargarAlumnos();
     } catch (error) {
-        alert("Error al anular el pago: " + error.message);
+        mostrarAlerta("Error al anular el pago: " + error.message);
     }
 }
 
@@ -576,12 +727,19 @@ async function abrirGrillaAlumno(id) {
         document.getElementById("detalle-edad").innerText = alumno.edad ? alumno.edad : "No especificada"; 
         document.getElementById("detalle-salud").innerText = alumno.condicion_medica || "Sin observaciones.";
 
+        let fechaFormateada = "Sin definir";
+        if (alumno.vencimiento_cuota) {
+            const partes = alumno.vencimiento_cuota.split('-'); // Cortamos el 2026-08-15
+            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; // Lo armamos como 15/08/2026
+        }
+        document.getElementById("detalle-vencimiento").innerText = fechaFormateada;
+
         document.getElementById("selector-dia-rutina").value = "Lunes";
         cambiarDiaRutina(); 
 
     } catch (error) {
         console.error("Error al abrir la ficha:", error.message);
-        alert("No se pudo cargar la información del alumno.");
+        mostrarAlerta("No se pudo cargar la información del alumno.");
     }
 }
 
@@ -676,7 +834,7 @@ async function ejecutarCambioDePago(alumnoId, baseFecha, estadoActivo) {
         }).eq('id', alumnoId);
         if (error) throw error;
         cargarAlumnos();
-    } catch (error) { alert("Error al actualizar pago: " + error.message); }
+    } catch (error) { mostrarAlerta("Error al actualizar pago: " + error.message); }
 }
 
 // --- 10. LÓGICA DE DÍAS Y RUTINAS (CON SUPABASE) ---
@@ -706,7 +864,7 @@ async function guardarEjercicioEnBD() {
     const dia = document.getElementById("selector-dia-rutina").value;
    // const zona = document.getElementById("input-zona-cuerpo").value.trim();
 
-    if (!zona || !nombre) { alert("¡Ponele una zona y un nombre al ejercicio!"); return; }
+    if (!zona || !nombre) { mostrarAlerta("Faltan datos","Ponele una zona y un nombre al ejercicio"); return; }
 
     try {
         if (ejercicioEditandoId) {
@@ -741,7 +899,7 @@ async function guardarEjercicioEnBD() {
         cerrarModalEjercicio();
         cambiarDiaRutina();
     } catch (error) {
-        alert("Error al guardar: " + error.message);
+        mostrarAlerta("Error al guardar: " + error.message);
     }
 }
 
@@ -812,7 +970,7 @@ async function cambiarDiaRutina() {
                         </div>
                     </div>
                     <div class="acciones-ejercicio">
-                        <svg onclick="abrirModalEditar('${ej.id}', '${ej.ejercicio_nombre}', '${ej.series_reps}', '${ej.descanso}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        <svg onclick="abrirModalEditar('${ej.id}', '${ej.zona_muscular}', '${ej.ejercicio_nombre}', '${ej.series_reps}', '${ej.descanso}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                         <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </div>
                 </div>
@@ -858,7 +1016,7 @@ function borrarEjercicio(id) {
                 const { error } = await clienteSupabase.from('rutinas_planificadas').delete().eq('id', id);
                 if (error) throw error;
                 cambiarDiaRutina();
-            } catch (error) { alert("Error al borrar: " + error.message); }
+            } catch (error) { mostrarAlerta("Error al borrar: " + error.message); }
         }
     );
 }
@@ -908,7 +1066,7 @@ async function editarProfe() {
         document.getElementById("modal-editar-profe").style.display = "flex";
         
     } catch (error) {
-        alert("Error al cargar los datos del perfil: " + error.message);
+        mostrarAlerta("Error al cargar los datos del perfil: " + error.message);
     }
 }
 
@@ -963,7 +1121,7 @@ async function guardarEdicionProfe() {
     const nuevoApellido = document.getElementById("input-edit-apellido").value.trim();
     
     if (!nuevoNombre) {
-        alert("El nombre no puede estar vacío.");
+        mostrarAlerta("Faltan datos","El nombre no puede estar vacío.");
         return;
     }
 
@@ -980,18 +1138,13 @@ async function guardarEdicionProfe() {
         
         if (error) throw error;
 
-        if (!profeActualizado || profeActualizado.length === 0) {
-            alert("¡Supabase bloqueó el cambio! Te falta crear la política UPDATE para la tabla 'profesores'.");
-            return;
-        }
-
         cerrarModalEditarProfe();
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nuevoNombre;
         
         cargarProfesores(); 
 
     } catch (e) { 
-        alert("Error al actualizar: " + e.message); 
+        mostrarAlerta("Error al actualizar: " + e.message); 
         console.error(e);
     }
 }
@@ -1007,32 +1160,12 @@ function borrarAlumno(id) {
                 const { error } = await clienteSupabase.from('alumnos').delete().eq('id', id);
                 if (error) throw error;
                 cargarAlumnos();
-            } catch (error) { alert("Error al borrar: " + error.message); }
+            } catch (error) { mostrarAlerta("Error al borrar: " + error.message); }
         }
     );
 }
 
-function darDeBajaProfe() {
-    pedirConfirmacion(
-        "Dar de Baja",
-        "Se borrará permanentemente este profesor, todos sus alumnos y sus rutinas.",
-        "Dar de baja",
-        async () => {
-            try {
-                const { data: alumnos } = await clienteSupabase.from('alumnos').select('id').eq('profesor_id', profeActivoId);
-                if (alumnos && alumnos.length > 0) {
-                    const idsAlumnos = alumnos.map(a => a.id);
-                    await clienteSupabase.from('rutinas_planificadas').delete().in('alumno_id', idsAlumnos);
-                    await clienteSupabase.from('alumnos').delete().eq('profesor_id', profeActivoId);
-                }
-                const { error } = await clienteSupabase.from('profesores').delete().eq('id', profeActivoId);
-                if (error) throw error;
-                volverAPerfiles();
-                cargarProfesores();
-            } catch (e) { alert("Error al dar de baja: " + e.message); }
-        }
-    );
-}
+
 
 function activarModoBorrado() {
     modoBorradoActivo = !modoBorradoActivo; 
@@ -1057,16 +1190,18 @@ function activarModoBorrado() {
 
 // --- EDICIÓN DE ALUMNO ---
 function abrirModalEditarAlumno() {
-    if (!alumnoDataActual) return; // Por seguridad, si no hay datos no abre
+    if (!alumnoDataActual) return; 
     
     document.getElementById("modal-editar-alumno").style.display = "flex";
     
-    // Rellenamos los campos usando nuestra memoria temporal
     document.getElementById("input-edit-alumno-nombre").value = `${alumnoDataActual.nombre} ${alumnoDataActual.apellido}`;
     document.getElementById("select-edit-alumno-actividad").value = alumnoDataActual.actividad || "Musculación";
     document.getElementById("input-edit-alumno-objetivo").value = alumnoDataActual.objetivo || "";
     document.getElementById("input-edit-alumno-edad").value = alumnoDataActual.edad || "";
     document.getElementById("input-edit-alumno-condicion").value = alumnoDataActual.condicion_medica || "";
+    
+    // NUEVO: Cargamos la fecha actual en el calendario
+    document.getElementById("input-edit-alumno-vencimiento").value = alumnoDataActual.vencimiento_cuota || "";
 }
 
 function cerrarModalEditarAlumno() {
@@ -1074,15 +1209,17 @@ function cerrarModalEditarAlumno() {
 }
 
 async function guardarEdicionAlumnoEnBD() {
-    // 1. Agarramos lo que el profe escribió
     const nombreCompleto = document.getElementById("input-edit-alumno-nombre").value.trim();
     const actividad = document.getElementById("select-edit-alumno-actividad").value;
     const objetivo = document.getElementById("input-edit-alumno-objetivo").value.trim();
     const edad = document.getElementById("input-edit-alumno-edad").value.trim();
     const condicion = document.getElementById("input-edit-alumno-condicion").value.trim();
+    
+    // NUEVO: Capturamos la fecha editada
+    const vencimiento = document.getElementById("input-edit-alumno-vencimiento").value;
 
     if (!nombreCompleto) {
-        alert("El nombre no puede estar vacío.");
+        mostrarAlerta("Faltan datos", "El nombre no puede estar vacío.");
         return;
     }
 
@@ -1091,7 +1228,6 @@ async function guardarEdicionAlumnoEnBD() {
     const apellido = partes.slice(1).join(" ") || "";
 
     try {
-        // 2. Mandamos la actualización a Supabase
         const { error } = await clienteSupabase
             .from('alumnos')
             .update({ 
@@ -1100,21 +1236,19 @@ async function guardarEdicionAlumnoEnBD() {
                 actividad: actividad,
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
-                condicion_medica: condicion
+                condicion_medica: condicion,
+                vencimiento_cuota: vencimiento || null // NUEVO: Guardamos la fecha
             })
             .eq('id', alumnoSeleccionadoId);
         
         if (error) throw error;
 
-        // 3. Cerramos la ventana y actualizamos todo
         cerrarModalEditarAlumno();
-        
-        // Recargamos la lista principal y la tarjeta actual para que se vean los cambios
         cargarAlumnos(); 
         abrirGrillaAlumno(alumnoSeleccionadoId); 
 
     } catch (e) { 
-        alert("Error al actualizar: " + e.message); 
+        mostrarAlerta("Error", "Error al actualizar: " + e.message); 
     }
 }
 
@@ -1176,6 +1310,7 @@ function abrirPantallaRutinas() {
 }
 
 // 2. Cargar los packs creados
+// 2. Cargar los packs creados
 async function cargarPacks() {
     const contenedor = document.getElementById("lista-packs");
     contenedor.innerHTML = "<p style='text-align:center;'>Cargando tus rutinas...</p>";
@@ -1202,10 +1337,44 @@ async function cargarPacks() {
                         <h3 style="font-size:1.05rem;">${pack.nombre}</h3>
                         <div class="info-detalle" style="font-size:0.8rem;">${ejCount} ejercicios configurados</div>
                     </div>
+                    
+                    <!-- NUEVO: Botón de borrar que empuja a la derecha -->
+                    <div class="acciones-ejercicio" style="margin-left: auto; padding-left: 10px;">
+                        <svg onclick="event.stopPropagation(); borrarPack('${pack.id}')" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" width="20">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </div>
                 </div>
             `;
         });
     } catch (e) { contenedor.innerHTML = "<p>Error al cargar.</p>"; }
+}
+
+// Función para eliminar un pack de la base de datos
+function borrarPack(idPack) {
+    pedirConfirmacion(
+        "Eliminar Rutina",
+        "¿Seguro que querés eliminar esta rutina predefinida? Esta acción no se puede deshacer.",
+        "Eliminar",
+        async () => {
+            try {
+                // Le damos la orden a Supabase de borrar el pack con ese ID
+                const { error } = await clienteSupabase
+                    .from('packs_rutinas')
+                    .delete()
+                    .eq('id', idPack);
+                    
+                if (error) throw error;
+                
+                // Si todo sale bien, recargamos la pantalla para que desaparezca
+                cargarPacks(); 
+                
+            } catch (error) { 
+                mostrarAlerta("Error", "No se pudo borrar la rutina: " + error.message); 
+            }
+        }
+    );
 }
 
 // 3. Crear Pack (Creación básica)
@@ -1217,7 +1386,7 @@ function cerrarModalCrearPack() { document.getElementById("modal-crear-pack").st
 
 async function guardarPackNuevo() {
     const nombre = document.getElementById("input-pack-nombre").value.trim();
-    if(!nombre) { alert("Poné un nombre para el pack."); return; }
+    if(!nombre) { mostrarAlerta("Faltan datos","Poné un nombre para el pack."); return; }
     
     try {
         const { error } = await clienteSupabase.from('packs_rutinas').insert([{
@@ -1228,7 +1397,7 @@ async function guardarPackNuevo() {
         if (error) throw error;
         cerrarModalCrearPack();
         cargarPacks();
-    } catch (e) { alert("Error: " + e.message); }
+    } catch (e) { mostrarAlerta("Error: " + e.message); }
 }
 
 // 4. Detalle del Pack (Para meterle ejercicios adentro)
@@ -1296,7 +1465,7 @@ async function guardarEjercicioEnPack() {
     const nombre = document.getElementById("select-pack-ej-nombre").value;
     const series = document.getElementById("input-pack-ej-series").value.trim();
     const descanso = document.getElementById("input-pack-ej-descanso").value.trim();
-    if(!zona || !nombre) { alert("Elegí zona y ejercicio"); return; }
+    if(!zona || !nombre) { mostrarAlerta("Faltan datos","Elegí zona y ejercicio"); return; }
     
     packActivoEjercicios.push({ zona, nombre, series, descanso });
     try {
@@ -1304,14 +1473,14 @@ async function guardarEjercicioEnPack() {
         if (error) throw error;
         document.getElementById("modal-ejercicio-pack").style.display = "none";
         cargarEjerciciosDePack();
-    } catch(e) { alert("Error: " + e.message); }
+    } catch(e) { mostrarAlerta("Error: " + e.message); }
 }
 async function borrarEjercicioDePack(index) {
     packActivoEjercicios.splice(index, 1);
     try {
         await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId);
         cargarEjerciciosDePack();
-    } catch(e) { alert("Error: " + e.message); }
+    } catch(e) { mostrarAlerta("Error: " + e.message); }
 }
 
 // --- 6. IMPORTAR PACK AL ALUMNO (LA MEJOR PARTE) ---
@@ -1338,14 +1507,16 @@ async function abrirModalSeleccionarPack() {
             const htmlAnim = obtenerAnimacionHTML(primerEj);
 
             contenedor.innerHTML += `
-                <div class="card-alumno" onclick="importarPackAAlumno('${pack.id}')" style="cursor:pointer; background:#f9f9f9; border: 1px solid #ddd; margin-bottom: 10px;">
+                <div class="card-alumno" onclick="importarPackAAlumno('${pack.id}')" style="cursor:pointer; background: rgb(255, 255, 255); border: 1px solid rgba(255, 255, 255, 0.8); margin-bottom: 10px; backdrop-filter: blur(4px);">
                     ${htmlAnim}
                     <div class="info-central" style="margin-left: 15px;">
-                        <h3 style="font-size: 1rem;">${pack.nombre}</h3>
-                        <div class="info-detalle" style="font-size: 0.75rem;">${ejCount} ejercicios adentro</div>
+                        
+                        <h3 style="font-size: 1.3rem; color: #111; text-shadow: none; margin-bottom: 2px;">${pack.nombre}</h3>
+                        
+                        <div class="info-detalle" style="font-size: 1rem; color: #444444;">${ejCount} ejercicios adentro</div>
                     </div>
                     <div class="acciones-ejercicio">
-                        <span style="color:#f39c12; font-weight:700; font-size: 0.8rem;">Elegir</span>
+                        <span style="color:#f39c12; font-weight:800; font-size: 1rem;">Elegir</span>
                     </div>
                 </div>
             `;
@@ -1361,7 +1532,7 @@ async function importarPackAAlumno(packId) {
         if (err1) throw err1;
         
         const ejs = pack.ejercicios || [];
-        if(ejs.length === 0) { alert("Este pack está vacío."); document.getElementById("modal-seleccionar-pack").style.display = "none"; return; }
+        if(ejs.length === 0) { mostrarAlerta("Error","Este pack está vacío."); document.getElementById("modal-seleccionar-pack").style.display = "none"; return; }
 
         // 2. Armamos la caja de datos masiva para insertar en el alumno
         const diaSelec = document.getElementById("selector-dia-rutina").value;
@@ -1382,7 +1553,7 @@ async function importarPackAAlumno(packId) {
         document.getElementById("modal-seleccionar-pack").style.display = "none";
         cambiarDiaRutina(); // Refrescamos la pantalla para ver la magia
         
-    } catch(e) { alert("Error al importar: " + e.message); }
+    } catch(e) { mostrarAlerta("Error al importar: " + e.message); }
 }
 
 // --- SISTEMA DE TEMA CLARO/OSCURO PARA EL LOGIN ---

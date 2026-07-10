@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -22,7 +21,6 @@
     <main class="contenedor-app">
 
         <div id="pantalla-inicio" class="pantalla-inicio">
-
             <button id="btn-tema-inicio" class="btn-tema" onclick="alternarTemaInicio()">
                 <svg id="icono-sol-inicio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                 <svg id="icono-luna-inicio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
@@ -60,7 +58,6 @@
                 </div>
             </div>
         </div>
-
         
         <div id="pantalla-login" class="login-visual" style="display: none;">
             <button class="btn-volver-atras" onclick="volverDesdeLoginAInicio()">
@@ -74,45 +71,35 @@
             
             <div class="login-header-visual">
                 <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="logo-visual">
-
                 <div class="contenedor-texto-visual">
                     <h1 class="titulo-visual">APP PARA PROFESORES</h1>
                     <p class="subtitulo-visual">Gestioná alumnos, cuotas y rutinas personalizadas.</p>
                 </div>
-                
             </div>
 
             <div class="tarjeta-login-visual">
-                
                 <div class="grupo-input-visual">
                     <input type="email" id="login-email" placeholder="Correo electrónico">
                 </div>
-                
                 <div class="grupo-input-visual">
                     <input type="password" id="login-password" placeholder="Contraseña">
                     <span class="contenedor-ojo-visual" onclick="alternarPassword()">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     </span>
                 </div>
-                
                 <button class="btn-iniciar-visual" onclick="iniciarSesion()">Iniciar sesión</button>
-                
             </div>
         </div>
 
         <div id="pantalla-perfiles" class="pantalla-perfiles" style="display: none;">
-            
             <button id="btn-tema-perfiles" class="btn-tema" onclick="alternarTemaPerfiles()">
                 <svg id="icono-sol-perfiles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                 <svg id="icono-luna-perfiles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
             </button>
 
             <div class="logo-container-small" style="margin-top: 8vh; margin-bottom: 3vh;">
-                
                 <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="img-logo-small logo-modo-oscuro" style="width: 220px;">
-                
                 <img src="imagenes/LOGOFULLCOLOR.png" alt="18.3 Clubhouse" class="img-logo-small logo-modo-claro" style="width: 220px;">
-                
             </div>
 
             <div class="textos-perfiles-caja">
@@ -120,17 +107,14 @@
                 <p>Ingresaste con el acceso de docentes.<br>Elegí tu perfil para continuar.</p>
             </div>
 
-            <div id="grilla-profesores" class="grilla-perfiles-moderna">
-                </div>
+            <div id="grilla-profesores" class="grilla-perfiles-moderna"></div>
 
             <div class="footer-perfiles-blanco">
                 <button class="btn-footer-icono" onclick="abrirModalProfe()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> 
                     <span style="color: #333;">Agregar profesor</span>
                 </button>
-                
                 <div class="separador-vertical"></div>
-                
                 <button class="btn-footer-icono" onclick="cerrarSesion()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 
                     <span style="color: #333;">Cerrar sesión</span>
@@ -138,115 +122,67 @@
             </div>
         </div>
 
-          
-        </div> <div id="pantalla-dashboard" class="pantalla-dashboard-moderna" style="display: none;">
+        <div id="pantalla-dashboard" class="pantalla-dashboard-moderna" style="display: none;">
             <div class="decoracion-top-right"></div>
-
-                <div class="header-dashboard">
-                    <img src="imagenes/logo.png" alt="Logo" class="logo-dash">
-                    <svg class="icono-campana" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <div class="header-dashboard">
+                <img src="imagenes/logo.png" alt="Logo" class="logo-dash">
+                <div class="iconos-derecha-header">
+                    <svg class="icono-header" onclick="editarProfe()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    <svg class="icono-header" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                 </div>
+            </div>
 
-                <div class="titulo-dashboard">
-                    <h2 id="nombre-profe-activo">Profe</h2>
-                    <p id="contador-alumnos">0 alumnos asignados</p>
-                </div>
+            <div class="titulo-dashboard">
+                <h2 id="nombre-profe-activo">Profe</h2>
+                <p id="contador-alumnos">0 alumnos asignados</p>
+            </div>
 
-                <div class="contenedor-agregar-alumno">
-                    <button class="btn-agregar-moderno" onclick="abrirModalAlumno()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Agregar alumno
-                    </button>
-                </div>
+            <div class="contenedor-agregar-alumno">
+                <button class="btn-agregar-moderno" onclick="abrirModalAlumno()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Agregar alumno
+                </button>
+            </div>
 
-                <div class="contenedor-admin-acciones">
-                        <button class="btn-accion-admin" onclick="editarProfe()">
-                            Editar perfil
-                        </button>
-                        <button id="btn-activar-borrado" class="btn-accion-admin peligro" onclick="activarModoBorrado()">
-                            Eliminar alumnos
-                        </button>
-                        <button class="btn-accion-admin peligro" onclick="darDeBajaProfe()">
-                            Eliminar profesor
-                        </button>
-                </div>
+            <div class="contenedor-admin-acciones">
+                <button id="btn-activar-borrado" class="btn-accion-admin peligro" onclick="activarModoBorrado()">
+                    Eliminar alumnos
+                </button>
+            </div>
 
-                <div class="contenedor-buscador">
-                    <svg class="icono-buscar" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="buscador-alumnos" placeholder="Buscar alumno" onkeyup="filtrarAlumnos()">
-                    <svg class="icono-filtros" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-                </div>
+            <div class="contenedor-buscador">
+                <svg class="icono-buscar" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="buscador-alumnos" placeholder="Buscar alumno" onkeyup="filtrarAlumnos()">
+                <svg class="icono-filtros" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            </div>
 
-                <div class="contenedor-chips">
-                    <button class="chip activo" onclick="filtrarPorChip(this, 'Todos')">Todos</button>
-                    <button class="chip" onclick="filtrarPorChip(this, 'Musculación')">Musculación</button>
-                    <button class="chip" onclick="filtrarPorChip(this, 'Readaptación')">Readaptación</button>
-                    <button class="chip" onclick="filtrarPorChip(this, 'Al día')">Cuota al día</button>
-                    <button class="chip" onclick="filtrarPorChip(this, 'Vencida')">Vencida</button>
-                </div>
+            <div class="contenedor-chips">
+                <button class="chip activo" onclick="filtrarPorChip(this, 'Todos')">Todos</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Musculación')">Musculación</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Readaptación')">Readaptación</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Al día')">Cuota al día</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Vencida')">Vencida</button>
+            </div>
 
-                <div id="lista-alumnos" class="lista-alumnos-moderna">
-                </div>
+            <div id="lista-alumnos" class="lista-alumnos-moderna"></div>
 
-                <div id="modal-alumno" class="modal-overlay" style="display: none;">
-                    <div class="modal-contenido">
-                        <h3>Añadir Alumno</h3>
-            
-                        <div class="campo-detalle">
-                            <input type="text" id="input-alumno-nombre" class="input-modal" placeholder="Nombre y Apellido">
-                        </div>
-            
-                        <div class="campo-detalle">
-                            <label class="label-modal">Actividad principal:</label>
-                            <select id="select-alumno-actividad" class="input-modal">
-                                <option value="Musculación">Musculación</option>
-                                <option value="Tela">Tela</option>
-                                <option value="Funcional">Funcional</option>
-                                <option value="Calistenia">Calistenia</option>
-                                <option value="Readaptación">Readaptación</option>
-                            </select>
-                        </div>
-
-                        <div class="campo-detalle">
-                            <input type="text" id="input-alumno-objetivo" class="input-modal" placeholder="Objetivo (Ej: Aumentar masa muscular)">
-                        </div>
-
-                        <div class="campo-detalle">
-                            <input type="number" id="input-alumno-edad" class="input-modal" placeholder="Edad (Ej: 28)">
-                        </div>
-            
-                        <div class="campo-detalle">
-                            <input type="text" id="input-alumno-condicion" class="input-modal" placeholder="Condición / Salud (Ej: Sin lesiones)">
-                        </div>
-
-                        <div class="modal-botones">
-                            <button class="btn-cancelar" onclick="cerrarModalAlumno()">Cancelar</button>
-                            <button class="btn-guardar" onclick="guardarAlumnoEnBD()">Guardar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <nav class="bottom-nav">
-                    <button class="nav-item" onclick="volverAPerfiles()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                        <span>Inicio</span>
-                    </button>
-                    <button class="nav-item activo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                        <span>Alumnos</span>
-                    </button>
-                    <button class="nav-item" onclick="abrirPantallaRutinas()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
-                        <span>Rutinas</span>
-                    </button>
-                    
-
-                    
-                </nav>
+            <nav class="bottom-nav">
+                <button class="nav-item" onclick="volverAPerfiles()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Inicio</span>
+                </button>
+                <button class="nav-item activo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Alumnos</span>
+                </button>
+                <button class="nav-item" onclick="abrirPantallaRutinas()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                    <span>Rutinas</span>
+                </button>
+            </nav>
         </div>
 
         <div id="pantalla-detalle-alumno" class="pantalla-fondo-claro" style="display: none;">
-    
             <div class="header-logo-centrado">
                 <img src="imagenes/logo.png" alt="18.3 Clubhouse" class="logo-top">
             </div>
@@ -256,12 +192,12 @@
                     <svg viewBox="0 0 24 24" fill="#555"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 </div>
                 <div class="datos-info-alumno">
-                    <h2 id="detalle-nombre-completo">Martín Rossi</h2>
-                    <p>Edad: <span id="detalle-edad">28</span></p>
-                    <p>Condición / salud: <span id="detalle-salud">Sin lesiones.</span></p>
-                    <p>Objetivo: <span id="detalle-objetivo">Aumentar masa muscular.</span></p>
+                    <h2 id="detalle-nombre-completo"></h2>
+                    <p style="margin-bottom: 6px; font-weight: 600; color: #f39c12;">Próximo pago: <span id="detalle-vencimiento" style="color: rgb(0, 0, 0);">-</span></p>
+                    <p>Edad: <span id="detalle-edad">-</span></p>
+                    <p>Condición / salud: <span id="detalle-salud">-</span></p>
+                    <p>Objetivo: <span id="detalle-objetivo">-</span></p>
                 </div>
-
                 <button class="btn-editar-alumno-card" onclick="abrirModalEditarAlumno()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                 </button>
@@ -270,7 +206,6 @@
             <div class="titulo-seccion-rutina">
                 <div class="encabezado-rutina-interactivo">
                     <h3><span class="subrayado-amarillo">Rutina</span> —</h3>
-            
                     <select id="selector-dia-rutina" class="selector-dia" onchange="cambiarDiaRutina()">
                         <option value="Lunes">Día Lunes</option>
                         <option value="Martes">Día Martes</option>
@@ -278,65 +213,15 @@
                         <option value="Jueves">Día Jueves</option>
                         <option value="Viernes">Día Viernes</option>
                     </select>
-            
                     <span class="separador-punto">•</span>
-            
-                    <input type="text" id="input-zona-cuerpo" class="input-zona" placeholder="Escribir zona muscular..." value="Pecho y bíceps">
+                    <input type="text" id="input-zona-cuerpo" class="input-zona" placeholder="Escribir zona muscular..." value="">
                 </div>
             </div>
 
-            <div id="lista-ejercicios-detalle" class="contenedor-ejercicios">
-            </div>
+            <div id="lista-ejercicios-detalle" class="contenedor-ejercicios"></div>
 
             <div class="contenedor-fab">
-               <!-- <span class="texto-fab">Añadir módulo</span> -->
                 <button class="btn-fab-amarillo" onclick="abrirModalEjercicio()">+</button>
-            </div>
-
-            <div id="modal-ejercicio" class="modal-overlay" style="display: none;">
-                <div class="modal-contenido">
-                    <h3>Añadir Ejercicio</h3>
-                    
-                    <button class="btn-guardar" onclick="abrirModalSeleccionarPack()" style="width: 100%; background-color: #2c2c2c; margin: 15px 0; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                        Elegir de Rutinas Predefinidas
-                    </button>
-                    
-                    <div style="text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 10px;">O crear un ejercicio manual:</div>
-            
-                    <div class="campo-detalle">
-                        <label class="label-modal">Zona muscular:</label>
-                        <select id="select-ej-zona" class="input-modal" onchange="actualizarListaEjercicios()">
-                            <option value="">Seleccioná una zona...</option>
-                            <option value="Pecho">Pecho</option>
-                            <option value="Espalda">Espalda</option>
-                            <option value="Hombros">Hombros</option>
-                            <option value="Piernas">Piernas</option>
-                            <option value="Glúteos">Glúteos</option>
-                            <option value="Brazos">Brazos</option>
-                            <option value="Core">Core / Abdominales</option>
-                        </select>
-                    </div>
-
-                    <div class="campo-detalle">
-                        <label class="label-modal">Ejercicio:</label>
-                        <select id="select-ej-nombre" class="input-modal">
-                            <option value="">Primero elegí una zona...</option>
-                        </select>
-                    </div>
-
-                    <div class="campo-detalle">
-                        <input type="text" id="input-ej-series" class="input-modal" placeholder="Series y Reps (Ej: 4 x 10 rep)">
-                    </div>
-                    <div class="campo-detalle">
-                        <input type="text" id="input-ej-descanso" class="input-modal" placeholder="Descanso (Ej: 90s)">
-                    </div>
-            
-                    <div class="modal-botones">
-                        <button class="btn-cancelar" onclick="cerrarModalEjercicio()">Cancelar</button>
-                        <button class="btn-guardar" onclick="guardarEjercicioEnBD()">Guardar</button>
-                    </div>
-                </div>
             </div>
 
             <nav class="bottom-nav">
@@ -344,122 +229,15 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     <span>Inicio</span>
                 </button>
-        
                 <button class="nav-item activo" onclick="volverAlDashboard()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     <span>Alumnos</span>
                 </button>
-        
                 <button class="nav-item" onclick="abrirPantallaRutinas()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
                     <span>Rutinas</span>
                 </button>
-        
             </nav>
-        </div>
-
-        <div id="modal-confirmacion" class="modal-overlay" style="display: none; z-index: 9999;">
-            <div class="modal-contenido" style="text-align: center; max-width: 320px;">
-                <div style="background-color: #ffebee; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" width="24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-        
-                <h3 id="titulo-confirmacion" style="margin-bottom: 5px;">¿Estás seguro?</h3>
-                <p id="texto-confirmacion" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.4;"></p>
-        
-                <div class="modal-botones" style="justify-content: center; width: 100%;">
-                    <button class="btn-cancelar" onclick="cerrarModalConfirmacion()" style="flex: 1;">Cancelar</button>
-                    <button id="btn-confirmar-accion" class="btn-guardar" style="flex: 1; background-color: #d32f2f;">Eliminar</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="modal-editar-profe" class="modal-overlay" style="display: none;">
-            <div class="modal-contenido">
-                <h3>Editar Perfil</h3>
-                
-                <div class="campo-detalle">
-                    <label class="label-modal">Nombre:</label>
-                    <input type="text" id="input-edit-nombre" class="input-modal" placeholder="Escribí el nombre">
-                </div>
-                
-                <div class="campo-detalle">
-                    <label class="label-modal">Apellido:</label>
-                    <input type="text" id="input-edit-apellido" class="input-modal" placeholder="Escribí el apellido">
-                </div>
-
-                <div class="campo-detalle">
-                    <label class="label-modal">Foto de perfil:</label>
-                    
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
-                        <div class="preview-avatar-profe">
-                            <img id="img-preview-edit-profe" src="imagenes/perfil1.png" alt="Preview">
-                        </div>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
-                            
-                            <label for="input-foto-edit-profe" class="btn-subir-foto">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                Cambiar mi foto
-                            </label>
-                            <input type="file" id="input-foto-edit-profe" accept="image/*" style="display: none;" onchange="procesarFotoEditSubida(event)">
-                            
-                            <select id="select-edit-profe-avatar" class="input-modal" style="padding: 8px 10px; font-size: 0.85rem;" onchange="cambiarPreviewEditAvatar()">
-                                <option value="">O elegí un avatar...</option>
-                                <option value="imagenes/perfil1.png">Avatar Mujer</option>
-                                <option value="imagenes/perfil2.png">Avatar Hombre</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-botones">
-                    <button class="btn-cancelar" onclick="cerrarModalEditarProfe()">Cancelar</button>
-                    <button class="btn-guardar" onclick="guardarEdicionProfe()">Guardar</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="modal-editar-alumno" class="modal-overlay" style="display: none;">
-            <div class="modal-contenido">
-                <h3>Editar Alumno</h3>
-                
-                <div class="campo-detalle">
-                    <label class="label-modal">Nombre y Apellido:</label>
-                    <input type="text" id="input-edit-alumno-nombre" class="input-modal">
-                </div>
-    
-                <div class="campo-detalle">
-                    <label class="label-modal">Actividad principal:</label>
-                    <select id="select-edit-alumno-actividad" class="input-modal">
-                        <option value="Musculación">Musculación</option>
-                        <option value="Tela">Tela</option>
-                        <option value="Funcional">Funcional</option>
-                        <option value="Calistenia">Calistenia</option>
-                        <option value="Readaptación">Readaptación</option>
-                    </select>
-                </div>
-
-                <div class="campo-detalle">
-                    <label class="label-modal">Objetivo:</label>
-                    <input type="text" id="input-edit-alumno-objetivo" class="input-modal">
-                </div>
-    
-                <div class="campo-detalle">
-                    <label class="label-modal">Edad:</label>
-                    <input type="number" id="input-edit-alumno-edad" class="input-modal">
-                </div>
-                
-                <div class="campo-detalle">
-                    <label class="label-modal">Condición / Salud:</label>
-                    <input type="text" id="input-edit-alumno-condicion" class="input-modal">
-                </div>
-    
-                <div class="modal-botones">
-                    <button class="btn-cancelar" onclick="cerrarModalEditarAlumno()">Cancelar</button>
-                    <button class="btn-guardar" onclick="guardarEdicionAlumnoEnBD()">Guardar</button>
-                </div>
-            </div>
         </div>
 
         <div id="pantalla-rutinas" class="pantalla-dashboard-moderna" style="display: none;">
@@ -470,14 +248,12 @@
                 <h2>Mis Rutinas</h2>
                 <p>Packs predefinidos para asignar rápido</p>
             </div>
-            
             <div class="contenedor-agregar-alumno">
                 <button class="btn-agregar-moderno" onclick="abrirModalCrearPack()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Crear Rutina
                 </button>
             </div>
-            
             <div id="lista-packs" class="lista-alumnos-moderna"></div>
 
             <nav class="bottom-nav">
@@ -493,7 +269,7 @@
             <div class="tarjeta-info-alumno" style="background-image: none; background-color: #2c2c2c; color: white;">
                 <div class="avatar-gris" style="background-color: rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" fill="white" width="28"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
                 <div class="datos-info-alumno">
-                    <h2 id="detalle-nombre-pack" style="color: white; font-weight: 600;">Nombre del Pack</h2>
+                    <h2 id="detalle-nombre-pack" style="color: white; font-weight: 600;"></h2>
                     <p style="color: rgba(255,255,255,0.7);">Ejercicios predefinidos</p>
                 </div>
             </div>
@@ -507,6 +283,220 @@
                     <span style="font-size: 1rem; border:none;">Volver a mis Rutinas</span>
                 </button>
             </nav>
+        </div>
+
+        <div id="pantalla-admin" class="pantalla-dashboard-moderna" style="display: none;">
+            <div class="header-dashboard">
+                <img src="imagenes/logo.png" alt="Logo" class="logo-dash">
+            </div>
+            <div class="titulo-dashboard">
+                <h2>Panel Admin</h2>
+                <p>Visión global del gimnasio</p>
+            </div>
+            <div id="contenedor-admin-general" style="display: flex; flex-direction: column; gap: 20px; padding-bottom: 80px;"></div>
+            <nav class="bottom-nav">
+                <button class="nav-item activo" onclick="volverDesdeAdminAPerfiles()" style="width: 100%; flex-direction: row; gap: 10px; color: #2c2c2c;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <span style="font-size: 1rem; border:none;">Volver a los Perfiles</span>
+                </button>
+            </nav>
+        </div>
+
+        <div id="pantalla-alumno-proximamente" class="pantalla-inicio" style="display: none; justify-content: center;">
+            <h2 style="color: white; font-family: 'Oswald', sans-serif;">PANTALLA ALUMNOS</h2>
+            <button class="btn-guardar" onclick="volverDesdeAlumnoAInicio()">Volver al Inicio</button>
+        </div>
+
+        <div id="modal-alumno" class="modal-overlay" style="display: none;">
+            <div class="modal-contenido">
+                <h3>Añadir Alumno</h3>
+                <div class="campo-detalle">
+                    <input type="text" id="input-alumno-nombre" class="input-modal" placeholder="Nombre y Apellido">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Actividad principal:</label>
+                    <select id="select-alumno-actividad" class="input-modal">
+                        <option value="Musculación">Musculación</option>
+                        <option value="Tela">Tela</option>
+                        <option value="Funcional">Funcional</option>
+                        <option value="Calistenia">Calistenia</option>
+                        <option value="Readaptación">Readaptación</option>
+                    </select>
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Objetivo:</label>
+                    <input type="text" id="input-alumno-objetivo" class="input-modal" placeholder="(Ej: Aumentar masa muscular)">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Edad:</label>
+                    <input type="number" id="input-alumno-edad" class="input-modal" placeholder="(Ej: 28)">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Condición / Salud:</label>
+                    <input type="text" id="input-alumno-condicion" class="input-modal" placeholder="(Ej: Sin lesiones)">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Vencimiento de la cuota:</label>
+                    <input type="date" id="input-alumno-vencimiento" class="input-modal" style="color-scheme: dark;">
+                </div>
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="cerrarModalAlumno()">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarAlumnoEnBD()">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-editar-alumno" class="modal-overlay" style="display: none;">
+            <div class="modal-contenido">
+                <h3>Editar Alumno</h3>
+                <div class="campo-detalle">
+                    <label class="label-modal">Nombre y Apellido:</label>
+                    <input type="text" id="input-edit-alumno-nombre" class="input-modal">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Actividad principal:</label>
+                    <select id="select-edit-alumno-actividad" class="input-modal">
+                        <option value="Musculación">Musculación</option>
+                        <option value="Tela">Tela</option>
+                        <option value="Funcional">Funcional</option>
+                        <option value="Calistenia">Calistenia</option>
+                        <option value="Readaptación">Readaptación</option>
+                    </select>
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Objetivo:</label>
+                    <input type="text" id="input-edit-alumno-objetivo" class="input-modal">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Edad:</label>
+                    <input type="number" id="input-edit-alumno-edad" class="input-modal">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Condición / Salud:</label>
+                    <input type="text" id="input-edit-alumno-condicion" class="input-modal">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Vencimiento de la cuota:</label>
+                    <input type="date" id="input-edit-alumno-vencimiento" class="input-modal" style="color-scheme: dark;">
+                </div>
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="cerrarModalEditarAlumno()">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarEdicionAlumnoEnBD()">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-profe" class="modal-overlay" style="display: none;">
+            <div class="modal-contenido">
+                <h3>Añadir Profesor</h3>
+                <div class="campo-detalle">
+                    <label class="label-modal">Nombre y Apellido:</label>
+                    <input type="text" id="input-profe-nombre" class="input-modal" placeholder="Ej: Juan Pérez">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Foto de perfil:</label>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
+                        <div class="preview-avatar-profe">
+                            <img id="img-preview-profe" src="imagenes/perfil1.png" alt="Preview">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
+                            <label for="input-foto-profe" class="btn-subir-foto">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                Subir mi foto
+                            </label>
+                            <input type="file" id="input-foto-profe" accept="image/*" style="display: none;" onchange="procesarFotoSubida(event)">
+                            <select id="select-profe-avatar" class="input-modal" style="padding: 8px 10px; font-size: 0.85rem;" onchange="cambiarPreviewAvatar()">
+                                <option value="imagenes/perfil1.png">Avatar Mujer</option>
+                                <option value="imagenes/perfil2.png">Avatar Hombre</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="cerrarModalProfe()">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarProfeEnBD()">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-editar-profe" class="modal-overlay" style="display: none;">
+            <div class="modal-contenido">
+                <h3>Editar Perfil</h3>
+                <div class="campo-detalle">
+                    <label class="label-modal">Nombre:</label>
+                    <input type="text" id="input-edit-nombre" class="input-modal" placeholder="Escribí el nombre">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Apellido:</label>
+                    <input type="text" id="input-edit-apellido" class="input-modal" placeholder="Escribí el apellido">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Foto de perfil:</label>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
+                        <div class="preview-avatar-profe">
+                            <img id="img-preview-edit-profe" src="imagenes/perfil1.png" alt="Preview">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
+                            <label for="input-foto-edit-profe" class="btn-subir-foto">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                Cambiar mi foto
+                            </label>
+                            <input type="file" id="input-foto-edit-profe" accept="image/*" style="display: none;" onchange="procesarFotoEditSubida(event)">
+                            <select id="select-edit-profe-avatar" class="input-modal" style="padding: 8px 10px; font-size: 0.85rem;" onchange="cambiarPreviewEditAvatar()">
+                                <option value="">O elegí un avatar...</option>
+                                <option value="imagenes/perfil1.png">Avatar Mujer</option>
+                                <option value="imagenes/perfil2.png">Avatar Hombre</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="cerrarModalEditarProfe()">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarEdicionProfe()">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-ejercicio" class="modal-overlay" style="display: none;">
+            <div class="modal-contenido">
+                <h3>Añadir Ejercicio</h3>
+                <button onclick="abrirModalSeleccionarPack()" style="width: 100%; margin: 15px 0; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; background-color: rgba(255, 255, 255, 0.863); color: #111; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.15);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                    Elegir de Rutinas Predefinidas
+                </button>
+                <div style="text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 10px;">O crear un ejercicio manual:</div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Zona muscular:</label>
+                    <select id="select-ej-zona" class="input-modal" onchange="actualizarListaEjercicios()">
+                        <option value="">Seleccioná una zona...</option>
+                        <option value="Pecho">Pecho</option>
+                        <option value="Espalda">Espalda</option>
+                        <option value="Hombros">Hombros</option>
+                        <option value="Piernas">Piernas</option>
+                        <option value="Glúteos">Glúteos</option>
+                        <option value="Brazos">Brazos</option>
+                        <option value="Core">Core / Abdominales</option>
+                    </select>
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Ejercicio:</label>
+                    <select id="select-ej-nombre" class="input-modal">
+                        <option value="">Primero elegí una zona...</option>
+                    </select>
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Series y Repeticiones:</label>
+                    <input type="text" id="input-ej-series" class="input-modal" placeholder="Ej: 4 x 10 rep">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">Tiempo de descanso:</label>
+                    <input type="text" id="input-ej-descanso" class="input-modal" placeholder="Ej: 90s">
+                </div>
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="cerrarModalEjercicio()">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarEjercicioEnBD()">Guardar</button>
+                </div>
+            </div>
         </div>
 
         <div id="modal-crear-pack" class="modal-overlay" style="display: none;">
@@ -536,7 +526,7 @@
             </div>
         </div>
 
-        <div id="modal-seleccionar-pack" class="modal-overlay" style="display: none; z-index: 2000;">
+        <div id="modal-seleccionar-pack" class="modal-overlay" style="display: none; z-index: 4000;">
             <div class="modal-contenido" style="max-height: 80vh; overflow-y: auto;">
                 <h3>Elegí un pack</h3>
                 <div id="lista-seleccionar-packs" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;"></div>
@@ -544,9 +534,22 @@
             </div>
         </div>
 
+        <div id="modal-confirmacion" class="modal-overlay" style="display: none; z-index: 9999;">
+            <div class="modal-contenido" style="text-align: center; max-width: 320px;">
+                <div style="background-color: #ffebee; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" width="24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <h3 id="titulo-confirmacion" style="margin-bottom: 5px;">¿Estás seguro?</h3>
+                <p id="texto-confirmacion" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.4;"></p>
+                <div class="modal-botones" style="justify-content: center; width: 100%;">
+                    <button class="btn-cancelar" onclick="cerrarModalConfirmacion()" style="flex: 1;">Cancelar</button>
+                    <button id="btn-confirmar-accion" class="btn-guardar" style="flex: 1; background-color: #d32f2f;">Eliminar</button>
+                </div>
+            </div>
+        </div>
+
         <div id="modal-error-login" class="modal-overlay" style="display: none; z-index: 9999;">
             <div class="modal-contenido" style="text-align: center; max-width: 300px;">
-                
                 <div style="display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2.5" width="44" height="44">
                         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
@@ -554,57 +557,25 @@
                         <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
                 </div>
-                
                 <h3 style="margin-bottom: 8px; color: #2c2c2c; font-size: 1.4rem;">¡Ups!</h3>
                 <p style="font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.5;">El correo o la contraseña son incorrectos. Por favor, revisalos e intentá de nuevo.</p>
-                
                 <button class="btn-guardar" onclick="cerrarModalErrorLogin()" style="width: 100%; font-size: 1.05rem; padding: 12px;">Entendido</button>
             </div>
         </div>
 
-        <div id="modal-profe" class="modal-overlay" style="display: none;">
-            <div class="modal-contenido">
-                <h3>Añadir Profesor</h3>
-                
-                <div class="campo-detalle">
-                    <label class="label-modal">Nombre y Apellido:</label>
-                    <input type="text" id="input-profe-nombre" class="input-modal" placeholder="Ej: Juan Pérez">
+        <div id="modal-alerta" class="modal-overlay" style="display: none; z-index: 9999;">
+            <div class="modal-contenido" style="text-align: center; max-width: 300px;">
+                <div style="display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2.5" width="44" height="44">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
                 </div>
-                
-                <div class="campo-detalle">
-                    <label class="label-modal">Foto de perfil:</label>
-                    
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
-                        <div class="preview-avatar-profe">
-                            <img id="img-preview-profe" src="imagenes/perfil1.png" alt="Preview">
-                        </div>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
-                            
-                            <label for="input-foto-profe" class="btn-subir-foto">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                Subir mi foto
-                            </label>
-                            <input type="file" id="input-foto-profe" accept="image/*" style="display: none;" onchange="procesarFotoSubida(event)">
-                            
-                            <select id="select-profe-avatar" class="input-modal" style="padding: 8px 10px; font-size: 0.85rem;" onchange="cambiarPreviewAvatar()">
-                                <option value="imagenes/perfil1.png">Avatar Mujer</option>
-                                <option value="imagenes/perfil2.png">Avatar Hombre</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-botones">
-                    <button class="btn-cancelar" onclick="cerrarModalProfe()">Cancelar</button>
-                    <button class="btn-guardar" onclick="guardarProfeEnBD()">Guardar</button>
-                </div>
+                <h3 id="titulo-alerta" style="margin-bottom: 8px; color: #ffffff; font-size: 1.4rem;"></h3>
+                <p id="texto-alerta" style="font-size: 1rem; color: #e4e4e4; margin-bottom: 20px; line-height: 1.5;"></p>
+                <button class="btn-guardar" onclick="cerrarModalAlerta()" style="width: 100%; font-size: 1.05rem; padding: 12px;">Entendido</button>
             </div>
-        </div>
-
-        <div id="pantalla-alumno-proximamente" class="pantalla-inicio" style="display: none; justify-content: center;">
-            <h2 style="color: white; font-family: 'Oswald', sans-serif;">PANTALLA ALUMNOS</h2>
-            <button class="btn-guardar" onclick="volverDesdeAlumnoAInicio()">Volver al Inicio</button>
         </div>
 
     </main>
@@ -620,7 +591,6 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script> 
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js"></script>
 </body>
