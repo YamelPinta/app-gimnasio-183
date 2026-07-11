@@ -207,12 +207,12 @@ button:active, .card-alumno:active, .card-ejercicio:active,
    ========================================= */
 .pantalla-inicio {
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-    background-image: url('imagenes/fondo-profes-oscuro.jpeg'); 
+    background-image: url('imagenes/FONDONEGRO.jpg'); 
     background-size: cover; background-position: center; background-color: #111; 
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
     padding-top: 10vh; z-index: 2500;
 }
-.pantalla-inicio.modo-claro { background-image: url('imagenes/FONDOBLANO1.jpg'); }
+.pantalla-inicio.modo-claro { background-image: url('imagenes/FONDOBLANCO.jpg'); }
 
 .logo-container-inicio { margin-bottom: 8vh; text-align: center; }
 .img-logo-inicio { width: 250px; filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8)); }
@@ -269,7 +269,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
    ========================================= */
 .login-visual {
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-    background-image: url('imagenes/FONDO.jpg'); background-size: cover; background-position: center; background-color: #111; 
+    background-image: url('imagenes/FONDONEGRO.jpg'); background-size: cover; background-position: center; background-color: #111; 
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start !important; 
     padding-top: 12vh !important; z-index: 2000;
 }
@@ -336,7 +336,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 }
 
 /* MODO CLARO DEL LOGIN */
-.login-visual.modo-claro { background-image: url('imagenes/FONDOBLANO1.jpg'); }
+.login-visual.modo-claro { background-image: url('imagenes/FONDOBLANCO.jpg'); }
 .login-visual.modo-claro .tarjeta-login-visual,
 .login-visual.modo-claro .btn-tema { background: rgba(255, 255, 255, 0.20); box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
 .login-visual.modo-claro .contenedor-texto-visual { background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 15%, rgba(255, 255, 255, 0.3) 100%); }
@@ -357,10 +357,10 @@ button:active, .card-alumno:active, .card-ejercicio:active,
    ========================================= */
 .pantalla-perfiles {
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh; overflow-y: auto; 
-    background-image: url('imagenes/fondo-profes-oscuro.jpeg'); background-size: cover; background-position: center; background-color: #111; 
+    background-image: url('imagenes/FONDONEGRO.jpg'); background-size: cover; background-position: center; background-color: #111; 
     display: flex; flex-direction: column; align-items: center; z-index: 2000;
 }
-.pantalla-perfiles.modo-claro { background-image: url('imagenes/fondo-profes-claro.jpeg'); }
+.pantalla-perfiles.modo-claro { background-image: url('imagenes/FONDOBLANCO.jpg'); }
 
 /* Alternar logos en modo oscuro/claro */
 .pantalla-perfiles .logo-modo-oscuro { display: inline-block; }
