@@ -13,7 +13,6 @@ let modoBorradoActivo = false;
 let accionPendiente = null; // Guarda temporalmente la orden de borrado
 let alumnoDataActual = null; // Guarda temporalmente toda la info del alumno actual
 
-
 // --- DICCIONARIO DE EJERCICIOS ---
 const catalogoEjercicios = {
     "Pecho": ["Press de banca", "Press inclinado con mancuernas", "Cruces en polea", "Flexiones de brazos"],
@@ -58,7 +57,6 @@ function cerrarModalConfirmacion() {
     document.getElementById("modal-confirmacion").style.display = "none";
     accionPendiente = null; // Limpiamos la memoria
 }
-
 
 // Escuchamos el clic del botón rojo del modal
 document.getElementById("btn-confirmar-accion").addEventListener("click", () => {
@@ -422,7 +420,6 @@ async function cargarPanelAdmin() {
     }
 }
 
-// ESTA FUNCIÓN REEMPLAZA A TU "darDeBajaProfe" VIEJA
 function darDeBajaProfe(idAEliminar) {
     pedirConfirmacion(
         "Eliminar Profesor",
@@ -700,48 +697,6 @@ async function anularPago(idAlumno, nombreAlumno, fechaVencimientoActual) {
     }
 }
 
-// --- ABRIR PANTALLA INDIVIDUAL DEL ALUMNO (DISEÑO NUEVO) ---
-// --- ABRIR PANTALLA INDIVIDUAL DEL ALUMNO (VERSIÓN LIMPIA) ---
-async function abrirGrillaAlumno(id) {
-    alumnoSeleccionadoId = id; 
-
-    try {
-        const { data: alumno, error } = await clienteSupabase
-            .from('alumnos')
-            .select('*')
-            .eq('id', id)
-            .single(); 
-
-        if (error) throw error;
-
-        alumnoDataActual = alumno;
-
-        document.getElementById("pantalla-dashboard").style.display = "none";
-        document.getElementById("pantalla-detalle-alumno").style.display = "block";
-
-        // Llenamos la tarjeta superior con la información 100% real
-        document.getElementById("detalle-nombre-completo").innerText = `${alumno.nombre} ${alumno.apellido}`;
-        document.getElementById("detalle-objetivo").innerText = alumno.objetivo || "General";
-        
-        // Colocamos la edad y condición de la base de datos
-        document.getElementById("detalle-edad").innerText = alumno.edad ? alumno.edad : "No especificada"; 
-        document.getElementById("detalle-salud").innerText = alumno.condicion_medica || "Sin observaciones.";
-
-        let fechaFormateada = "Sin definir";
-        if (alumno.vencimiento_cuota) {
-            const partes = alumno.vencimiento_cuota.split('-'); // Cortamos el 2026-08-15
-            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; // Lo armamos como 15/08/2026
-        }
-        document.getElementById("detalle-vencimiento").innerText = fechaFormateada;
-
-        document.getElementById("selector-dia-rutina").value = "Lunes";
-        cambiarDiaRutina(); 
-
-    } catch (error) {
-        console.error("Error al abrir la ficha:", error.message);
-        mostrarAlerta("No se pudo cargar la información del alumno.");
-    }
-}
 
 // Función para alternar la visibilidad de la contraseña
 function alternarPassword() {
@@ -855,154 +810,6 @@ function cerrarModalEjercicio() {
     document.getElementById("modal-ejercicio").style.display = "none";
 }
 
-// Guardar el ejercicio en la base de datos
-async function guardarEjercicioEnBD() {
-    const zona = document.getElementById("select-ej-zona").value; 
-    const nombre = document.getElementById("select-ej-nombre").value.trim();
-    const series = document.getElementById("input-ej-series").value.trim();
-    const descanso = document.getElementById("input-ej-descanso").value.trim();
-    const dia = document.getElementById("selector-dia-rutina").value;
-   // const zona = document.getElementById("input-zona-cuerpo").value.trim();
-
-    if (!zona || !nombre) { mostrarAlerta("Faltan datos","Ponele una zona y un nombre al ejercicio"); return; }
-
-    try {
-        if (ejercicioEditandoId) {
-            // MODO EDITAR: Actualizamos el registro existente
-            const { error } = await clienteSupabase
-                .from('rutinas_planificadas')
-                .update({ 
-                    ejercicio_nombre: nombre, 
-                    series_reps: series, 
-                    descanso: descanso,
-                    zona_muscular: zona
-                })
-                .eq('id', ejercicioEditandoId);
-            if (error) throw error;
-        } else {
-            // MODO INSERTAR: Creamos un registro nuevo
-            const { error } = await clienteSupabase
-                .from('rutinas_planificadas')
-                .insert([{
-                    alumno_id: alumnoSeleccionadoId,
-                    dia_semana: dia,
-                    zona_muscular: zona,
-                    ejercicio_nombre: nombre,
-                    series_reps: series,
-                    descanso: descanso,
-                    orden:999
-                }]);
-            if (error) throw error;
-        }
-        
-        ejercicioEditandoId = null; // Reseteamos la variable tras guardar
-        cerrarModalEjercicio();
-        cambiarDiaRutina();
-    } catch (error) {
-        mostrarAlerta("Error al guardar: " + error.message);
-    }
-}
-
-// Cargar los ejercicios desde Supabase cuando cambias de día
-async function cambiarDiaRutina() {
-    const diaSeleccionado = document.getElementById("selector-dia-rutina").value;
-    const contenedorEjercicios = document.getElementById("lista-ejercicios-detalle");
-    const inputZona = document.getElementById("input-zona-cuerpo");
-    
-    contenedorEjercicios.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top: 20px;'>Cargando rutina...</p>";
-
-    try {
-        // AGREGAMOS LOS .order PARA QUE RESPETE LA POSICIÓN GUARDADA
-        const { data: ejercicios, error } = await clienteSupabase
-            .from('rutinas_planificadas')
-            .select('*')
-            .eq('alumno_id', alumnoSeleccionadoId)
-            .eq('dia_semana', diaSeleccionado)
-            .order('orden', { ascending: true, nullsFirst: false }) 
-            .order('id', { ascending: true }); // Si no tienen orden, usa el ID
-
-        if (error) throw error;
-        contenedorEjercicios.innerHTML = ""; 
-
-        if (ejercicios.length === 0) {
-            contenedorEjercicios.innerHTML = `<p style="text-align:center; color:#888; font-size: 0.9rem; margin-top: 30px;">No hay ejercicios. Tocá el + para añadir uno.</p>`;
-            inputZona.value = ""; 
-            return;
-        }
-
-        inputZona.value = ejercicios[0].zona_muscular || ""; 
-        
-        ejercicios.forEach(ej => {
-
-            const nombreEj = ej.ejercicio_nombre;
-            
-            // 2. Por defecto, ponemos tu cuadrito gris
-            let htmlImagen = `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
-            
-            // 3. BUsqueda
-            if (nombreEj === "Vuelos laterales") {
-                htmlImagen = `<div class="img-animada anim-vuelos-laterales"></div>`;
-            } 
-            else if (nombreEj === "Press de banca") {
-                htmlImagen = `<div class="img-animada anim-press-banca"></div>`;
-            }
-            else if (nombreEj === "Back squat") {
-                htmlImagen = `<div class="img-animada anim-back-squat"></div>`;
-            }
-            else if (nombreEj === "Peso muerto") {
-                htmlImagen = `<div class="img-animada anim-peso-muerto"></div>`;
-            }
-
-            // 4. Dibujamos la tarjeta... (el resto de tu código queda igual)
-            contenedorEjercicios.innerHTML += `
-                <div class="card-ejercicio" data-id="${ej.id}">
-                    <svg class="icono-arrastre" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
-                    
-                    ${htmlImagen}
-                    
-                    <div class="info-ejercicio">
-                        <h4>${ej.ejercicio_nombre}</h4>
-                        <div class="detalle-ejercicio">
-                            <div class="punto-ama"></div>
-                            <span>${ej.series_reps || "-"}</span>
-                            <span class="separador">|</span>
-                            <span>Descanso ${ej.descanso || "-"}</span>
-                        </div>
-                    </div>
-                    <div class="acciones-ejercicio">
-                        <svg onclick="abrirModalEditar('${ej.id}', '${ej.zona_muscular}', '${ej.ejercicio_nombre}', '${ej.series_reps}', '${ej.descanso}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </div>
-                </div>
-            `;
-        });
-
-        // --- ACTIVAMOS LA MAGIA DE ARRASTRE ---
-        new Sortable(contenedorEjercicios, {
-            // AL BORRAR LA PALABRA "HANDLE", TODA LA TARJETA SE VUELVE ARRASTRABLE
-            animation: 200,
-            
-            // TRUCO PARA CELULARES: Mantener presionado un instante para mover
-            delay: 200, 
-            delayOnTouchOnly: true, 
-            
-            // PROTECCIÓN: Evita que se mueva la tarjeta si intentas tocar 
-            // el lápiz de editar o el tachito de basura
-            filter: ".acciones-ejercicio svg", 
-            preventOnFilter: false,
-
-            chosenClass: "tarjeta-arrastrando",     // Le pone el contorno a la que tocás
-            ghostClass: "tarjeta-indicador-caida",  // Dibuja el hueco amarillo donde va a caer
-
-            onEnd: function () {
-                guardarOrdenEjercicios();
-            }
-        });
-
-    } catch (error) {
-        console.error("Error cargando rutina:", error);
-    }
-}
 
 // --- LÓGICA DE EDICIÓN Y BORRADO ---
 
@@ -1015,7 +822,7 @@ function borrarEjercicio(id) {
             try {
                 const { error } = await clienteSupabase.from('rutinas_planificadas').delete().eq('id', id);
                 if (error) throw error;
-                cambiarDiaRutina();
+                cargarEjerciciosCategoriaBD();
             } catch (error) { mostrarAlerta("Error al borrar: " + error.message); }
         }
     );
@@ -1165,26 +972,20 @@ function borrarAlumno(id) {
     );
 }
 
-
-
 function activarModoBorrado() {
     modoBorradoActivo = !modoBorradoActivo; 
     
-    const btnBorrarAlumnos = document.getElementById("btn-activar-borrado");
+    const btnTachito = document.getElementById("btn-activar-borrado");
 
     if (modoBorradoActivo) {
-        // ACTIVAMOS MODO BORRADO
-        btnBorrarAlumnos.innerText = "No borrar";
-        btnBorrarAlumnos.classList.remove("peligro"); // Quitamos rojo
-        btnBorrarAlumnos.classList.add("gris");       // Ponemos gris
+        // ACTIVAMOS MODO BORRADO: El tachito se pone rojo
+        btnTachito.classList.add("activo"); 
     } else {
-        // VOLVEMOS AL ESTADO NORMAL
-        btnBorrarAlumnos.innerText = "Eliminar alumnos";
-        btnBorrarAlumnos.classList.remove("gris");    // Quitamos gris
-        btnBorrarAlumnos.classList.add("peligro");    // Ponemos rojo
+        // VOLVEMOS AL ESTADO NORMAL: El tachito vuelve a gris
+        btnTachito.classList.remove("activo"); 
     }
 
-    cargarAlumnos();
+    cargarAlumnos(); // Refrescamos la lista para que aparezcan/desaparezcan los botones de borrar en cada alumno
 }
 
 
@@ -1194,13 +995,12 @@ function abrirModalEditarAlumno() {
     
     document.getElementById("modal-editar-alumno").style.display = "flex";
     
+    // Rellenamos TODOS los campos con la info que ya existía para que no estén vacíos
     document.getElementById("input-edit-alumno-nombre").value = `${alumnoDataActual.nombre} ${alumnoDataActual.apellido}`;
     document.getElementById("select-edit-alumno-actividad").value = alumnoDataActual.actividad || "Musculación";
     document.getElementById("input-edit-alumno-objetivo").value = alumnoDataActual.objetivo || "";
     document.getElementById("input-edit-alumno-edad").value = alumnoDataActual.edad || "";
     document.getElementById("input-edit-alumno-condicion").value = alumnoDataActual.condicion_medica || "";
-    
-    // NUEVO: Cargamos la fecha actual en el calendario
     document.getElementById("input-edit-alumno-vencimiento").value = alumnoDataActual.vencimiento_cuota || "";
 }
 
@@ -1280,281 +1080,6 @@ async function guardarOrdenEjercicios() {
     }
 }
 
-// --- 11. SISTEMA DE PACKS / RUTINAS PREDEFINIDAS ---
-let packActivoId = null;
-let packActivoEjercicios = []; // Array en memoria para editar rápido
-
-// Helper maestro para las animaciones (Se usa en Packs y en el Alumno)
-function obtenerAnimacionHTML(nombreEj) {
-    if (!nombreEj) return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
-    const n = nombreEj.trim();
-    if (n === "Vuelos laterales") return `<div class="img-animada anim-vuelos-laterales"></div>`;
-    if (n === "Press de banca") return `<div class="img-animada anim-press-banca"></div>`;
-    if (n === "Back squat" || n === "Sentadilla") return `<div class="img-animada anim-back-squat"></div>`;
-    if (n === "Peso muerto") return `<div class="img-animada anim-peso-muerto"></div>`;
-    return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
-}
-
-// 1. Navegación hacia la pantalla
-// 1. Navegación hacia la pantalla
-function abrirPantallaRutinas() {
-    // Apagamos TODAS las demás
-    document.getElementById("pantalla-dashboard").style.display = "none";
-    document.getElementById("pantalla-detalle-alumno").style.display = "none";
-    document.getElementById("pantalla-detalle-pack").style.display = "none";
-    document.getElementById("pantalla-perfiles").style.display = "none"; // Apagamos el inicio por las dudas
-    
-    // Encendemos Rutinas
-    document.getElementById("pantalla-rutinas").style.display = "block";
-    cargarPacks();
-}
-
-// 2. Cargar los packs creados
-// 2. Cargar los packs creados
-async function cargarPacks() {
-    const contenedor = document.getElementById("lista-packs");
-    contenedor.innerHTML = "<p style='text-align:center;'>Cargando tus rutinas...</p>";
-    try {
-        const { data: packs, error } = await clienteSupabase.from('packs_rutinas').select('*').eq('profesor_id', profeActivoId);
-        if (error) throw error;
-        
-        contenedor.innerHTML = "";
-        if (packs.length === 0) {
-            contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top:20px;'>No tenés rutinas guardadas.</p>";
-            return;
-        }
-        
-        packs.forEach(pack => {
-            const ejCount = pack.ejercicios ? pack.ejercicios.length : 0;
-            // Magia: extraemos el primer ejercicio para mostrar su animación en la tarjeta principal
-            const primerEj = (ejCount > 0) ? pack.ejercicios[0].nombre : null;
-            const htmlAnim = obtenerAnimacionHTML(primerEj);
-
-            contenedor.innerHTML += `
-                <div class="card-alumno" onclick="abrirDetallePack('${pack.id}', '${pack.nombre}')" style="cursor:pointer;">
-                    ${htmlAnim}
-                    <div class="info-central" style="margin-left: 15px;">
-                        <h3 style="font-size:1.05rem;">${pack.nombre}</h3>
-                        <div class="info-detalle" style="font-size:0.8rem;">${ejCount} ejercicios configurados</div>
-                    </div>
-                    
-                    <!-- NUEVO: Botón de borrar que empuja a la derecha -->
-                    <div class="acciones-ejercicio" style="margin-left: auto; padding-left: 10px;">
-                        <svg onclick="event.stopPropagation(); borrarPack('${pack.id}')" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" width="20">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                    </div>
-                </div>
-            `;
-        });
-    } catch (e) { contenedor.innerHTML = "<p>Error al cargar.</p>"; }
-}
-
-// Función para eliminar un pack de la base de datos
-function borrarPack(idPack) {
-    pedirConfirmacion(
-        "Eliminar Rutina",
-        "¿Seguro que querés eliminar esta rutina predefinida? Esta acción no se puede deshacer.",
-        "Eliminar",
-        async () => {
-            try {
-                // Le damos la orden a Supabase de borrar el pack con ese ID
-                const { error } = await clienteSupabase
-                    .from('packs_rutinas')
-                    .delete()
-                    .eq('id', idPack);
-                    
-                if (error) throw error;
-                
-                // Si todo sale bien, recargamos la pantalla para que desaparezca
-                cargarPacks(); 
-                
-            } catch (error) { 
-                mostrarAlerta("Error", "No se pudo borrar la rutina: " + error.message); 
-            }
-        }
-    );
-}
-
-// 3. Crear Pack (Creación básica)
-function abrirModalCrearPack() {
-    document.getElementById("input-pack-nombre").value = "";
-    document.getElementById("modal-crear-pack").style.display = "flex";
-}
-function cerrarModalCrearPack() { document.getElementById("modal-crear-pack").style.display = "none"; }
-
-async function guardarPackNuevo() {
-    const nombre = document.getElementById("input-pack-nombre").value.trim();
-    if(!nombre) { mostrarAlerta("Faltan datos","Poné un nombre para el pack."); return; }
-    
-    try {
-        const { error } = await clienteSupabase.from('packs_rutinas').insert([{
-            profesor_id: profeActivoId,
-            nombre: nombre,
-            ejercicios: [] // Arranca con un array JSON vacío
-        }]);
-        if (error) throw error;
-        cerrarModalCrearPack();
-        cargarPacks();
-    } catch (e) { mostrarAlerta("Error: " + e.message); }
-}
-
-// 4. Detalle del Pack (Para meterle ejercicios adentro)
-async function abrirDetallePack(id, nombre) {
-    packActivoId = id;
-    document.getElementById("pantalla-rutinas").style.display = "none";
-    document.getElementById("pantalla-detalle-pack").style.display = "block";
-    document.getElementById("detalle-nombre-pack").innerText = nombre;
-    cargarEjerciciosDePack();
-}
-
-async function cargarEjerciciosDePack() {
-    const contenedor = document.getElementById("lista-ejercicios-pack");
-    contenedor.innerHTML = "<p style='text-align:center;'>Cargando...</p>";
-    try {
-        const { data, error } = await clienteSupabase.from('packs_rutinas').select('ejercicios').eq('id', packActivoId).single();
-        if (error) throw error;
-        
-        packActivoEjercicios = data.ejercicios || [];
-        contenedor.innerHTML = "";
-        
-        if (packActivoEjercicios.length === 0) {
-            contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top:30px;'>Pack vacío. Añadí ejercicios con el +</p>";
-            return;
-        }
-        
-        packActivoEjercicios.forEach((ej, index) => {
-            const htmlAnim = obtenerAnimacionHTML(ej.nombre);
-            contenedor.innerHTML += `
-                <div class="card-ejercicio">
-                    ${htmlAnim}
-                    <div class="info-ejercicio">
-                        <h4>${ej.nombre} <span style="font-size:0.7rem; color:#888; font-weight: normal;">(${ej.zona})</span></h4>
-                        <div class="detalle-ejercicio">
-                            <div class="punto-ama"></div>
-                            <span>${ej.series}</span> <span class="separador">|</span> <span>Descanso ${ej.descanso}</span>
-                        </div>
-                    </div>
-                    <div class="acciones-ejercicio">
-                        <svg onclick="borrarEjercicioDePack(${index})" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </div>
-                </div>
-            `;
-        });
-    } catch(e) { console.error(e); }
-}
-
-// 5. Agregar ejercicios al JSON
-function abrirModalEjercicioPack() {
-    document.getElementById("select-pack-ej-zona").value = "";
-    document.getElementById("select-pack-ej-nombre").innerHTML = '<option value="">Primero elegí una zona...</option>';
-    document.getElementById("input-pack-ej-series").value = "";
-    document.getElementById("input-pack-ej-descanso").value = "";
-    document.getElementById("modal-ejercicio-pack").style.display = "flex";
-}
-function actualizarListaEjerciciosPack() {
-    const zonaSeleccionada = document.getElementById("select-pack-ej-zona").value;
-    const selectNombre = document.getElementById("select-pack-ej-nombre");
-    selectNombre.innerHTML = "";
-    if (!zonaSeleccionada) { selectNombre.innerHTML = '<option value="">Primero elegí una zona...</option>'; return; }
-    catalogoEjercicios[zonaSeleccionada].forEach(ej => { selectNombre.innerHTML += `<option value="${ej}">${ej}</option>`; });
-}
-async function guardarEjercicioEnPack() {
-    const zona = document.getElementById("select-pack-ej-zona").value;
-    const nombre = document.getElementById("select-pack-ej-nombre").value;
-    const series = document.getElementById("input-pack-ej-series").value.trim();
-    const descanso = document.getElementById("input-pack-ej-descanso").value.trim();
-    if(!zona || !nombre) { mostrarAlerta("Faltan datos","Elegí zona y ejercicio"); return; }
-    
-    packActivoEjercicios.push({ zona, nombre, series, descanso });
-    try {
-        const { error } = await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId);
-        if (error) throw error;
-        document.getElementById("modal-ejercicio-pack").style.display = "none";
-        cargarEjerciciosDePack();
-    } catch(e) { mostrarAlerta("Error: " + e.message); }
-}
-async function borrarEjercicioDePack(index) {
-    packActivoEjercicios.splice(index, 1);
-    try {
-        await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId);
-        cargarEjerciciosDePack();
-    } catch(e) { mostrarAlerta("Error: " + e.message); }
-}
-
-// --- 6. IMPORTAR PACK AL ALUMNO (LA MEJOR PARTE) ---
-async function abrirModalSeleccionarPack() {
-    document.getElementById("modal-ejercicio").style.display = "none"; // Cierra el modal manual
-    document.getElementById("modal-seleccionar-pack").style.display = "flex";
-    
-    const contenedor = document.getElementById("lista-seleccionar-packs");
-    contenedor.innerHTML = "<p style='text-align:center;'>Cargando rutinas...</p>";
-    
-    try {
-        const { data: packs, error } = await clienteSupabase.from('packs_rutinas').select('*').eq('profesor_id', profeActivoId);
-        if (error) throw error;
-        
-        contenedor.innerHTML = "";
-        if (packs.length === 0) {
-            contenedor.innerHTML = "<p style='text-align:center;'>No hay rutinas creadas.</p>";
-            return;
-        }
-        
-        packs.forEach(pack => {
-            const ejCount = pack.ejercicios ? pack.ejercicios.length : 0;
-            const primerEj = (ejCount > 0) ? pack.ejercicios[0].nombre : null;
-            const htmlAnim = obtenerAnimacionHTML(primerEj);
-
-            contenedor.innerHTML += `
-                <div class="card-alumno" onclick="importarPackAAlumno('${pack.id}')" style="cursor:pointer; background: rgb(255, 255, 255); border: 1px solid rgba(255, 255, 255, 0.8); margin-bottom: 10px; backdrop-filter: blur(4px);">
-                    ${htmlAnim}
-                    <div class="info-central" style="margin-left: 15px;">
-                        
-                        <h3 style="font-size: 1.3rem; color: #111; text-shadow: none; margin-bottom: 2px;">${pack.nombre}</h3>
-                        
-                        <div class="info-detalle" style="font-size: 1rem; color: #444444;">${ejCount} ejercicios adentro</div>
-                    </div>
-                    <div class="acciones-ejercicio">
-                        <span style="color:#f39c12; font-weight:800; font-size: 1rem;">Elegir</span>
-                    </div>
-                </div>
-            `;
-        });
-    } catch(e) { contenedor.innerHTML = "Error al cargar"; }
-}
-
-async function importarPackAAlumno(packId) {
-    document.getElementById("lista-seleccionar-packs").innerHTML = "<p style='text-align:center;'>Descargando rutina para el alumno...</p>";
-    try {
-        // 1. Extraemos los ejercicios del pack
-        const { data: pack, error: err1 } = await clienteSupabase.from('packs_rutinas').select('ejercicios').eq('id', packId).single();
-        if (err1) throw err1;
-        
-        const ejs = pack.ejercicios || [];
-        if(ejs.length === 0) { mostrarAlerta("Error","Este pack está vacío."); document.getElementById("modal-seleccionar-pack").style.display = "none"; return; }
-
-        // 2. Armamos la caja de datos masiva para insertar en el alumno
-        const diaSelec = document.getElementById("selector-dia-rutina").value;
-        const insertData = ejs.map((ej, index) => ({
-            alumno_id: alumnoSeleccionadoId,
-            dia_semana: diaSelec,
-            zona_muscular: ej.zona,
-            ejercicio_nombre: ej.nombre,
-            series_reps: ej.series,
-            descanso: ej.descanso,
-            orden: 999 + index // Esto asegura que caigan todos juntitos al final de la lista
-        }));
-
-        // 3. Supabase inyecta todos los ejercicios en 1 solo segundo
-        const { error: err2 } = await clienteSupabase.from('rutinas_planificadas').insert(insertData);
-        if (err2) throw err2;
-
-        document.getElementById("modal-seleccionar-pack").style.display = "none";
-        cambiarDiaRutina(); // Refrescamos la pantalla para ver la magia
-        
-    } catch(e) { mostrarAlerta("Error al importar: " + e.message); }
-}
 
 // --- SISTEMA DE TEMA CLARO/OSCURO PARA EL LOGIN ---
 function alternarTemaLogin() {
@@ -1617,3 +1142,729 @@ mostrarAlerta = function(titulo, mensaje) {
     }
     funcionAlertaOriginal(titulo, mensaje); // Llama a tu alerta gráfica normal
 };
+
+// ==========================================
+// SISTEMA DE RENDIMIENTO Y EVALUACIONES
+// ==========================================
+let graficoInstancia = null; // Memoria del gráfico para poder actualizarlo
+
+function abrirModalRendimiento() {
+    document.getElementById("modal-rendimiento").style.display = "flex";
+    
+    // Setear mes y año actual automáticamente al abrir
+    const hoy = new Date();
+    document.getElementById("select-rend-anio").value = hoy.getFullYear().toString();
+    document.getElementById("select-rend-mes").value = (hoy.getMonth() + 1).toString();
+    
+    cargarRendimiento(); // Trae los datos de Supabase
+}
+
+function cerrarModalRendimiento() {
+    document.getElementById("modal-rendimiento").style.display = "none";
+}
+
+async function cargarRendimiento() {
+    const anio = document.getElementById("select-rend-anio").value;
+    const mes = document.getElementById("select-rend-mes").value.padStart(2, '0');
+    const contenedor = document.getElementById("lista-comentarios-rend");
+    
+    contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.85rem;'>Consultando base de datos...</p>";
+    
+    try {
+        // Armamos el rango de búsqueda real para Supabase (Ej: de 2026-03-01 a 2026-03-31)
+        const fechaInicio = `${anio}-${mes}-01`;
+        const ultimoDia = new Date(anio, mes, 0).getDate();
+        const fechaFin = `${anio}-${mes}-${ultimoDia}`;
+
+        const { data: evaluaciones, error } = await clienteSupabase
+            .from('evaluaciones_rendimiento')
+            .select('*')
+            .eq('alumno_id', alumnoSeleccionadoId)
+            .gte('fecha', fechaInicio)
+            .lte('fecha', fechaFin)
+            .order('fecha', { ascending: true });
+
+        if (error) throw error;
+
+        // 1. DIBUJAR COMENTARIOS
+        contenedor.innerHTML = "";
+        if (evaluaciones.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.85rem;'>No hay registros de rendimiento en este período.</p>";
+        } else {
+            evaluaciones.forEach(ev => {
+                const fechaFormateada = ev.fecha.split('-').reverse().join('/'); // Pasa de 2026-10-05 a 05/10/2026
+                
+                if (ev.tipo === 'alumno') {
+                    contenedor.innerHTML += `
+                        <div class="burbuja-alumno">
+                            <strong style="color: #3498db; font-size:0.8rem;">Autoevaluación (${fechaFormateada}) - Nota: ${ev.calificacion}/10</strong>
+                            <p style="font-size:0.85rem; color:#ddd; margin-top:4px;">"${ev.comentario}"</p>
+                        </div>
+                    `;
+                } else {
+                    contenedor.innerHTML += `
+                        <div class="burbuja-profe">
+                            <strong style="color: #f39c12; font-size:0.8rem;">Mi Evaluación (${fechaFormateada})</strong>
+                            <p style="font-size:0.85rem; color:#ddd; margin-top:4px;">"${ev.comentario}"</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // 2. DIBUJAR GRÁFICO (Solo con los datos reales del alumno)
+        dibujarGraficoRendimiento(evaluaciones);
+
+    } catch (e) {
+        contenedor.innerHTML = `<p style='color:#e74c3c; font-size:0.85rem;'>Error al cargar: ${e.message}</p>`;
+    }
+}
+
+function dibujarGraficoRendimiento(evaluaciones) {
+    const ctx = document.getElementById('grafico-rendimiento').getContext('2d');
+    
+    // Si ya había un gráfico antes, lo destruimos para dibujar el nuevo mes sin que se superpongan
+    if (graficoInstancia) { graficoInstancia.destroy(); }
+
+    // Filtramos SOLO las evaluaciones del alumno que tengan una nota numérica
+    const evAlumno = evaluaciones.filter(e => e.tipo === 'alumno' && e.calificacion);
+    
+    // Extraemos las etiquetas (fechas) y los datos (notas). Si no hay, queda vacío esperando datos reales.
+    const labels = evAlumno.map(e => e.fecha.split('-').reverse().slice(0,2).join('/')); // Muestra Ej: "05/10"
+    const data = evAlumno.map(e => e.calificacion);
+
+    graficoInstancia = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Sensación de esfuerzo (Real)',
+                data: data,
+                borderColor: '#f39c12',
+                backgroundColor: 'rgba(243, 156, 18, 0.2)',
+                borderWidth: 2.5,
+                tension: 0.4, // Curvas suaves
+                pointBackgroundColor: '#ffffff',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, max: 10, ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                x: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { display: false } }
+            },
+            plugins: {
+                legend: { labels: { color: 'white', font: { size: 11 } } }
+            }
+        }
+    });
+}
+
+async function guardarEvaluacionProfe() {
+    const comentario = document.getElementById("input-comentario-profe").value.trim();
+    if (!comentario) {
+        mostrarAlerta("Atención", "No escribiste nada en la evaluación.");
+        return;
+    }
+    
+    const hoy = new Date().toISOString().split('T')[0];
+
+    try {
+        const { error } = await clienteSupabase.from('evaluaciones_rendimiento').insert([{
+            alumno_id: alumnoSeleccionadoId,
+            profesor_id: profeActivoId,
+            tipo: 'profe',
+            comentario: comentario,
+            fecha: hoy
+            // No le pasamos "calificacion" porque eso es solo para el alumno
+        }]);
+        
+        if (error) throw error;
+        
+        document.getElementById("input-comentario-profe").value = "";
+        cargarRendimiento(); // Recarga la base de datos para mostrar tu comentario instantáneamente
+        
+    } catch (e) {
+        mostrarAlerta("Error", "No se pudo guardar: " + e.message);
+    }
+}
+
+// --- ABRIR PANTALLA INDIVIDUAL DEL ALUMNO (VERSIÓN LIMPIA) ---
+async function abrirGrillaAlumno(id) {
+    alumnoSeleccionadoId = id; 
+
+    try {
+        const { data: alumno, error } = await clienteSupabase
+            .from('alumnos')
+            .select('*')
+            .eq('id', id)
+            .single(); 
+
+        if (error) throw error;
+
+        alumnoDataActual = alumno;
+
+        document.getElementById("pantalla-dashboard").style.display = "none";
+        document.getElementById("pantalla-detalle-alumno").style.display = "block";
+
+        // Llenamos la tarjeta superior con la información 100% real
+        document.getElementById("detalle-nombre-completo").innerText = `${alumno.nombre} ${alumno.apellido}`;
+        document.getElementById("detalle-objetivo").innerText = alumno.objetivo || "General";
+        
+        // Colocamos la edad y condición de la base de datos
+        document.getElementById("detalle-edad").innerText = alumno.edad ? alumno.edad : "No especificada"; 
+        document.getElementById("detalle-salud").innerText = alumno.condicion_medica || "Sin observaciones.";
+
+        let fechaFormateada = "Sin definir";
+        if (alumno.vencimiento_cuota) {
+            const partes = alumno.vencimiento_cuota.split('-'); // Cortamos el 2026-08-15
+            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; // Lo armamos como 15/08/2026
+        }
+        document.getElementById("detalle-vencimiento").innerText = fechaFormateada;
+
+        // Reseteamos la vista al slider principal y cargamos los chips
+        cerrarCategoria(); 
+        generarChipsRutina(); // <-- Dibuja las semanas y días
+
+    } catch (error) {
+        console.error("Error al abrir la ficha:", error.message);
+        mostrarAlerta("No se pudo cargar la información del alumno.");
+    }
+}
+
+// ==========================================
+// SISTEMA DE CHIPS (SEMANAS Y DÍAS)
+// ==========================================
+let semanaActiva = 1; 
+let diaActivo = 1;    
+
+function generarChipsRutina() {
+    const contenedorSemanas = document.getElementById("chips-semanas");
+    const contenedorDias = document.getElementById("chips-dias");
+
+    // 1. DIBUJAR SEMANAS (1 a 4)
+    contenedorSemanas.innerHTML = "";
+    for (let i = 1; i <= 4; i++) {
+        const claseActivo = (i === semanaActiva) ? "activo" : "";
+        contenedorSemanas.innerHTML += `<button class="chip-rutina ${claseActivo}" onclick="seleccionarSemana(${i})">Semana ${i}</button>`;
+    }
+
+    // 2. DIBUJAR DÍAS PERSONALIZADOS
+    let dias = ["D1", "D2", "D3", "D4", "D5"];
+    
+    // Si el alumno tiene días guardados en la BD, los usamos:
+    if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length === 5) {
+        dias = alumnoDataActual.nombres_dias;
+    }
+    
+    contenedorDias.innerHTML = "";
+    dias.forEach((diaTexto, index) => {
+        const numDia = index + 1;
+        const claseActivo = (numDia === diaActivo) ? "activo" : "";
+        contenedorDias.innerHTML += `<button class="chip-rutina ${claseActivo}" onclick="seleccionarDia(${numDia})">${diaTexto}</button>`;
+    });
+
+    // 3. BOTONCITO DE EDITAR AL FINAL
+    contenedorDias.innerHTML += `
+        <button class="chip-rutina" style="padding: 8px 12px; border-color: #ccc; color: #888; display: flex; align-items: center;" onclick="abrirModalEditarDias()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        </button>
+    `;
+
+    // Si estamos viendo las barras, las redibujamos para actualizar la cantidad de ejercicios por día
+    if (vistaSliderActual === 'categorias') {
+        dibujarCategoriasAlumno();
+    }
+}
+
+// Cuando el profe toca una Semana
+function seleccionarSemana(numSemana) {
+    semanaActiva = numSemana;
+    generarChipsRutina(); // Redibuja para mover el color naranja
+    if(vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD(); 
+}
+
+// Cuando el profe toca un Día
+function seleccionarDia(numDia) {
+    diaActivo = numDia;
+    generarChipsRutina(); // Redibuja para mover el color naranja
+    if(vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD(); 
+}
+
+// Abre la ventana y rellena los inputs con los nombres actuales
+function abrirModalEditarDias() {
+    let dias = ["D1", "D2", "D3", "D4", "D5"];
+    if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length === 5) {
+        dias = alumnoDataActual.nombres_dias;
+    }
+    
+    document.getElementById("input-dia-1").value = dias[0];
+    document.getElementById("input-dia-2").value = dias[1];
+    document.getElementById("input-dia-3").value = dias[2];
+    document.getElementById("input-dia-4").value = dias[3];
+    document.getElementById("input-dia-5").value = dias[4];
+    
+    document.getElementById("modal-editar-dias").style.display = "flex";
+}
+
+// Guarda los nombres nuevos
+async function guardarEdicionDias() {
+    const nuevosDias = [
+        document.getElementById("input-dia-1").value.trim() || "D1",
+        document.getElementById("input-dia-2").value.trim() || "D2",
+        document.getElementById("input-dia-3").value.trim() || "D3",
+        document.getElementById("input-dia-4").value.trim() || "D4",
+        document.getElementById("input-dia-5").value.trim() || "D5"
+    ];
+
+    // Lo actualizamos en la memoria visual instantáneamente
+    if (!alumnoDataActual) alumnoDataActual = {};
+    alumnoDataActual.nombres_dias = nuevosDias;
+    
+    generarChipsRutina(); // Redibuja los botones al instante
+    document.getElementById("modal-editar-dias").style.display = "none";
+
+    // Lo mandamos a Supabase para que quede guardado para siempre
+    try {
+        const { error } = await clienteSupabase
+            .from('alumnos')
+            .update({ nombres_dias: nuevosDias })
+            .eq('id', alumnoSeleccionadoId);
+        
+        if (error) throw error;
+    } catch (e) {
+        mostrarAlerta("Error", "Error al guardar en Supabase.");
+    }
+}
+
+// ==========================================
+// CONTROLADOR DEL SLIDER Y CATEGORÍAS (BARRAS REALES)
+// ==========================================
+let vistaSliderActual = 'categorias'; 
+let categoriaSeleccionada = null;
+let categoriaOpcionesActiva = null; 
+
+async function dibujarCategoriasAlumno() {
+    const contenedor = document.getElementById("lista-categorias-rutina");
+    contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top:20px;'>Cargando barras...</p>";
+
+    // 1. Buscamos las barras del alumno en Supabase (o le damos las 3 por defecto)
+    let categorias = ["Movilidad", "Entrada en calor", "Entrenamiento"];
+    if (alumnoDataActual && alumnoDataActual.categorias_rutina) {
+        categorias = alumnoDataActual.categorias_rutina;
+    }
+
+    // 2. Traemos el día actual para contar cuántos ejercicios tiene cada barra
+    let dias = ["D1", "D2", "D3", "D4", "D5"];
+    if (alumnoDataActual && alumnoDataActual.nombres_dias) { dias = alumnoDataActual.nombres_dias; }
+    const diaSeleccionado = dias[diaActivo - 1]; 
+
+    try {
+        // Consultamos todos los ejercicios del día para hacer el conteo
+        const { data: ejercicios } = await clienteSupabase
+            .from('rutinas_planificadas')
+            .select('categoria')
+            .eq('alumno_id', alumnoSeleccionadoId)
+            .eq('dia_semana', diaSeleccionado);
+
+        contenedor.innerHTML = "";
+        
+        categorias.forEach(cat => {
+            // Contamos los ejercicios. (Si la categoría es "Entrenamiento", incluimos los ejercicios viejos que no tenían categoría)
+            let cantidad = 0;
+            if (ejercicios) {
+                cantidad = ejercicios.filter(e => {
+                    if (cat.toUpperCase() === 'ENTRENAMIENTO') return !e.categoria || e.categoria === cat;
+                    return e.categoria === cat;
+                }).length;
+            }
+
+            // Asignamos íconos visuales
+            let iconoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+            if (cat.toUpperCase() === "MOVILIDAD") iconoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="6.5"></line></svg>`;
+            if (cat.toUpperCase() === "ENTRADA EN CALOR") iconoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`;
+            if (cat.toUpperCase() === "ENTRENAMIENTO") iconoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><line x1="6" y1="4" x2="6" y2="20"></line><line x1="18" y1="4" x2="18" y2="20"></line><path d="M6 12h12"></path><rect x="2" y="8" width="4" height="8" rx="1"></rect><rect x="18" y="8" width="4" height="8" rx="1"></rect></svg>`;
+
+            contenedor.innerHTML += `
+                <div class="card-categoria" onclick="abrirCategoria('${cat}')">
+                    <div class="menu-puntos-izq" onclick="event.stopPropagation(); abrirOpcionesCategoria('${cat}')">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                    </div>
+                    <div class="icono-categoria">${iconoSvg}</div>
+                    <div class="info-categoria">
+                        <h4>${cat.toUpperCase()}</h4>
+                        <p>${cantidad} ejercicios cargados</p>
+                    </div>
+                    <svg class="flecha-derecha" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2.5" width="20"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+            `;
+        });
+    } catch (e) { console.error(e); }
+}
+
+function abrirCategoria(nombreCategoria) {
+    categoriaSeleccionada = nombreCategoria;
+    document.getElementById('titulo-categoria-activa').innerText = nombreCategoria.toUpperCase();
+    document.getElementById('track-slider-rutinas').style.transform = 'translateX(-50%)';
+    vistaSliderActual = 'ejercicios';
+    cargarEjerciciosCategoriaBD(); 
+}
+
+function cerrarCategoria() {
+    categoriaSeleccionada = null;
+    document.getElementById('track-slider-rutinas').style.transform = 'translateX(0%)';
+    vistaSliderActual = 'categorias';
+    dibujarCategoriasAlumno(); // Actualiza los numeritos al volver atrás
+}
+
+function accionBotonFabInteligente() {
+    if (vistaSliderActual === 'categorias') {
+        document.getElementById('input-nueva-categoria').value = '';
+        document.getElementById('modal-categoria').style.display = 'flex';
+    } else {
+        abrirModalEjercicio(); 
+    }
+}
+
+function abrirOpcionesCategoria(nombreCategoria) {
+    categoriaOpcionesActiva = nombreCategoria;
+    document.getElementById('titulo-opciones-cat').innerText = "Opciones: " + nombreCategoria;
+    document.getElementById('modal-opciones-categoria').style.display = 'flex';
+}
+
+// CONEXIÓN: CREAR BARRA EN BD
+async function guardarNuevaCategoriaBD() { 
+    const nuevaCat = document.getElementById('input-nueva-categoria').value.trim();
+    if(!nuevaCat) return;
+    
+    let categorias = ["Movilidad", "Entrada en calor", "Entrenamiento"];
+    if (alumnoDataActual && alumnoDataActual.categorias_rutina) { categorias = alumnoDataActual.categorias_rutina; }
+    
+    categorias.push(nuevaCat);
+    alumnoDataActual.categorias_rutina = categorias; 
+    
+    document.getElementById('modal-categoria').style.display = 'none';
+    dibujarCategoriasAlumno(); 
+    
+    try { await clienteSupabase.from('alumnos').update({ categorias_rutina: categorias }).eq('id', alumnoSeleccionadoId); } 
+    catch (e) { console.error(e); }
+}
+
+// CONEXIÓN: BORRAR BARRA EN BD
+async function borrarCategoriaActiva() { 
+    document.getElementById('modal-opciones-categoria').style.display = 'none';
+    pedirConfirmacion("Borrar Categoría", `¿Seguro que querés borrar '${categoriaOpcionesActiva}' y TODOS sus ejercicios adentro?`, "Borrar", async () => {
+        let categorias = ["Movilidad", "Entrada en calor", "Entrenamiento"];
+        if (alumnoDataActual && alumnoDataActual.categorias_rutina) { categorias = alumnoDataActual.categorias_rutina; }
+        
+        categorias = categorias.filter(c => c !== categoriaOpcionesActiva);
+        alumnoDataActual.categorias_rutina = categorias;
+        dibujarCategoriasAlumno();
+        
+        try { 
+            // Borra la barra del alumno y borra todos los ejercicios que vivían ahí adentro
+            await clienteSupabase.from('alumnos').update({ categorias_rutina: categorias }).eq('id', alumnoSeleccionadoId); 
+            await clienteSupabase.from('rutinas_planificadas').delete().eq('alumno_id', alumnoSeleccionadoId).eq('categoria', categoriaOpcionesActiva);
+        } catch (e) { console.error(e); }
+    });
+}
+
+// Abre la ventana hermosa para renombrar
+function editarNombreCategoria() { 
+    document.getElementById('modal-opciones-categoria').style.display = 'none';
+    document.getElementById('input-renombrar-categoria').value = categoriaOpcionesActiva;
+    document.getElementById('modal-renombrar-categoria').style.display = 'flex';
+}
+
+// Guarda el nuevo nombre en la pantalla y en Supabase
+async function guardarRenombrarCategoriaBD() {
+    const nuevoNombre = document.getElementById('input-renombrar-categoria').value.trim();
+    
+    if (!nuevoNombre || nuevoNombre === "" || nuevoNombre.toUpperCase() === categoriaOpcionesActiva.toUpperCase()) {
+        document.getElementById('modal-renombrar-categoria').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('modal-renombrar-categoria').style.display = 'none';
+
+    let categorias = ["Movilidad", "Entrada en calor", "Entrenamiento"];
+    if (alumnoDataActual && alumnoDataActual.categorias_rutina) { 
+        categorias = alumnoDataActual.categorias_rutina; 
+    }
+    
+    const index = categorias.indexOf(categoriaOpcionesActiva);
+    if (index !== -1) categorias[index] = nuevoNombre;
+    
+    alumnoDataActual.categorias_rutina = categorias;
+    dibujarCategoriasAlumno();
+
+    try {
+        // Actualiza el nombre en el alumno, y muda todos los ejercicios a la barra con el nombre nuevo
+        await clienteSupabase.from('alumnos').update({ categorias_rutina: categorias }).eq('id', alumnoSeleccionadoId);
+        await clienteSupabase.from('rutinas_planificadas').update({ categoria: nuevoNombre }).eq('alumno_id', alumnoSeleccionadoId).eq('categoria', categoriaOpcionesActiva);
+    } catch (e) { 
+        console.error(e); 
+    }
+}
+
+function obtenerAnimacionHTML(nombreEj) {
+    if (!nombreEj) return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
+    const n = nombreEj.trim();
+    if (n === "Vuelos laterales") return `<div class="img-animada anim-vuelos-laterales"></div>`;
+    if (n === "Press de banca") return `<div class="img-animada anim-press-banca"></div>`;
+    if (n === "Back squat" || n === "Sentadilla") return `<div class="img-animada anim-back-squat"></div>`;
+    if (n === "Peso muerto") return `<div class="img-animada anim-peso-muerto"></div>`;
+    return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
+}
+
+// ==========================================
+// EJERCICIOS Y RUTINAS DESDE BD
+// ==========================================
+async function cargarEjerciciosCategoriaBD() {
+    const contenedorEjercicios = document.getElementById("lista-ejercicios-detalle");
+    contenedorEjercicios.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top: 20px;'>Cargando rutina...</p>";
+
+    let dias = ["D1", "D2", "D3", "D4", "D5"];
+    if (alumnoDataActual && alumnoDataActual.nombres_dias) { dias = alumnoDataActual.nombres_dias; }
+    const diaSeleccionado = dias[diaActivo - 1]; 
+
+    try {
+        // Consulta base: el alumno y el día
+        let query = clienteSupabase.from('rutinas_planificadas').select('*')
+            .eq('alumno_id', alumnoSeleccionadoId)
+            .eq('dia_semana', diaSeleccionado) 
+            .order('orden', { ascending: true, nullsFirst: false }) 
+            .order('id', { ascending: true }); 
+
+        // MAGIA DE RESCATE: Si estamos en "Entrenamiento", traemos los ejercicios nuevos Y los viejos de Ana Banana (que no tienen categoría)
+        if (categoriaSeleccionada.toUpperCase() === 'ENTRENAMIENTO') {
+            query = query.or(`categoria.eq.${categoriaSeleccionada},categoria.is.null`);
+        } else {
+            query = query.eq('categoria', categoriaSeleccionada);
+        }
+
+        const { data: ejercicios, error } = await query;
+        if (error) throw error;
+        
+        contenedorEjercicios.innerHTML = ""; 
+
+        if (ejercicios.length === 0) {
+            contenedorEjercicios.innerHTML = `<p style="text-align:center; color:#888; font-size: 0.9rem; margin-top: 30px;">No hay ejercicios acá. Tocá el + para añadir uno.</p>`;
+            return;
+        }
+        
+        ejercicios.forEach(ej => {
+            let htmlImagen = obtenerAnimacionHTML(ej.ejercicio_nombre);
+            contenedorEjercicios.innerHTML += `
+                <div class="card-ejercicio" data-id="${ej.id}">
+                    <svg class="icono-arrastre" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+                    ${htmlImagen}
+                    <div class="info-ejercicio">
+                        <h4>${ej.ejercicio_nombre}</h4>
+                        <div class="detalle-ejercicio"><div class="punto-ama"></div><span>${ej.series_reps || "-"}</span><span class="separador">|</span><span>Descanso ${ej.descanso || "-"}</span></div>
+                    </div>
+                    <div class="acciones-ejercicio">
+                        <svg onclick="abrirModalEditar('${ej.id}', '${ej.zona_muscular}', '${ej.ejercicio_nombre}', '${ej.series_reps}', '${ej.descanso}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </div>
+                </div>`;
+        });
+
+        new Sortable(contenedorEjercicios, {
+            animation: 200, delay: 200, delayOnTouchOnly: true, filter: ".acciones-ejercicio svg", preventOnFilter: false,
+            chosenClass: "tarjeta-arrastrando", ghostClass: "tarjeta-indicador-caida",
+            onEnd: function () { guardarOrdenEjercicios(); }
+        });
+    } catch (e) { console.error(e); }
+}
+
+async function guardarEjercicioEnBD() {
+    const zona = document.getElementById("select-ej-zona").value; 
+    const nombre = document.getElementById("select-ej-nombre").value.trim();
+    if (!zona || !nombre) { mostrarAlerta("Faltan datos","Ponele zona y nombre."); return; }
+
+    let dias = ["D1", "D2", "D3", "D4", "D5"];
+    if (alumnoDataActual && alumnoDataActual.nombres_dias) { dias = alumnoDataActual.nombres_dias; }
+    const diaSeleccionado = dias[diaActivo - 1]; 
+
+    try {
+        if (ejercicioEditandoId) {
+            await clienteSupabase.from('rutinas_planificadas').update({ 
+                ejercicio_nombre: nombre, series_reps: document.getElementById("input-ej-series").value, 
+                descanso: document.getElementById("input-ej-descanso").value, zona_muscular: zona
+            }).eq('id', ejercicioEditandoId);
+        } else {
+            await clienteSupabase.from('rutinas_planificadas').insert([{
+                alumno_id: alumnoSeleccionadoId, 
+                dia_semana: diaSeleccionado, 
+                categoria: categoriaSeleccionada, // AHORA SE GUARDA EN SU BARRA CORRESPONDIENTE
+                zona_muscular: zona,
+                ejercicio_nombre: nombre, 
+                series_reps: document.getElementById("input-ej-series").value,
+                descanso: document.getElementById("input-ej-descanso").value, 
+                orden:999
+            }]);
+        }
+        ejercicioEditandoId = null; cerrarModalEjercicio(); cargarEjerciciosCategoriaBD();
+    } catch (e) { mostrarAlerta("Error", e.message); }
+}
+
+// --- 11. SISTEMA DE PACKS PREDEFINIDOS ---
+let packActivoId = null;
+let packActivoEjercicios = []; 
+
+function abrirPantallaRutinas() {
+    document.getElementById("pantalla-dashboard").style.display = "none";
+    document.getElementById("pantalla-detalle-alumno").style.display = "none";
+    document.getElementById("pantalla-perfiles").style.display = "none"; 
+    document.getElementById("pantalla-rutinas").style.display = "block";
+    cargarPacks();
+}
+
+async function cargarPacks() {
+    const contenedor = document.getElementById("lista-packs");
+    contenedor.innerHTML = "<p style='text-align:center;'>Cargando tus rutinas...</p>";
+    try {
+        const { data: packs, error } = await clienteSupabase.from('packs_rutinas').select('*').eq('profesor_id', profeActivoId);
+        if (error) throw error;
+        contenedor.innerHTML = "";
+        if (packs.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#888;'>No tenés rutinas guardadas.</p>"; return;
+        }
+        packs.forEach(pack => {
+            const ejCount = pack.ejercicios ? pack.ejercicios.length : 0;
+            contenedor.innerHTML += `
+                <div class="card-alumno" onclick="abrirDetallePack('${pack.id}', '${pack.nombre}')" style="cursor:pointer;">
+                    ${obtenerAnimacionHTML((ejCount > 0) ? pack.ejercicios[0].nombre : null)}
+                    <div class="info-central" style="margin-left: 15px;"><h3>${pack.nombre}</h3><div class="info-detalle">${ejCount} ejercicios configurados</div></div>
+                    <div class="acciones-ejercicio" style="margin-left: auto; padding-left: 10px;">
+                        <svg onclick="event.stopPropagation(); borrarPack('${pack.id}')" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </div>
+                </div>`;
+        });
+    } catch (e) { contenedor.innerHTML = "<p>Error al cargar packs.</p>"; }
+}
+
+function borrarPack(idPack) {
+    pedirConfirmacion("Eliminar", "¿Seguro que querés eliminar esta rutina?", "Eliminar", async () => {
+        try { await clienteSupabase.from('packs_rutinas').delete().eq('id', idPack); cargarPacks(); } 
+        catch (e) { mostrarAlerta("Error", e.message); }
+    });
+}
+
+function abrirModalCrearPack() { 
+    document.getElementById("input-pack-nombre").value = ""; 
+    document.getElementById("modal-crear-pack").style.display = "flex"; 
+}
+
+function cerrarModalCrearPack() { 
+    document.getElementById("modal-crear-pack").style.display = "none"; 
+}
+
+async function guardarPackNuevo() {
+    const nombre = document.getElementById("input-pack-nombre").value.trim();
+    if(!nombre) return;
+    try { 
+        await clienteSupabase.from('packs_rutinas').insert([{ profesor_id: profeActivoId, nombre: nombre, ejercicios: [] }]); 
+        cerrarModalCrearPack(); 
+        cargarPacks(); 
+    } catch (e) { 
+        console.error(e); 
+    }
+}
+
+async function abrirDetallePack(id, nombre) {
+    packActivoId = id;
+    document.getElementById("pantalla-rutinas").style.display = "none"; 
+    document.getElementById("pantalla-detalle-pack").style.display = "block";
+    document.getElementById("detalle-nombre-pack").innerText = nombre; 
+    cargarEjerciciosDePack();
+}
+
+async function cargarEjerciciosDePack() {
+    const contenedor = document.getElementById("lista-ejercicios-pack");
+    try {
+        const { data, error } = await clienteSupabase.from('packs_rutinas').select('ejercicios').eq('id', packActivoId).single();
+        if (error) throw error;
+        packActivoEjercicios = data.ejercicios || [];
+        contenedor.innerHTML = "";
+        packActivoEjercicios.forEach((ej, index) => {
+            contenedor.innerHTML += `<div class="card-ejercicio">${obtenerAnimacionHTML(ej.nombre)}<div class="info-ejercicio"><h4>${ej.nombre}</h4><div class="detalle-ejercicio"><span>${ej.series}</span></div></div><div class="acciones-ejercicio"><svg onclick="borrarEjercicioDePack(${index})" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div></div>`;
+        });
+    } catch(e) { console.error(e); }
+}
+
+function abrirModalEjercicioPack() { 
+    document.getElementById("modal-ejercicio-pack").style.display = "flex"; 
+}
+
+function actualizarListaEjerciciosPack() {
+    const z = document.getElementById("select-pack-ej-zona").value;
+    const s = document.getElementById("select-pack-ej-nombre");
+    s.innerHTML = ""; if(!z) return;
+    catalogoEjercicios[z].forEach(ej => { s.innerHTML += `<option value="${ej}">${ej}</option>`; });
+}
+
+async function guardarEjercicioEnPack() {
+    packActivoEjercicios.push({ zona: document.getElementById("select-pack-ej-zona").value, nombre: document.getElementById("select-pack-ej-nombre").value, series: document.getElementById("input-pack-ej-series").value, descanso: document.getElementById("input-pack-ej-descanso").value });
+    try { await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId); document.getElementById("modal-ejercicio-pack").style.display = "none"; cargarEjerciciosDePack(); } catch(e) { console.error(e); }
+}
+
+async function borrarEjercicioDePack(index) { 
+    packActivoEjercicios.splice(index, 1); 
+    await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId); 
+    cargarEjerciciosDePack(); 
+}
+
+async function abrirModalSeleccionarPack() {
+    document.getElementById("modal-seleccionar-pack").style.display = "flex";
+    const contenedor = document.getElementById("lista-seleccionar-packs");
+    try {
+        const { data: packs } = await clienteSupabase.from('packs_rutinas').select('*').eq('profesor_id', profeActivoId);
+        contenedor.innerHTML = "";
+        packs.forEach(pack => {
+            contenedor.innerHTML += `<div class="card-alumno" onclick="importarPackAAlumno('${pack.id}')" style="cursor:pointer; background: white; margin-bottom:10px;">${obtenerAnimacionHTML(pack.ejercicios?.[0]?.nombre)}<div class="info-central" style="margin-left: 15px;"><h3 style="font-size:1.2rem;">${pack.nombre}</h3></div><div class="acciones-ejercicio"><span style="color:#f39c12; font-weight:800;">Elegir</span></div></div>`;
+        });
+    } catch(e) { console.error(e); }
+}
+
+async function importarPackAAlumno(packId) {
+    try {
+        const { data: pack } = await clienteSupabase.from('packs_rutinas').select('ejercicios').eq('id', packId).single();
+        let dias = ["D1", "D2", "D3", "D4", "D5"];
+        if (alumnoDataActual && alumnoDataActual.nombres_dias) { dias = alumnoDataActual.nombres_dias; }
+        const diaSelec = dias[diaActivo - 1]; 
+        
+        const insertData = pack.ejercicios.map((ej, index) => ({
+            alumno_id: alumnoSeleccionadoId, 
+            dia_semana: diaSelec, 
+            categoria: categoriaSeleccionada, // LOS PACKS TAMBIÉN CAEN ADENTRO DE LA BARRA ACTIVA
+            zona_muscular: ej.zona,
+            ejercicio_nombre: ej.nombre, series_reps: ej.series, descanso: ej.descanso, orden: 999 + index
+        }));
+        await clienteSupabase.from('rutinas_planificadas').insert(insertData);
+        document.getElementById("modal-seleccionar-pack").style.display = "none";
+        document.getElementById("modal-ejercicio").style.display = "none";
+        cargarEjerciciosCategoriaBD(); 
+    } catch(e) { console.error(e); }
+}
+
+// --- SISTEMA DE TEMA CLARO/OSCURO PARA EL DASHBOARD DE ALUMNOS ---
+function alternarTemaDashboard() {
+    const pantallaDash = document.getElementById('pantalla-dashboard');
+    const iconoSol = document.getElementById('icono-sol-dash');
+    const iconoLuna = document.getElementById('icono-luna-dash');
+
+    // Cambiamos el modo
+    pantallaDash.classList.toggle('modo-oscuro');
+
+    // Alternamos el dibujo de los íconos
+    if (pantallaDash.classList.contains('modo-oscuro')) {
+        iconoLuna.style.display = 'none'; 
+        iconoSol.style.display = 'block'; 
+    } else {
+        iconoLuna.style.display = 'block'; 
+        iconoSol.style.display = 'none'; 
+    }
+}
