@@ -24,7 +24,7 @@
 }
 
 body {
-    background-image: url('imagenes/fonfo.png');
+    background-image: url('imagenes/FONDOBLANCOTODO.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -433,10 +433,28 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 /* =========================================
    7. PANTALLA 4: DASHBOARD (Alumnos)
    ========================================= */
+/* =========================================
+   7. PANTALLA 4: DASHBOARD (Alumnos)
+   ========================================= */
 .pantalla-dashboard-moderna {
-    background-image: url('imagenes/fonfo.png'); background-size: cover; background-repeat: no-repeat;
-    background-position: center top; background-attachment: fixed; background-color: transparent;
-    margin: -30px -20px; padding: 40px 20px 80px 20px; min-height: 100vh; position: relative; overflow-x: hidden;
+    background-color: transparent;
+    margin: -30px -20px; 
+    padding: 40px 20px 80px 20px; 
+    min-height: 100vh; 
+    position: relative; 
+    overflow-x: hidden;
+}
+
+/* ESTA ES LA CAPA VIRTUAL GIGANTE (FONDO CLARO POR DEFECTO) */
+.pantalla-dashboard-moderna::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1; /* Lo manda bien al fondo de todo */
+    background-image: url('imagenes/FONDOBLANCOTODO.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .header-dashboard { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -498,14 +516,45 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 
 /* Lista y Tarjetas de Alumno */
 .lista-alumnos-moderna { display: flex; flex-direction: column; gap: 12px; }
-.card-alumno { background: white; border-radius: 16px; padding: 15px; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+.card-alumno { 
+    /* Truco de doble fondo para lograr borde degradado con esquinas curvas */
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box, 
+                linear-gradient(to right, #f39c12, #ffd700) border-box;
+                
+    border-radius: 16px; 
+    padding: 15px; 
+    display: flex; 
+    align-items: center; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04); 
+}
 .avatar-actividad { width: 60px; height: 60px; background: #2c2c2c; border-radius: 50%; margin-right: 15px; flex-shrink: 0; object-fit: cover; }
-.info-central { flex-grow: 1; }
-.info-central h3 { font-size: 1.1rem; color: #2c2c2c; margin-bottom: 4px; }
-.info-detalle { display: flex; align-items: center; font-size: 0.8rem; color: #777; margin-bottom: 2px; }
-.punto-naranja { width: 8px; height: 8px; background: #f39c12; border-radius: 50%; margin-right: 6px; }
+.info-central { 
+    flex-grow: 1; 
+    padding-right: 12px; /* Un poco de aire antes de la línea gris */
+    overflow: hidden; /* Evita que los textos largos desarmen la tarjeta */
+}
+.info-central h3 { 
+    font-size: 1.1rem; color: #2c2c2c; margin-bottom: 4px; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Pone "..." si el nombre es muy largo */
+}
+.info-detalle { 
+    display: flex; align-items: center; font-size: 0.8rem; color: #777; margin-bottom: 2px; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+}
+.punto-naranja { 
+    width: 8px; height: 8px; background: #f39c12; border-radius: 50%; margin-right: 6px; flex-shrink: 0;
+}
 
-.estado-derecha { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding-left: 10px; border-left: 1px solid #eee; flex-shrink: 0; }
+.estado-derecha { 
+    width: 110px; 
+    text-align: right; 
+    display: flex; flex-direction: column; align-items: flex-end; justify-content: center; 
+    padding-left: 12px; 
+    border-left: 1px solid #f39c12; 
+    flex-shrink: 0; 
+}
+
 .badge-estado { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; }
 .badge-aldia { background: #e8f5e9; color: #2e7d32; }
 .badge-vencepronto { background: #fff3e0; color: #f57c00; }
@@ -516,7 +565,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;
     display: flex; align-items: center; gap: 4px; transition: all 0.2s ease; width: 100%; justify-content: center;
 }
-.btn-pago-pendiente { background-color: #f0f0f0; color: #666; border: 1px dashed #ccc; }
+.btn-pago-pendiente { background-color: #f0f0f0; color: #666; border: 1px dashed #f39c12; /* Línea punteada naranja */ }
 .btn-pago-realizado { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
 
 
@@ -763,26 +812,19 @@ button:active, .card-alumno:active, .card-ejercicio:active,
    ========================================= */
 
 /* 1. Hacemos transparente el contenedor central para que deje ver el fondo gigante */
+/* =========================================
+   MODO OSCURO PARA EL DASHBOARD (LISTA DE ALUMNOS)
+   ========================================= */
+
+/* 1. Hacemos transparente el contenedor central para que deje ver el fondo gigante */
 .pantalla-dashboard-moderna.modo-oscuro {
-    /* ACÁ ABAJO ESTÁ LA LÍNEA PREPARADA PARA TU FUTURO FONDO (Solo borrá los asteriscos cuando la tengas) */
-    /* background-image: url('imagenes/tu-fondo-oscuro.png') !important; */
     background: transparent !important;
 }
 
-/* 2. Creamos una "capa virtual" que se estira por toda la pantalla del dispositivo */
+/* 2. Cuando se activa el modo oscuro, le cambiamos la foto a la lona gigante */
 .pantalla-dashboard-moderna.modo-oscuro::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    z-index: -1; /* Lo manda bien al fondo, detrás de tus botones y tarjetas */
-    
-    /* ACÁ ABAJO ESTÁ LA LÍNEA PARA TU FUTURO FONDO (Borrá los /* cuando lo tengas) */
-    /* background-image: url('imagenes/tu-fondo-oscuro.png'); */
-    
-    background-color: #121212; /* Color oscuro temporal */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-image: url('imagenes/FONDONEGROTODO.jpg') !important; 
+    background-color: #121212; 
 }
 
 /* Cambiar textos principales a blanco */
@@ -792,13 +834,14 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 
 /* Invertir colores de las tarjetas de alumnos */
 .pantalla-dashboard-moderna.modo-oscuro .card-alumno {
-    background: #1e1e1e;
+    border: 2px solid transparent;
+    background: linear-gradient(#1e1e1e, #1e1e1e) padding-box, 
+                linear-gradient(to right, #f39c12, #ffd700) border-box;
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    border: 1px solid #2a2a2a;
 }
 .pantalla-dashboard-moderna.modo-oscuro .info-central h3 { color: #f0f0f0; }
 .pantalla-dashboard-moderna.modo-oscuro .info-detalle { color: #999; }
-.pantalla-dashboard-moderna.modo-oscuro .estado-derecha { border-left-color: #333; }
+.pantalla-dashboard-moderna.modo-oscuro .estado-derecha { border-left-color: #f39c12; }
 
 /* Buscador oscuro */
 .pantalla-dashboard-moderna.modo-oscuro .contenedor-buscador {
@@ -824,7 +867,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 .pantalla-dashboard-moderna.modo-oscuro .btn-pago-pendiente {
     background-color: #111;
     color: #888;
-    border-color: #333;
+    border: 1px dashed #f39c12; /* Línea punteada naranja */
 }
 
 /* Tacho de basura / Modo borrado */
