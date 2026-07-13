@@ -506,7 +506,9 @@ async function cargarAlumnos() {
             "Tela": "imagenes/alumno2.jpeg",
             "Funcional": "imagenes/alumno3.jpeg",
             "Calistenia": "imagenes/alumno4.jpeg",
-            "Readaptación": "imagenes/alumno5.jpeg"
+            "Readaptación": "imagenes/alumno5.jpeg",
+            "Hyrox": "imagenes/alumno1.jpeg", /* Podés cambiar esta foto más adelante */
+            "Crossfit": "imagenes/alumno3.jpeg" /* Podés cambiar esta foto más adelante */
         };
 
         alumnos.forEach((alumno) => {
@@ -1381,14 +1383,32 @@ function generarChipsRutina() {
 // Cuando el profe toca una Semana
 function seleccionarSemana(numSemana) {
     semanaActiva = numSemana;
-    generarChipsRutina(); // Redibuja para mover el color naranja
+    
+    // 1. Pintamos de naranja el botón tocado (Sin borrar el HTML, así dejamos que rebote!)
+    const botonesSemanas = document.querySelectorAll("#chips-semanas .chip-rutina");
+    botonesSemanas.forEach((btn, index) => {
+        if (index + 1 === numSemana) btn.classList.add("activo");
+        else btn.classList.remove("activo");
+    });
+
+    // 2. Actualizamos la info de abajo
+    if(vistaSliderActual === 'categorias') dibujarCategoriasAlumno();
     if(vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD(); 
 }
 
 // Cuando el profe toca un Día
 function seleccionarDia(numDia) {
     diaActivo = numDia;
-    generarChipsRutina(); // Redibuja para mover el color naranja
+    
+    // 1. Pintamos de naranja el botón tocado (Sin borrar el HTML, así dejamos que rebote!)
+    const botonesDias = document.querySelectorAll("#chips-dias .chip-rutina");
+    botonesDias.forEach((btn, index) => {
+        if (index + 1 === numDia) btn.classList.add("activo");
+        else btn.classList.remove("activo");
+    });
+
+    // 2. Actualizamos la info de abajo
+    if(vistaSliderActual === 'categorias') dibujarCategoriasAlumno();
     if(vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD(); 
 }
 

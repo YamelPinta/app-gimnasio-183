@@ -215,6 +215,13 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 .pantalla-inicio.modo-claro { background-image: url('imagenes/FONDOBLANCO.jpg'); }
 
 .logo-container-inicio { margin-bottom: 8vh; text-align: center; }
+/* Alternar logos en Pantalla de Inicio */
+.pantalla-inicio .logo-modo-oscuro-inicio { display: inline-block; }
+.pantalla-inicio .logo-modo-claro-inicio { display: none; }
+
+.pantalla-inicio.modo-claro .logo-modo-oscuro-inicio { display: none; }
+.pantalla-inicio.modo-claro .logo-modo-claro-inicio { display: inline-block; }
+
 .img-logo-inicio { width: 250px; filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8)); }
 
 .contenedor-botones-rol {
@@ -226,7 +233,27 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     position: relative; width: 100%; height: 130px; border-radius: 20px;
     cursor: pointer; overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    /* Le devolvemos el fondo 100% transparente para que no te tape nada */
+    background: transparent; 
 }
+
+/* Acá creamos el marco hueco con la animación que flota por encima de tu foto */
+.tarjeta-rol::after {
+    content: "";
+    position: absolute;
+    inset: 0; /* Se pega a los 4 bordes exactos */
+    border-radius: 20px;
+    padding: 2px; /* Grosor del borde mágico */
+    background: linear-gradient(var(--angulo-borde), #f39c12, #ffd700, #f39c12);
+    /* El truco de la máscara: recorta el centro perfecto y deja solo el marco */
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none; /* Para que el dedo pase de largo y puedas hacer clic */
+    z-index: 10;
+    animation: rotarBorde 4s linear infinite;
+}
+
 .tarjeta-rol:active { box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4); }
 
 .tarjeta-profe { height: 95px; } /* Más petisa */
@@ -275,6 +302,13 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 }
 
 .login-header-visual { text-align: center; margin-bottom: 4vh; z-index: 2; padding: 0 20px; }
+
+/* Alternar logos en Pantalla de Login */
+.login-visual .logo-modo-oscuro-login { display: inline-block; }
+.login-visual .logo-modo-claro-login { display: none; }
+
+.login-visual.modo-claro .logo-modo-oscuro-login { display: none; }
+.login-visual.modo-claro .logo-modo-claro-login { display: inline-block; }
 
 .logo-visual {
     width: 200px; margin-top: 0; margin-bottom: 15vh; 
@@ -357,10 +391,10 @@ button:active, .card-alumno:active, .card-ejercicio:active,
    ========================================= */
 .pantalla-perfiles {
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh; overflow-y: auto; 
-    background-image: url('imagenes/FONDONEGRO.jpg'); background-size: cover; background-position: center; background-color: #111; 
+    background-image: url('imagenes/FONDONEGROTODO.jpg'); background-size: cover; background-position: center; background-color: #111; 
     display: flex; flex-direction: column; align-items: center; z-index: 2000;
 }
-.pantalla-perfiles.modo-claro { background-image: url('imagenes/FONDOBLANCO.jpg'); }
+.pantalla-perfiles.modo-claro { background-image: url('imagenes/FONDOBLANCOTODO.jpg'); }
 
 /* Alternar logos en modo oscuro/claro */
 .pantalla-perfiles .logo-modo-oscuro { display: inline-block; }
@@ -510,8 +544,8 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     color: white; 
     border-color: #f39c12; 
     font-weight: 600;
-    /* El mismo brillo elegante que los botones */
-    box-shadow: 0 0 12px rgba(243, 156, 18, 0.6), 0 0 20px rgba(243, 156, 18, 0.4) !important;
+    /* Brillo mucho más sutil y elegante */
+    box-shadow: 0 0 8px rgba(243, 156, 18, 0.35), 0 0 12px rgba(243, 156, 18, 0.15) !important;
 }
 
 /* Lista y Tarjetas de Alumno */
@@ -595,10 +629,26 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 .logo-top { height: 50px; }
 
 /* Tarjeta de Información Superior */
+/* Tarjeta de Información Superior */
 .tarjeta-info-alumno {
-    background-image: url('imagenes/nombre.png'); background-size: cover; background-position: right center; background-repeat: no-repeat;
-    background-color: #e0e0e0; border-radius: 20px; padding: 8px 8px; display: flex; align-items: center; gap: 10px; margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; position: relative;
+    /* Magia combinada: Mantiene tu imagen nombre.png, el fondo gris y agrega el borde animado */
+    border: 2px solid transparent;
+    background: url('imagenes/nombre.png') right center / cover no-repeat padding-box, 
+                linear-gradient(#e0e0e0, #e0e0e0) padding-box, 
+                linear-gradient(var(--angulo-borde),  #d88909, #ffd700) border-box;
+                
+    border-radius: 20px; 
+    padding: 8px 8px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+    overflow: hidden; 
+    position: relative;
+    
+    /* Enciende el motor de rotación del borde */
+    animation: rotarBorde 4s linear infinite;
 }
 .avatar-gris { width: 60px; height: 60px; background-color: #c2c2c2; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
 .avatar-gris svg { width: 30px; height: 30px; }
@@ -625,11 +675,30 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 .scroll-horizontal-chips::-webkit-scrollbar { display: none; } 
 
 .chip-rutina {
-    white-space: nowrap; padding: 8px 18px; border-radius: 12px;
-    border: 1px solid #f39c12; background: white; color: #f39c12;
-    font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;
+    display: inline-block; /* <-- ¡ESTA ES LA LLAVE PARA QUE REBOTE! */
+    white-space: nowrap; 
+    padding: 8px 18px; 
+    border-radius: 12px;
+    border: 1px solid #f39c12; 
+    background: white; 
+    color: #f39c12;
+    font-weight: 600; 
+    font-size: 0.9rem; 
+    cursor: pointer; 
+    transition: all 0.2s ease, transform 0.2s ease !important;
 }
-.chip-rutina.activo { background: #f39c12; color: white; }
+
+/* 1. Efecto de rebote al apretar el botón */
+.chip-rutina:active {
+    transform: scale(0.92) !important;
+}
+
+/* 2. Efecto resplandor suave cuando la semana/día está seleccionada */
+.chip-rutina.activo { 
+    background: #f39c12; 
+    color: white; 
+    box-shadow: 0 0 8px rgba(243, 156, 18, 0.35), 0 0 12px rgba(243, 156, 18, 0.15) !important;
+}
 
 /* EL SLIDER HORIZONTAL DE VISTAS */
 .viewport-slider {
@@ -644,8 +713,23 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 
 /* LAS TARJETAS DE CATEGORÍA (BARRAS BLANCAS) */
 .card-categoria {
-    background: white; border-radius: 16px; padding: 12px 15px; display: flex; align-items: center; gap: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 12px; cursor: pointer; position: relative;
+    /* El truco del borde degradado giratorio */
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box, 
+                linear-gradient(var(--angulo-borde), #d88909, #ffd700 /*, #f39c12*/) border-box;
+                
+    border-radius: 16px; 
+    padding: 12px 15px; 
+    display: flex; 
+    align-items: center; 
+    gap: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+    margin-bottom: 12px; 
+    cursor: pointer; 
+    position: relative;
+    
+    /* Enciende el motor de rotación del borde */
+    animation: rotarBorde 4s linear infinite;
 }
 
 /* Tres puntitos a la izquierda */
@@ -924,23 +1008,81 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 }
 
 /* =========================================
-   EFECTO RESPLANDOR PARA BOTONES AMARILLOS
+   EFECTO RESPLANDOR PARA BOTONES AMARILLOS (SUAVE)
    ========================================= */
 
 /* 1. Botón "Agregar alumno" y "Crear Rutina" */
 .btn-agregar-moderno {
-    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.6), 0 0 25px rgba(243, 156, 18, 0.4) !important;
+    box-shadow: 0 4px 8px rgba(243, 156, 18, 0.35), 0 0 12px rgba(243, 156, 18, 0.15) !important;
 }
 
 /* 2. Botón flotante redondo (+) */
 .btn-fab-amarillo {
-    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.6), 0 0 25px rgba(243, 156, 18, 0.5) !important;
+    box-shadow: 0 4px 8px rgba(243, 156, 18, 0.35), 0 0 12px rgba(243, 156, 18, 0.2) !important;
 }
 
-/* 3. Botones "Guardar" de las ventanas emergentes (aumentamos el brillo que ya tenían) */
+/* 3. Botones "Guardar" de las ventanas emergentes */
 .btn-guardar {
-    box-shadow: 0 0 15px rgba(243, 156, 18, 0.8), 0 0 35px rgba(243, 156, 18, 0.5) !important;
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5), 0 0 15px rgba(243, 156, 18, 0.2) !important;
 }
 .btn-guardar:active {
-    box-shadow: 0 0 10px rgba(243, 156, 18, 0.9), 0 0 20px rgba(243, 156, 18, 0.7) !important;
+    box-shadow: 0 2px 5px rgba(243, 156, 18, 0.6), 0 0 8px rgba(243, 156, 18, 0.3) !important;
+
+
 }
+
+/* =========================================
+   QUITAR SOMBRAS DE LOGOS EN MODO CLARO
+   ========================================= */
+.pantalla-inicio.modo-claro .img-logo-inicio { 
+    filter: none !important; 
+}
+
+.login-visual.modo-claro .logo-visual { 
+    filter: none !important; 
+}
+
+
+/* =========================================
+   FONDOS DE TARJETAS DE ROL (CLARO/OSCURO)
+   ========================================= */
+
+/* 1. Modo Oscuro (Por defecto usamos las negras) */
+.fondo-alumno { background-image: url('imagenes/BOTONALUMNO NEGRO.png'); }
+.fondo-profe  { background-image: url('imagenes/BOTONPROFENEGRO.png'); }
+
+/* 2. Modo Claro (Cambiamos a las blancas) */
+.pantalla-inicio.modo-claro .fondo-alumno { background-image: url('imagenes/BOTONALUMNOBLANCO.png'); }
+.pantalla-inicio.modo-claro .fondo-profe  { background-image: url('imagenes/BOTONPROFEBLANCO.png'); }
+
+/* 3. Ajuste de Textos e Íconos para el Modo Claro (Fondo Blanco) */
+.pantalla-inicio.modo-claro .textos-rol h2 { 
+    color: #111; /* Texto oscuro */
+    text-shadow: none; /* Le sacamos la sombra negra que tenían */
+}
+.pantalla-inicio.modo-claro .textos-rol p { 
+    color: #333; /* Texto gris oscuro */
+    text-shadow: none; 
+}
+/* Ocultamos los íconos negros por defecto (Modo Oscuro) */
+.icono-rol-negro { 
+    display: none; 
+}
+
+/* Cuando se activa el Modo Claro, escondemos los blancos y mostramos los negros */
+.pantalla-inicio.modo-claro .icono-rol-blanco { 
+    display: none; 
+}
+.pantalla-inicio.modo-claro .icono-rol-negro { 
+    display: inline-block; 
+}
+
+.pantalla-inicio.modo-claro .flecha-rol { 
+    filter: none; /* La flecha naranja se ve bien siempre, solo le sacamos la sombra */
+}
+
+/* Quitar la sombra a los íconos negros en el modo claro */
+.pantalla-inicio.modo-claro .icono-rol-negro {
+    filter: none !important;
+}
+

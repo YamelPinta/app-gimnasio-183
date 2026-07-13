@@ -30,28 +30,42 @@
             </button>
 
             <div class="logo-container-inicio">
-                <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="img-logo-inicio logo-modo-oscuro">
+                <!-- Logo para modo oscuro -->
+                <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="img-logo-inicio logo-modo-oscuro-inicio">
+                <!-- Logo para modo claro -->
+                <img src="imagenes/LOGOFULLCOLOR.png" alt="18.3 Clubhouse" class="img-logo-inicio logo-modo-claro-inicio">
             </div>
 
             <div class="contenedor-botones-rol">
                 <div class="tarjeta-rol" onclick="irPantallaAlumno()">
-                    <div class="fondo-tarjeta-rol" style="background-image: url('imagenes/BOTON GRANDE.png');"></div>
+                    <!-- Le sacamos el style fijo y le ponemos la clase fondo-alumno -->
+                    <div class="fondo-tarjeta-rol fondo-alumno"></div>
                     
                     <div class="contenido-rol">
-                        <img src="imagenes/ICONO ALUMNO.png" class="icono-rol"  style="width: 65px; margin-left: 0px; margin-right: 12px;">
+                        <!-- Ícono blanco (Modo Oscuro) -->
+                        <img src="imagenes/ICONO ALUMNO.png" class="icono-rol icono-rol-blanco" style="width: 65px; margin-left: 0px; margin-right: 12px;">
+                        <!-- Ícono negro (Modo Claro) -->
+                        <img src="imagenes/ICONO ALUMNO NEGRO.png" class="icono-rol icono-rol-negro" style="width: 65px; margin-left: 0px; margin-right: 12px;">
+                        
                         <div class="textos-rol">
                             <h2>ALUMNO</h2>
                             <p>Entrená, seguí tu progreso<br>y alcanzá tus metas.</p>
                         </div>
                         <svg class="flecha-rol" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="3"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>
+
                 </div>
 
                 <div class="tarjeta-rol tarjeta-profe" onclick="irPantallaLoginProfe()">
-                    <div class="fondo-tarjeta-rol" style="background-image: url('imagenes/BOTON MEDIANO.png');"></div>
+                    <!-- Le sacamos el style fijo y le ponemos la clase fondo-profe -->
+                    <div class="fondo-tarjeta-rol fondo-profe"></div>
                     
                     <div class="contenido-rol">
-                        <img src="imagenes/ICONO PROFE.png" class="icono-rol" style="width: 55px; margin-left: 0px; margin-right: 12px;">
+                        <!-- Ícono blanco (Modo Oscuro) -->
+                        <img src="imagenes/ICONO PROFE.png" class="icono-rol icono-rol-blanco" style="width: 55px; margin-left: 0px; margin-right: 12px;">
+                        <!-- Ícono negro (Modo Claro) -->
+                        <img src="imagenes/ICONO PROFESOR NEGRO.png" class="icono-rol icono-rol-negro" style="width: 55px; margin-left: 0px; margin-right: 12px;">
+                        
                         <div class="textos-rol">
                             <h2>PROFESOR</h2>
                             <p>Gestioná tus clases.</p>
@@ -73,7 +87,11 @@
             </button>
             
             <div class="login-header-visual">
-                <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="logo-visual">
+                <!-- Logo para modo oscuro -->
+                <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="logo-visual logo-modo-oscuro-login">
+                <!-- Logo para modo claro -->
+                <img src="imagenes/LOGOFULLCOLOR.png" alt="18.3 Clubhouse" class="logo-visual logo-modo-claro-login">
+                
                 <div class="contenedor-texto-visual">
                     <h1 class="titulo-visual">APP PARA PROFESORES</h1>
                     <p class="subtitulo-visual">Gestioná alumnos, cuotas y rutinas personalizadas.</p>
@@ -174,7 +192,12 @@
             <div class="contenedor-chips">
                 <button class="chip activo" onclick="filtrarPorChip(this, 'Todos')">Todos</button>
                 <button class="chip" onclick="filtrarPorChip(this, 'Musculación')">Musculación</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Tela')">Tela</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Funcional')">Funcional</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Calistenia')">Calistenia</button>
                 <button class="chip" onclick="filtrarPorChip(this, 'Readaptación')">Readaptación</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Hyrox')">Hyrox</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Crossfit')">Crossfit</button>
                 <button class="chip" onclick="filtrarPorChip(this, 'Al día')">Cuota al día</button>
                 <button class="chip" onclick="filtrarPorChip(this, 'Vencida')">Vencida</button>
             </div>
@@ -370,6 +393,8 @@
                         <option value="Funcional">Funcional</option>
                         <option value="Calistenia">Calistenia</option>
                         <option value="Readaptación">Readaptación</option>
+                        <option value="Hyrox">Hyrox</option>
+                        <option value="Crossfit">Crossfit</option>
                     </select>
                 </div>
                 <div class="campo-detalle">
@@ -410,6 +435,8 @@
                         <option value="Funcional">Funcional</option>
                         <option value="Calistenia">Calistenia</option>
                         <option value="Readaptación">Readaptación</option>
+                        <option value="Hyrox">Hyrox</option>
+                        <option value="Crossfit">Crossfit</option>
                     </select>
                 </div>
                 <div class="campo-detalle">
