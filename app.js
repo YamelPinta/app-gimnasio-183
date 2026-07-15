@@ -600,6 +600,11 @@ async function cargarAlumnos() {
                                 onclick="event.stopPropagation(); modificarCicloPago('${alumno.id}', '${alumno.vencimiento_cuota}', ${estaAlDia})">
                                 ${textoBotonPago}
                             </button>
+                            <!-- NUEVO: BOTÓN DE ASISTENCIA RÁPIDA -->
+                            <button class="btn-checkin-rapido" onclick="event.stopPropagation(); abrirModalCheckin('${alumno.id}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                Asistencia
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -839,7 +844,9 @@ function abrirModalEjercicio() {
     document.getElementById("select-ej-zona").value = "";
     actualizarListaEjercicios(); // Esto resetea la lista de nombres
     document.getElementById("input-ej-series").value = "";
+    document.getElementById("input-ej-fuerza").value = "";
     document.getElementById("input-ej-descanso").value = "";
+
 }
 
 function cerrarModalEjercicio() {
@@ -865,7 +872,7 @@ function borrarEjercicio(id) {
     );
 }
 
-function abrirModalEditar(id, zona, nombre, series, descanso) {
+function abrirModalEditar(id, zona, nombre, series, fuerza, descanso) {
     ejercicioEditandoId = id; 
     document.getElementById("modal-ejercicio").style.display = "flex";
     
@@ -877,6 +884,7 @@ function abrirModalEditar(id, zona, nombre, series, descanso) {
     document.getElementById("select-ej-nombre").value = nombre;
     
     document.getElementById("input-ej-series").value = series;
+    document.getElementById("input-ej-fuerza").value = fuerza !== 'undefined' && fuerza !== 'null' ? fuerza : "";
     document.getElementById("input-ej-descanso").value = descanso;
 }
 
@@ -1152,7 +1160,8 @@ mostrarAlerta = function(titulo, mensaje) {
 // ==========================================
 // SISTEMA DE RENDIMIENTO Y EVALUACIONES
 // ==========================================
-let graficoInstancia = null; // Memoria del gráfico para poder actualizarlo
+let graficoInstancia = null; 
+let graficoRadarInstancia = null; // NUEVA MEMORIA PARA EL RADAR
 
 function abrirModalRendimiento() {
     document.getElementById("modal-rendimiento").style.display = "flex";
@@ -1174,15 +1183,15 @@ async function cargarRendimiento() {
     const mes = document.getElementById("select-rend-mes").value.padStart(2, '0');
     const contenedor = document.getElementById("lista-comentarios-rend");
     
-    contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.85rem;'>Consultando base de datos...</p>";
+    contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.85rem;'>Analizando datos del alumno...</p>";
     
     try {
-        // Armamos el rango de búsqueda real para Supabase (Ej: de 2026-03-01 a 2026-03-31)
         const fechaInicio = `${anio}-${mes}-01`;
         const ultimoDia = new Date(anio, mes, 0).getDate();
         const fechaFin = `${anio}-${mes}-${ultimoDia}`;
 
-        const { data: evaluaciones, error } = await clienteSupabase
+        // 1. Traemos las evaluaciones
+        const { data: evaluaciones, error: errEval } = await clienteSupabase
             .from('evaluaciones_rendimiento')
             .select('*')
             .eq('alumno_id', alumnoSeleccionadoId)
@@ -1190,79 +1199,182 @@ async function cargarRendimiento() {
             .lte('fecha', fechaFin)
             .order('fecha', { ascending: true });
 
-        if (error) throw error;
+        if (errEval) throw errEval;
 
-        // 1. DIBUJAR COMENTARIOS
+        // 2. Traemos LA RUTINA DEL ALUMNO para armar el gráfico muscular
+        const { data: rutina, error: errRut } = await clienteSupabase
+            .from('rutinas_planificadas')
+            .select('zona_muscular, fuerza') /* ACÁ AGREGAMOS LA FUERZA */
+            .eq('alumno_id', alumnoSeleccionadoId);
+
+        if (errRut) throw errRut;
+
+        // 3. Traemos el HISTORIAL REAL DE PESOS para el gráfico de evolución
+        const { data: historialPeso, error: errHistorial } = await clienteSupabase
+            .from('registro_ejercicios')
+            .select('*')
+            .eq('alumno_id', alumnoSeleccionadoId)
+            .gte('fecha', fechaInicio)
+            .lte('fecha', fechaFin)
+            .order('fecha', { ascending: true });
+
+        if (errHistorial) throw errHistorial;
+
+        // --- RENDERIZADO DE COMENTARIOS ---
         contenedor.innerHTML = "";
         if (evaluaciones.length === 0) {
-            contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.85rem;'>No hay registros de rendimiento en este período.</p>";
+            contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.85rem;'>No hay evaluaciones en este período.</p>";
         } else {
             evaluaciones.forEach(ev => {
-                const fechaFormateada = ev.fecha.split('-').reverse().join('/'); // Pasa de 2026-10-05 a 05/10/2026
-                
+                const fechaFormateada = ev.fecha.split('-').reverse().join('/'); 
                 if (ev.tipo === 'alumno') {
                     contenedor.innerHTML += `
                         <div class="burbuja-alumno">
-                            <strong style="color: #3498db; font-size:0.8rem;">Autoevaluación (${fechaFormateada}) - Nota: ${ev.calificacion}/10</strong>
+                            <strong style="color: #3498db; font-size:0.8rem;">Auto-reporte (${fechaFormateada}) - Esfuerzo: ${ev.calificacion}/10</strong>
                             <p style="font-size:0.85rem; color:#ddd; margin-top:4px;">"${ev.comentario}"</p>
-                        </div>
-                    `;
+                        </div>`;
                 } else {
                     contenedor.innerHTML += `
                         <div class="burbuja-profe">
-                            <strong style="color: #f39c12; font-size:0.8rem;">Mi Evaluación (${fechaFormateada})</strong>
+                            <strong style="color: #f39c12; font-size:0.8rem;">Profe (${fechaFormateada})</strong>
                             <p style="font-size:0.85rem; color:#ddd; margin-top:4px;">"${ev.comentario}"</p>
-                        </div>
-                    `;
+                        </div>`;
                 }
             });
         }
 
-        // 2. DIBUJAR GRÁFICO (Solo con los datos reales del alumno)
-        dibujarGraficoRendimiento(evaluaciones);
+        // --- CÁLCULO DE KPIs ---
+        const evAlumno = evaluaciones.filter(e => e.tipo === 'alumno' && e.calificacion);
+        
+        // Calcular Esfuerzo Promedio
+        if (evAlumno.length > 0) {
+            const suma = evAlumno.reduce((acc, curr) => acc + parseInt(curr.calificacion), 0);
+            const promedio = (suma / evAlumno.length).toFixed(1);
+            document.getElementById("kpi-esfuerzo").innerHTML = `${promedio} <span style="font-size:0.9rem; color:#888;">/10</span>`;
+            
+            // Simular cumplimiento de asistencia basado en cantidad de reportes (ej: 12 reportes al mes = 100%)
+            let porcentaje = Math.min(Math.round((evAlumno.length / 12) * 100), 100);
+            document.getElementById("kpi-asistencia").innerText = `${porcentaje}%`;
+            document.getElementById("kpi-barra-fill").style.width = `${porcentaje}%`;
+        } else {
+            document.getElementById("kpi-esfuerzo").innerHTML = `-- <span style="font-size:0.9rem; color:#888;">/10</span>`;
+            document.getElementById("kpi-asistencia").innerText = `0%`;
+            document.getElementById("kpi-barra-fill").style.width = `0%`;
+        }
+
+        // --- DIBUJAR LOS 2 GRÁFICOS ---
+        dibujarGraficoEvolucion(historialPeso);
+        dibujarGraficoMuscular(rutina);
 
     } catch (e) {
         contenedor.innerHTML = `<p style='color:#e74c3c; font-size:0.85rem;'>Error al cargar: ${e.message}</p>`;
     }
 }
 
-function dibujarGraficoRendimiento(evaluaciones) {
+function dibujarGraficoEvolucion(historial) {
     const ctx = document.getElementById('grafico-rendimiento').getContext('2d');
-    
-    // Si ya había un gráfico antes, lo destruimos para dibujar el nuevo mes sin que se superpongan
-    if (graficoInstancia) { graficoInstancia.destroy(); }
+    if (graficoInstancia) { graficoInstancia.destroy(); } 
 
-    // Filtramos SOLO las evaluaciones del alumno que tengan una nota numérica
-    const evAlumno = evaluaciones.filter(e => e.tipo === 'alumno' && e.calificacion);
-    
-    // Extraemos las etiquetas (fechas) y los datos (notas). Si no hay, queda vacío esperando datos reales.
-    const labels = evAlumno.map(e => e.fecha.split('-').reverse().slice(0,2).join('/')); // Muestra Ej: "05/10"
-    const data = evAlumno.map(e => e.calificacion);
+    // 1. Agrupamos los datos reales por fecha y zona muscular
+    const fechasSet = new Set();
+    const zonasMap = {}; 
 
+    historial.forEach(reg => {
+        const fechaArg = reg.fecha.split('-').reverse().slice(0,2).join('/'); // Pasa a formato DD/MM
+        fechasSet.add(fechaArg);
+        
+        if(!zonasMap[reg.zona_muscular]) zonasMap[reg.zona_muscular] = {};
+        // Si entrena la misma zona 2 veces el mismo día, se suma todo
+        zonasMap[reg.zona_muscular][fechaArg] = (zonasMap[reg.zona_muscular][fechaArg] || 0) + reg.peso_total;
+    });
+
+    const labels = Array.from(fechasSet); // Fechas que van abajo en el gráfico
+
+    // 2. Le damos un color específico a cada línea para identificarlas rápido
+    const colores = {
+        "Pecho": "#e74c3c", "Espalda": "#3498db", "Piernas": "#2ecc71", 
+        "Brazos": "#f1c40f", "Hombros": "#9b59b6", "Glúteos": "#e67e22", "Core": "#1abc9c"
+    };
+
+    // 3. Creamos una línea independiente por cada músculo que haya entrenado
+    const datasets = Object.keys(zonasMap).map(zona => {
+        const dataPuntos = labels.map(fecha => zonasMap[zona][fecha] || null); 
+        return {
+            label: zona + ' (kg)',
+            data: dataPuntos,
+            borderColor: colores[zona] || '#f39c12',
+            backgroundColor: 'transparent',
+            borderWidth: 2.5,
+            tension: 0.3,
+            pointBackgroundColor: '#ffffff',
+            pointRadius: 4,
+            spanGaps: true // Conecta la línea aunque un día no haya entrenado ese músculo
+        };
+    });
+
+    // 4. Dibujamos el gráfico
     graficoInstancia = new Chart(ctx, {
         type: 'line',
+        data: { labels: labels, datasets: datasets },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Kilos (kg)', color: '#666' }, ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                x: { ticks: { color: '#888' }, grid: { display: false } }
+            },
+            plugins: { 
+                legend: { display: true, labels: { color: '#aaa', boxWidth: 12, font: {size: 10} } },
+                tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.y + ' kg'; } } }
+            }
+        }
+    });
+}
+
+function dibujarGraficoMuscular(rutina) {
+    const ctx = document.getElementById('grafico-radar-musculos').getContext('2d');
+    if (graficoRadarInstancia) { graficoRadarInstancia.destroy(); }
+    
+    // Sumamos los kilos REALES de cada zona
+    const pesoZonas = { "Pecho": 0, "Espalda": 0, "Piernas": 0, "Brazos": 0, "Hombros": 0, "Glúteos": 0, "Core": 0 };
+    
+    if(rutina) {
+        rutina.forEach(ej => {
+            if(ej.zona_muscular && ej.fuerza !== undefined && ej.fuerza !== null) {
+                pesoZonas[ej.zona_muscular] += ej.fuerza; 
+            }
+        });
+    }
+
+    const labels = Object.keys(pesoZonas);
+    const data = Object.values(pesoZonas);
+    
+    // Cambiamos la etiqueta del gráfico para que diga la verdad
+    // (Asegurate de que el dataset del gráfico ahora diga: label: 'Total Levantado (kg)')
+
+    graficoRadarInstancia = new Chart(ctx, {
+        type: 'radar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Sensación de esfuerzo (Real)',
+                label: 'Ejercicios Asignados',
                 data: data,
-                borderColor: '#f39c12',
-                backgroundColor: 'rgba(243, 156, 18, 0.2)',
-                borderWidth: 2.5,
-                tension: 0.4, // Curvas suaves
+                backgroundColor: 'rgba(52, 152, 219, 0.3)', // Azul transparente
+                borderColor: '#3498db', // Azul brillante
                 pointBackgroundColor: '#ffffff',
-                pointRadius: 4
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true, max: 10, ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                x: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { display: false } }
+                r: {
+                    angleLines: { color: 'rgba(255,255,255,0.1)' },
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    pointLabels: { color: '#bbb', font: { size: 10 } },
+                    ticks: { display: false, beginAtZero: true } // Oculta los numeritos del medio
+                }
             },
-            plugins: {
-                legend: { labels: { color: 'white', font: { size: 11 } } }
-            }
+            plugins: { legend: { display: false } }
         }
     });
 }
@@ -1698,11 +1810,17 @@ async function cargarEjerciciosCategoriaBD() {
                     ${htmlImagen}
                     <div class="info-ejercicio">
                         <h4>${ej.ejercicio_nombre}</h4>
-                        <div class="detalle-ejercicio"><div class="punto-ama"></div><span>${ej.series_reps || "-"}</span><span class="separador">|</span><span>Descanso ${ej.descanso || "-"}</span></div>
+                        <div class="detalle-ejercicio">
+                            <div class="punto-ama"></div>
+                            <span>${ej.series_reps || "-"}</span>
+                            <span class="separador">|</span>
+                            <span style="color: #f39c12; font-weight: bold;">${ej.fuerza ? ej.fuerza : '0'}</span>
+                            <span class="separador">|</span>
+                            <span>Descanso ${ej.descanso || "-"}</span>
+                        </div>
                     </div>
                     <div class="acciones-ejercicio">
-                        <svg onclick="abrirModalEditar('${ej.id}', '${ej.zona_muscular}', '${ej.ejercicio_nombre}', '${ej.series_reps}', '${ej.descanso}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <svg onclick="abrirModalEditar('${ej.id}', '${ej.zona_muscular}', '${ej.ejercicio_nombre}', '${ej.series_reps}','${ej.fuerza}', '${ej.descanso}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>                        <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </div>
                 </div>`;
         });
@@ -1716,6 +1834,7 @@ async function cargarEjerciciosCategoriaBD() {
 }
 
 async function guardarEjercicioEnBD() {
+    const fuerza = document.getElementById("input-ej-fuerza").value.trim();
     const zona = document.getElementById("select-ej-zona").value; 
     const nombre = document.getElementById("select-ej-nombre").value.trim();
     if (!zona || !nombre) { mostrarAlerta("Faltan datos","Ponele zona y nombre."); return; }
@@ -1728,7 +1847,8 @@ async function guardarEjercicioEnBD() {
         if (ejercicioEditandoId) {
             await clienteSupabase.from('rutinas_planificadas').update({ 
                 ejercicio_nombre: nombre, series_reps: document.getElementById("input-ej-series").value, 
-                descanso: document.getElementById("input-ej-descanso").value, zona_muscular: zona
+                descanso: document.getElementById("input-ej-descanso").value, zona_muscular: zona,
+                fuerza: fuerza ? parseFloat(fuerza) : null,
             }).eq('id', ejercicioEditandoId);
         } else {
             await clienteSupabase.from('rutinas_planificadas').insert([{
@@ -1738,6 +1858,7 @@ async function guardarEjercicioEnBD() {
                 zona_muscular: zona,
                 ejercicio_nombre: nombre, 
                 series_reps: document.getElementById("input-ej-series").value,
+                fuerza: fuerza ? parseFloat(fuerza) : null,
                 descanso: document.getElementById("input-ej-descanso").value, 
                 orden:999
             }]);
@@ -2069,7 +2190,8 @@ window.addEventListener('popstate', function (event) {
             { id: "modal-editar-alumno", cerrar: cerrarModalEditarAlumno },
             { id: "modal-alumno", cerrar: cerrarModalAlumno },
             { id: "modal-editar-profe", cerrar: cerrarModalEditarProfe },
-            { id: "modal-profe", cerrar: cerrarModalProfe }
+            { id: "modal-profe", cerrar: cerrarModalProfe },
+            { id: "modal-checkin", cerrar: cerrarModalCheckin }
         ];
 
         for (let modal of modales) {
@@ -2130,3 +2252,117 @@ window.addEventListener('popstate', function (event) {
         // no ponemos la trampa y permitimos que el celular cierre la app de forma natural.
     }
 });
+
+
+// ==========================================
+// SISTEMA DE ASISTENCIA RÁPIDA (CHECK-IN)
+// ==========================================
+let checkinAlumnoId = null;
+
+async function abrirModalCheckin(alumnoId) {
+    checkinAlumnoId = alumnoId;
+    document.getElementById("modal-checkin").style.display = "flex";
+    
+    const contenedorDias = document.getElementById("lista-dias-checkin");
+    contenedorDias.innerHTML = "<p style='color:#888; font-size:0.8rem;'>Cargando días...</p>";
+
+    try {
+        // 1. Buscamos rápidamente si el alumno le cambió los nombres a sus días (Ej: "Día de Pierna")
+        const { data: alumno, error } = await clienteSupabase
+            .from('alumnos')
+            .select('nombres_dias')
+            .eq('id', alumnoId)
+            .single();
+        
+        if (error) throw error;
+
+        let dias = ["D1", "D2", "D3", "D4", "D5"];
+        if (alumno && alumno.nombres_dias && alumno.nombres_dias.length === 5) {
+            dias = alumno.nombres_dias;
+        }
+
+        // 2. Dibujamos un botón para cada día
+        contenedorDias.innerHTML = "";
+        dias.forEach(diaTexto => {
+            contenedorDias.innerHTML += `
+                <button class="btn-dia-checkin" onclick="procesarCheckin('${diaTexto}')">
+                    ${diaTexto}
+                </button>
+            `;
+        });
+    } catch(e) {
+        console.error(e);
+        contenedorDias.innerHTML = "<p style='color:#e74c3c; font-size:0.8rem;'>Error al cargar los días.</p>";
+    }
+}
+
+function cerrarModalCheckin() {
+    document.getElementById("modal-checkin").style.display = "none";
+    checkinAlumnoId = null;
+}
+
+// 3. El motor que lee la fuerza y la guarda mágicamente en el historial
+async function procesarCheckin(diaSeleccionado) {
+    // 1. SALVAMOS EL ID EN UNA VARIABLE SEGURA ANTES DE CERRAR LA VENTANA
+    const idSeguro = checkinAlumnoId; 
+    
+    // 2. Ahora sí cerramos la ventana rápido
+    cerrarModalCheckin(); 
+    
+    try {
+        // 3. Usamos nuestro "idSeguro" para preguntarle a Supabase
+        const { data: ejercicios, error: errorSupabase } = await clienteSupabase
+            .from('rutinas_planificadas')
+            .select('zona_muscular,fuerza')
+            .eq('alumno_id', idSeguro) // <--- ACÁ ESTÁ LA MAGIA
+            .eq('dia_semana', diaSeleccionado);
+
+        if (errorSupabase) {
+            console.error("Detalle del error:", errorSupabase);
+            mostrarAlerta("Error en la Base de Datos", "Supabase dice: " + errorSupabase.message);
+            return;
+        }
+
+        if (!ejercicios || ejercicios.length === 0) {
+            mostrarAlerta("Sin rutina", `No hay ejercicios cargados para el día "${diaSeleccionado}".`);
+            return;
+        }
+
+        // Agrupamos la fuerza por músculo
+        const pesosPorZona = {};
+        ejercicios.forEach(ej => {
+            if (ej.zona_muscular && ej.fuerza) {
+                pesosPorZona[ej.zona_muscular] = (pesosPorZona[ej.zona_muscular] || 0) + ej.fuerza;
+            }
+        });
+
+        // Preparamos los paquetes de datos para enviar a la base de datos hoy
+        const fechaHoy = new Date().toISOString().split('T')[0];
+        const registros = Object.keys(pesosPorZona).map(zona => ({
+            alumno_id: idSeguro, // <--- TAMBIÉN LO USAMOS ACÁ PARA EL HISTORIAL
+            fecha: fechaHoy,
+            zona_muscular: zona,
+            peso_total: pesosPorZona[zona]
+        }));
+
+        if (registros.length === 0) {
+            mostrarAlerta("Aviso", `Los ejercicios de ${diaSeleccionado} tienen la fuerza en 0. No se sumaron kilos al gráfico de evolución.`);
+            return;
+        }
+
+        // Insertamos en el historial real
+        const { error: errorHistorial } = await clienteSupabase.from('registro_ejercicios').insert(registros);
+        
+        if (errorHistorial) {
+            mostrarAlerta("Error al guardar", "No se pudo guardar el historial: " + errorHistorial.message);
+            return;
+        }
+
+        // Feedback de éxito
+        mostrarAlerta("¡Asistencia Registrada!", `El entrenamiento de ${diaSeleccionado} se guardó correctamente en el gráfico del alumno.`);
+        
+    } catch(e) {
+        console.error(e);
+        mostrarAlerta("Error Crítico", "No se pudo procesar la solicitud.");
+    }
+}
