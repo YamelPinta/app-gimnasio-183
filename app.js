@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("pantalla-login").style.display = "none";
     }
     
+    inicializarTema();
     cargarProfesores();
 });
 
@@ -118,39 +119,22 @@ function volverDesdeAlumnoAInicio() {
     document.getElementById("pantalla-inicio").style.display = "flex";
 }
 
-// Sistema de cambio de tema para la nueva pantalla
-function alternarTemaInicio() {
-    const pantallaInicio = document.getElementById('pantalla-inicio');
-    const iconoSol = document.getElementById('icono-sol-inicio');
-    const iconoLuna = document.getElementById('icono-luna-inicio');
-
-    pantallaInicio.classList.toggle('modo-claro');
-
-    if (pantallaInicio.classList.contains('modo-claro')) {
-        iconoSol.style.display = 'none';
-        iconoLuna.style.display = 'block';
-    } else {
-        iconoSol.style.display = 'block';
-        iconoLuna.style.display = 'none';
-    }
-}
 
 
 // --- 3. LOGIN Y LOGOUT ---
+// --- 3. LOGIN Y LOGOUT ---
 function iniciarSesion() {
-    const emailIngresado = document.getElementById("login-email").value.trim();
     const passIngresada = document.getElementById("login-password").value.trim();
 
-    // Credenciales únicas para todo el equipo
-    const correoUnico = "profesores@183.com";
+    // Contraseña única para todo el equipo
     const passwordUnica = "gimnasio2026";
 
-    if (emailIngresado === correoUnico && passIngresada === passwordUnica) {
+    if (passIngresada === passwordUnica) {
         localStorage.setItem('sesionGimnasio', 'activa'); // Guardamos el sello
         document.getElementById("pantalla-login").style.display = "none";
         document.getElementById("pantalla-perfiles").style.display = "flex";
     } else {
-        // EN VEZ DEL ALERT FEO, ENCENDEMOS NUESTRA VENTANA HERMOSA
+        // Encendemos nuestra ventana hermosa de error
         document.getElementById("modal-error-login").style.display = "flex";
     }
 }
@@ -164,7 +148,7 @@ function cerrarSesion() {
     localStorage.removeItem('sesionGimnasio'); // Borramos el sello
     document.getElementById("pantalla-perfiles").style.display = "none";
     document.getElementById("pantalla-login").style.display = "flex";
-    document.getElementById("login-email").value = "";
+    // Solo vaciamos la cajita de la contraseña
     document.getElementById("login-password").value = "";
 }
 
@@ -496,19 +480,25 @@ async function cargarAlumnos() {
         if (alumnos.length === 0) {
             contenedor.innerHTML = `<p style="color: #a0a0a0; text-align: center; margin-top: 20px;">Aún no tenés alumnos asignados.</p>`;
             return;
-        }
+        } 
 
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0); 
 
+        // ----- SISTEMA DE NOTIFICACIONES -----
+        let nuevasNotif = 0;
+        let listaNotificaciones = [];
+        let leidasGuardadas = JSON.parse(localStorage.getItem('notifLeidas_' + profeActivoId)) || [];
+        // -------------------------------------
+
         const mapaActividades = {
-            "Musculación": "imagenes/alumno1.jpeg",
-            "Tela": "imagenes/alumno2.jpeg",
-            "Funcional": "imagenes/alumno3.jpeg",
-            "Calistenia": "imagenes/alumno4.jpeg",
-            "Readaptación": "imagenes/alumno5.jpeg",
-            "Hyrox": "imagenes/alumno1.jpeg", /* Podés cambiar esta foto más adelante */
-            "Crossfit": "imagenes/alumno3.jpeg" /* Podés cambiar esta foto más adelante */
+            "Musculación": "imagenes/MUSCULACION.jpg",
+            "Tela": "imagenes/TELA.jpg",
+            "Funcional": "imagenes/REHABILITACION.jpg",
+            "Calistenia": "imagenes/CALISTENIA.jpg",
+            "Readaptación": "imagenes/READAPTACION.jpg",
+            "Hyrox": "imagenes/HYROX.jpg",
+            "Crossfit": "imagenes/CROSSFIT.jpg",
         };
 
         alumnos.forEach((alumno) => {
@@ -536,13 +526,37 @@ async function cargarAlumnos() {
                     textoRutina = "Rutina activa";
                     estaAlDia = true;
                 }
+
+                // Generar alerta en segundo plano si está por vencer o venció
+                if (diferenciaDias <= 5) {
+                    let tipoNotif = diferenciaDias < 0 ? 'vencida' : 'pronto';
+                    // Creamos un código único para esta alerta (Ej: Juan_2026-08-10_vencida)
+                    let idNotif = `${alumno.id}_${alumno.vencimiento_cuota}_${tipoNotif}`; 
+                    let esNueva = !leidasGuardadas.includes(idNotif); // ¿Ya la vio el profe?
+
+                    let fechaFormateada = alumno.vencimiento_cuota.split('-').reverse().join('/');
+
+                    listaNotificaciones.push({
+                        idNotif: idNotif,
+                        alumnoNombre: `${alumno.nombre} ${alumno.apellido}`,
+                        tipo: tipoNotif,
+                        dias: Math.abs(diferenciaDias),
+                        esNueva: esNueva,
+                        fechaFormateada: fechaFormateada
+                    });
+
+                    if (esNueva) nuevasNotif++;
+                }
             }
 
             const actividadReal = alumno.actividad || "Musculación";
             const objetivoReal = alumno.objetivo || "Sin definir";
-            const imagenAsignada = mapaActividades[actividadReal] || "imagenes/alumno1.jpeg";
+            const imagenAsignada = mapaActividades[actividadReal] || "imagenes/MUSCULACION.jpg";
             const textoBotonPago = estaAlDia ? "Pagado" : "Marcar Pago";
             const claseBotonPago = estaAlDia ? "btn-pago-realizado" : "btn-pago-pendiente";
+
+            // ---> NUEVO: Preparamos el texto de la cuota para mostrarlo
+            const cuotaTexto = alumno.cuota ? `$${alumno.cuota}` : "$ -";
 
             // Lógica del botón borrar (solo aparece si el modo está activo)
             let htmlBotonBorrar = "";
@@ -561,10 +575,20 @@ async function cargarAlumnos() {
                     
                     <div class="info-central">
                         <h3>${alumno.nombre} ${alumno.apellido}</h3>
-                        <div class="info-detalle"><div class="punto-naranja"></div> ${actividadReal}</div>
+                        
+                        <div class="info-detalle">
+                            <div class="punto-naranja"></div> ${actividadReal}
+                        </div>
+                        
                         <div class="info-detalle">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 5px;"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
                             ${objetivoReal}
+                        </div>
+                        
+                        <!-- NUEVO RENGLÓN: Cuota debajo del objetivo -->
+                        <div class="info-detalle" style="margin-top: 2px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="14" height="14" style="margin-right: 5px;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            <span style="color: #f39c12; font-weight: 600;">${cuotaTexto}</span>
                         </div>
                     </div>
 
@@ -581,6 +605,13 @@ async function cargarAlumnos() {
                 </div>
             `;
         });
+
+        // ACTUALIZAR PUNTITO DE LA CAMPANITA
+        window.notificacionesGlobales = listaNotificaciones; // Las guardamos en memoria
+        const badge = document.getElementById("badge-notificaciones");
+        if (badge) {
+            badge.style.display = nuevasNotif > 0 ? "block" : "none";
+        }
 
     } catch (error) {
         console.error("Error al cargar alumnos:", error.message);
@@ -599,6 +630,7 @@ function abrirModalAlumno() {
     document.getElementById("input-alumno-objetivo").value = "";
     document.getElementById("input-alumno-edad").value = "";
     document.getElementById("input-alumno-condicion").value = "";
+    document.getElementById("input-alumno-cuota").value = "";
 
     // NUEVO: Sugerimos un vencimiento de 1 mes por defecto
     const fecha = new Date();
@@ -612,6 +644,7 @@ async function guardarAlumnoEnBD() {
     let objetivo = document.getElementById("input-alumno-objetivo").value.trim();
     const edad = document.getElementById("input-alumno-edad").value.trim();
     let condicion = document.getElementById("input-alumno-condicion").value.trim();
+    const cuota = document.getElementById("input-alumno-cuota").value.trim();
     
     // NUEVO: Capturamos la fecha que eligió el profe
     let vencimientoCuota = document.getElementById("input-alumno-vencimiento").value;
@@ -639,7 +672,9 @@ async function guardarAlumnoEnBD() {
                 actividad: actividad,
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
-                condicion_medica: condicion
+                condicion_medica: condicion,
+                // Adentro del insert de guardarAlumnoEnBD:
+                cuota: cuota ? parseInt(cuota.replace(/\./g, '')) : null
             }]); 
 
         if (error) throw error;
@@ -1004,6 +1039,7 @@ function abrirModalEditarAlumno() {
     document.getElementById("input-edit-alumno-edad").value = alumnoDataActual.edad || "";
     document.getElementById("input-edit-alumno-condicion").value = alumnoDataActual.condicion_medica || "";
     document.getElementById("input-edit-alumno-vencimiento").value = alumnoDataActual.vencimiento_cuota || "";
+    document.getElementById("input-edit-alumno-cuota").value = alumnoDataActual.cuota ? alumnoDataActual.cuota.toLocaleString('es-AR') : "";
 }
 
 function cerrarModalEditarAlumno() {
@@ -1016,6 +1052,7 @@ async function guardarEdicionAlumnoEnBD() {
     const objetivo = document.getElementById("input-edit-alumno-objetivo").value.trim();
     const edad = document.getElementById("input-edit-alumno-edad").value.trim();
     const condicion = document.getElementById("input-edit-alumno-condicion").value.trim();
+    const cuota = document.getElementById("input-edit-alumno-cuota").value.trim();
     
     // NUEVO: Capturamos la fecha editada
     const vencimiento = document.getElementById("input-edit-alumno-vencimiento").value;
@@ -1039,7 +1076,9 @@ async function guardarEdicionAlumnoEnBD() {
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
                 condicion_medica: condicion,
-                vencimiento_cuota: vencimiento || null // NUEVO: Guardamos la fecha
+                vencimiento_cuota: vencimiento || null, // NUEVO: Guardamos la fecha
+                // Adentro del update de guardarEdicionAlumnoEnBD:
+                cuota: cuota ? parseInt(cuota.replace(/\./g, '')) : null
             })
             .eq('id', alumnoSeleccionadoId);
         
@@ -1083,41 +1122,6 @@ async function guardarOrdenEjercicios() {
 }
 
 
-// --- SISTEMA DE TEMA CLARO/OSCURO PARA EL LOGIN ---
-function alternarTemaLogin() {
-    const pantallaLogin = document.getElementById('pantalla-login');
-    const iconoSol = document.getElementById('icono-sol');
-    const iconoLuna = document.getElementById('icono-luna');
-
-    // Agrega o saca la clase "modo-claro" como si fuera un interruptor
-    pantallaLogin.classList.toggle('modo-claro');
-
-    // Cambia el dibujito del botón
-    if (pantallaLogin.classList.contains('modo-claro')) {
-        iconoSol.style.display = 'none'; // Esconde el sol
-        iconoLuna.style.display = 'block'; // Muestra la luna
-    } else {
-        iconoSol.style.display = 'block'; // Muestra el sol
-        iconoLuna.style.display = 'none'; // Esconde la luna
-    }
-}
-
-// --- SISTEMA DE TEMA CLARO/OSCURO PARA PERFILES ---
-function alternarTemaPerfiles() {
-    const pantallaPerfiles = document.getElementById('pantalla-perfiles');
-    const iconoSol = document.getElementById('icono-sol-perfiles');
-    const iconoLuna = document.getElementById('icono-luna-perfiles');
-
-    pantallaPerfiles.classList.toggle('modo-claro');
-
-    if (pantallaPerfiles.classList.contains('modo-claro')) {
-        iconoSol.style.display = 'none'; 
-        iconoLuna.style.display = 'block'; 
-    } else {
-        iconoSol.style.display = 'block'; 
-        iconoLuna.style.display = 'none'; 
-    }
-}
 
 // ==========================================
 // SISTEMA GLOBAL DE VIBRACIÓN (FEEDBACK HÁPTICO)
@@ -1318,6 +1322,9 @@ async function abrirGrillaAlumno(id) {
         document.getElementById("detalle-edad").innerText = alumno.edad ? alumno.edad : "No especificada"; 
         document.getElementById("detalle-salud").innerText = alumno.condicion_medica || "Sin observaciones.";
 
+        // Mostramos el valor de la cuota
+        document.getElementById("detalle-cuota").innerText = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "No definida";
+
         let fechaFormateada = "Sin definir";
         if (alumno.vencimiento_cuota) {
             const partes = alumno.vencimiento_cuota.split('-'); // Cortamos el 2026-08-15
@@ -1501,17 +1508,26 @@ async function dibujarCategoriasAlumno() {
             }
 
             // Asignamos íconos visuales
-            let iconoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
-            if (cat.toUpperCase() === "MOVILIDAD") iconoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="6.5"></line></svg>`;
-            if (cat.toUpperCase() === "ENTRADA EN CALOR") iconoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`;
-            if (cat.toUpperCase() === "ENTRENAMIENTO") iconoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><line x1="6" y1="4" x2="6" y2="20"></line><line x1="18" y1="4" x2="18" y2="20"></line><path d="M6 12h12"></path><rect x="2" y="8" width="4" height="8" rx="1"></rect><rect x="18" y="8" width="4" height="8" rx="1"></rect></svg>`;
+            // Por defecto dejamos una estrellita por si el profe crea una categoría nueva (ej: "Estiramiento")
+            let iconoHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+            
+            // Si es una de las principales, usamos tus imágenes espectaculares
+            if (cat.toUpperCase() === "MOVILIDAD") {
+                iconoHTML = `<img src="imagenes/MOVILIDAD.jpg" class="img-cat-rutina" alt="Movilidad">`;
+            }
+            if (cat.toUpperCase() === "ENTRADA EN CALOR") {
+                iconoHTML = `<img src="imagenes/ENTRADAENCALOR.jpg" class="img-cat-rutina" alt="Entrada en calor">`;
+            }
+            if (cat.toUpperCase() === "ENTRENAMIENTO") {
+                iconoHTML = `<img src="imagenes/ENTRENAMIENTO.jpg" class="img-cat-rutina" alt="Entrenamiento">`;
+            }
 
             contenedor.innerHTML += `
                 <div class="card-categoria" onclick="abrirCategoria('${cat}')">
                     <div class="menu-puntos-izq" onclick="event.stopPropagation(); abrirOpcionesCategoria('${cat}')">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="20"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                     </div>
-                    <div class="icono-categoria">${iconoSvg}</div>
+                    <div class="icono-categoria">${iconoHTML}</div>
                     <div class="info-categoria">
                         <h4>${cat.toUpperCase()}</h4>
                         <p>${cantidad} ejercicios cargados</p>
@@ -1870,21 +1886,148 @@ async function importarPackAAlumno(packId) {
     } catch(e) { console.error(e); }
 }
 
-// --- SISTEMA DE TEMA CLARO/OSCURO PARA EL DASHBOARD DE ALUMNOS ---
-function alternarTemaDashboard() {
-    const pantallaDash = document.getElementById('pantalla-dashboard');
-    const iconoSol = document.getElementById('icono-sol-dash');
-    const iconoLuna = document.getElementById('icono-luna-dash');
+// Función para volver desde perfiles a la pantalla de inicio de roles
+function volverDesdePerfilesAInicio() {
+    document.getElementById("pantalla-perfiles").style.display = "none";
+    document.getElementById("pantalla-inicio").style.display = "flex";
+}
 
-    // Cambiamos el modo
-    pantallaDash.classList.toggle('modo-oscuro');
-
-    // Alternamos el dibujo de los íconos
-    if (pantallaDash.classList.contains('modo-oscuro')) {
-        iconoLuna.style.display = 'none'; 
-        iconoSol.style.display = 'block'; 
+// --- FORMATEO AUTOMÁTICO DE CUOTAS ---
+function formatearMiles(input) {
+    // 1. Borramos todo lo que no sea un número (para evitar que metan letras o símbolos raros)
+    let valorStr = input.value.replace(/\D/g, "");
+    
+    if (valorStr !== "") {
+        // 2. Lo transformamos a número y le pedimos a JS que le ponga el formato argentino (con punto para los miles)
+        input.value = parseInt(valorStr).toLocaleString('es-AR');
     } else {
-        iconoLuna.style.display = 'block'; 
-        iconoSol.style.display = 'none'; 
+        input.value = "";
     }
 }
+
+
+// ==========================================
+// VENTANA DE NOTIFICACIONES (LA CAMPANITA)
+// ==========================================
+
+function abrirModalNotificaciones() {
+    const contenedor = document.getElementById("lista-notificaciones");
+    contenedor.innerHTML = "";
+
+    if (!window.notificacionesGlobales || window.notificacionesGlobales.length === 0) {
+        contenedor.innerHTML = "<p style='color: #aaa; text-align: center; margin-top: 20px;'>No hay vencimientos pendientes.</p>";
+    } else {
+        // Ordenamos para que las nuevas aparezcan arriba de todo
+        window.notificacionesGlobales.sort((a, b) => b.esNueva - a.esNueva);
+
+        window.notificacionesGlobales.forEach(notif => {
+            let claseLeida = notif.esNueva ? "nueva" : "leida";
+            let claseTipo = notif.tipo === 'vencida' ? "vencida" : "";
+            let textoEstado = notif.tipo === 'vencida' ? `Vencida hace ${notif.dias} días` : `Vence en ${notif.dias} días`;
+
+            contenedor.innerHTML += `
+                <div class="item-notificacion ${claseTipo} ${claseLeida}">
+                    <h4>${notif.alumnoNombre}</h4>
+                    <p>${textoEstado} (${notif.fechaFormateada})</p>
+                </div>
+            `;
+        });
+    }
+
+    // Mostramos la ventana
+    document.getElementById("modal-notificaciones").style.display = "flex";
+
+    // Al abrirla, marcamos TODAS automáticamente como leídas
+    if (window.notificacionesGlobales && window.notificacionesGlobales.length > 0) {
+        let leidasGuardadas = JSON.parse(localStorage.getItem('notifLeidas_' + profeActivoId)) || [];
+        
+        window.notificacionesGlobales.forEach(n => {
+            if (!leidasGuardadas.includes(n.idNotif)) {
+                leidasGuardadas.push(n.idNotif); // Se guardan en la memoria del celular
+            }
+        });
+        
+        localStorage.setItem('notifLeidas_' + profeActivoId, JSON.stringify(leidasGuardadas));
+
+        // Borramos el puntito rojo al instante
+        const badge = document.getElementById("badge-notificaciones");
+        if (badge) badge.style.display = "none";
+        
+        // Las actualizamos internamente para que no salgan como nuevas la próxima vez que abra el modal hoy
+        window.notificacionesGlobales.forEach(n => n.esNueva = false);
+    }
+}
+
+function cerrarModalNotificaciones() {
+    document.getElementById("modal-notificaciones").style.display = "none";
+}
+
+// ==========================================
+// CEREBRO GLOBAL DEL TEMA (CLARO/OSCURO)
+// ==========================================
+let esTemaOscuro = true; // La app arranca en oscuro por defecto
+
+function inicializarTema() {
+    // 1. Preguntamos a la memoria del celular qué eligió el usuario la última vez
+    const temaGuardado = localStorage.getItem('temaGlobalGym');
+    
+    if (temaGuardado === 'claro') {
+        esTemaOscuro = false;
+    } else {
+        esTemaOscuro = true; // Si es la primera vez que entra, es oscuro
+    }
+    
+    // 2. Aplicamos los colores a TODAS las pantallas
+    aplicarTemaVisual();
+}
+
+function alternarTemaGlobal() {
+    // 1. Invertimos el estado (si era oscuro pasa a claro, y viceversa)
+    esTemaOscuro = !esTemaOscuro;
+    
+    // 2. Lo guardamos en el celular para siempre
+    localStorage.setItem('temaGlobalGym', esTemaOscuro ? 'oscuro' : 'claro');
+    
+    // 3. Pintamos toda la app
+    aplicarTemaVisual();
+}
+
+function aplicarTemaVisual() {
+    // A. Pantallas que "de fábrica" son OSCURAS (Inicio, Login, Perfiles)
+    const pantallasOscuras = ['pantalla-inicio', 'pantalla-login', 'pantalla-perfiles'];
+    pantallasOscuras.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            if(esTemaOscuro) el.classList.remove('modo-claro');
+            else el.classList.add('modo-claro');
+        }
+    });
+
+    // B. Pantallas que "de fábrica" son CLARAS (Dashboard, Alumno, Rutinas, Packs, Admin)
+    const pantallasClaras = ['pantalla-dashboard', 'pantalla-detalle-alumno', 'pantalla-rutinas', 'pantalla-detalle-pack', 'pantalla-admin'];
+    pantallasClaras.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            if(esTemaOscuro) el.classList.add('modo-oscuro');
+            else el.classList.remove('modo-oscuro');
+        }
+    });
+
+    // C. Sincronizar absolutamente todos los íconos de la app al mismo tiempo
+    const soles = document.querySelectorAll('[id^="icono-sol"]');
+    const lunas = document.querySelectorAll('[id^="icono-luna"]');
+
+    if(esTemaOscuro) {
+        soles.forEach(sol => sol.style.display = 'block'); // Muestra los soles para que toques y vayas al claro
+        lunas.forEach(luna => luna.style.display = 'none');
+    } else {
+        soles.forEach(sol => sol.style.display = 'none');
+        lunas.forEach(luna => luna.style.display = 'block'); // Muestra las lunas para que toques y vayas al oscuro
+    }
+}
+
+// Conectamos los botones viejos al nuevo Cerebro Central
+function alternarTemaInicio() { alternarTemaGlobal(); }
+function alternarTemaLogin() { alternarTemaGlobal(); }
+function alternarTemaPerfiles() { alternarTemaGlobal(); }
+function alternarTemaDashboard() { alternarTemaGlobal(); }

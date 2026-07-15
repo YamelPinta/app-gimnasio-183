@@ -631,23 +631,37 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 /* Tarjeta de Información Superior */
 /* Tarjeta de Información Superior */
 .tarjeta-info-alumno {
-    /* Magia combinada: Mantiene tu imagen nombre.png, el fondo gris y agrega el borde animado */
-    border: 2px solid transparent;
-    background: url('imagenes/nombre.png') right center / cover no-repeat padding-box, 
-                linear-gradient(#e0e0e0, #e0e0e0) padding-box, 
-                linear-gradient(var(--angulo-borde),  #d88909, #ffd700) border-box;
-                
-    border-radius: 20px; 
+    position: relative;
+    /* Fondo base y la imagen real separadas para que no se rompan */
+    background-color: #e0e0e0;
+    background-image: url('imagenes/nombre.png');
+    background-position: right center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    
+    /* La hacemos más redondeada como pediste (pasó de 20px a 28px) */
+    border-radius: 28px; 
     padding: 8px 8px; 
     display: flex; 
     align-items: center; 
     gap: 10px; 
     margin-bottom: 25px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-    overflow: hidden; 
-    position: relative;
-    
-    /* Enciende el motor de rotación del borde */
+}
+
+/* Aplicamos la "Máscara Hueca" para el borde mágico, igual que en la pantalla de inicio */
+.tarjeta-info-alumno::after {
+    content: "";
+    position: absolute;
+    inset: 0; 
+    border-radius: 28px; /* Mismo redondeo exacto que la tarjeta */
+    padding: 2px; /* Grosor del borde */
+    background: linear-gradient(var(--angulo-borde), #d88909, #ffd700, #d88909);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none; 
+    z-index: 10;
     animation: rotarBorde 4s linear infinite;
 }
 .avatar-gris { width: 60px; height: 60px; background-color: #c2c2c2; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
@@ -742,6 +756,14 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 .icono-categoria {
     width: 50px; height: 50px; border-radius: 50%; background: #fff3e0; color: #f39c12;
     display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+    overflow: hidden; /* Esto es CLAVE para que la foto cuadrada se recorte en círculo */
+}
+
+/* Esta regla hace que tu imagen ocupe todo el espacio del círculo a la perfección */
+.img-cat-rutina {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 .info-categoria { flex-grow: 1; }
 .info-categoria h4 {
@@ -818,9 +840,27 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 /* Botón flotante para añadir ejercicios (+) */
 .contenedor-fab { position: fixed; bottom: 85px; right: 20px; display: flex; align-items: center; gap: 10px; z-index: 100; }
 .btn-fab-amarillo {
-    width: 42px; height: 42px; border-radius: 50%; background-color: #f39c12; color: white;
-    font-size: 1.5rem; display: flex; justify-content: center; align-items: center; line-height: 0; padding-bottom: 2px; 
-    border: none; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.4); cursor: pointer;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #f39c12;
+    color: white;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    
+    border: none;
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.4);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Aseguramos que el dibujito sea siempre blanco y limpio */
+.btn-fab-amarillo svg {
+    stroke: white;
 }
 
 /* --- BOTÓN DE RENDIMIENTO --- */
@@ -1086,3 +1126,189 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     filter: none !important;
 }
 
+/* =========================================
+   BOTONES DE VOLVER ATRÁS FIJOS Y FAB
+   ========================================= */
+
+/* 1. Estilo base del botón (fijo para que NUNCA se aplaste) */
+.btn-flotante-atras {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 99;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    flex-shrink: 0; /* Esto prohíbe terminantemente que se aplaste */
+}
+
+.btn-flotante-atras svg {
+    stroke: white;
+}
+
+/* 2. Modificamos la caja flotante para apilar el "+" y la flecha */
+.contenedor-fab { 
+    position: fixed; 
+    bottom: 85px; 
+    right: 20px; 
+    display: flex; 
+    flex-direction: column; /* Apila los botones uno arriba del otro */
+    align-items: center; 
+    gap: 15px; /* Espaciado perfecto entre el + y la flecha */
+    z-index: 100; 
+}
+
+/* 3. Comportamiento FIJO para la pantalla de Perfiles (que no tiene "+") */
+.pantalla-perfiles .btn-flotante-atras {
+    position: fixed;
+    bottom: 30px; /* Pegado abajo a la derecha de la pantalla */
+    right: 20px;
+}
+
+/* =========================================
+   SISTEMA DE NOTIFICACIONES Y CAMPANITA
+   ========================================= */
+
+/* Contenedor relativo para posicionar el punto rojo */
+.contenedor-campanita {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* El punto rojo (Badge) */
+.badge-notificacion {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background-color: #d32f2f;
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 10;
+}
+.pantalla-dashboard-moderna.modo-oscuro .badge-notificacion {
+    border-color: #121212; /* Borde oscuro si está en modo noche */
+}
+
+/* Tarjetitas de las notificaciones */
+.item-notificacion {
+    background: rgba(255, 255, 255, 0.08);
+    border-left: 4px solid #f39c12;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: opacity 0.3s ease;
+}
+
+/* Tipos de alerta */
+.item-notificacion.vencida { border-left-color: #d32f2f; }
+.item-notificacion h4 { font-size: 0.95rem; color: #fff; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.item-notificacion p { font-size: 0.8rem; color: #ddd; margin: 0; }
+
+/* Estados (Nuevas vs Viejas) */
+.item-notificacion.nueva { 
+    opacity: 1; 
+    background: rgba(255, 255, 255, 0.15); 
+}
+.item-notificacion.leida { 
+    opacity: 0.45; /* Viejas se ponen casi transparentes */
+}
+
+
+
+
+/* =========================================
+   MODO OSCURO: PANTALLA INDIVIDUAL DE ALUMNO Y PACKS
+   ========================================= */
+
+/* 1. Fondo principal transparente para mostrar la imagen gigante de fondo */
+.pantalla-fondo-claro.modo-oscuro {
+    background-color: transparent !important;
+}
+
+/* 2. Inyectamos la imagen de fondo fijo que pediste */
+.pantalla-fondo-claro.modo-oscuro::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background-image: url('imagenes/FONDONEGROTODO.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #121212;
+}
+
+/* 3. Textos generales a blanco/gris */
+.pantalla-fondo-claro.modo-oscuro h2,
+.pantalla-fondo-claro.modo-oscuro h3 { color: #f0f0f0 !important; }
+.pantalla-fondo-claro.modo-oscuro p,
+.pantalla-fondo-claro.modo-oscuro span { color: #ccc; }
+
+/* 4. Tarjeta superior (Mantiene el borde animado pero con fondo negro) */
+/* 4. Tarjeta superior (Fondo oscuro con tu imagen original) */
+.pantalla-fondo-claro.modo-oscuro .tarjeta-info-alumno {
+    background-color: #1e1e1e !important;
+    background-image: url('imagenes/nombre.png') !important;
+}
+/* Textos oscuros obligatorios para la tarjeta porque la foto de fondo es clara */
+.pantalla-fondo-claro.modo-oscuro .tarjeta-info-alumno h2 { 
+    color: #111 !important; /* Nombre en negro fuerte */
+}
+.pantalla-fondo-claro.modo-oscuro .tarjeta-info-alumno p { 
+    color: #333; /* Párrafos en gris oscuro (sin !important para no pisar tu naranja) */
+}
+.pantalla-fondo-claro.modo-oscuro .tarjeta-info-alumno span { 
+    color: #111 !important; /* Textos de los resultados en negro fuerte */
+}
+
+/* Avatar gris (se pone oscuro) */
+.pantalla-fondo-claro.modo-oscuro .avatar-gris { background-color: #333 !important; }
+.pantalla-fondo-claro.modo-oscuro .avatar-gris svg { fill: #888 !important; }
+
+/* 5. Chips de días y semanas */
+.pantalla-fondo-claro.modo-oscuro .chip-rutina {
+    background: #1e1e1e; color: #f39c12;
+}
+.pantalla-fondo-claro.modo-oscuro .chip-rutina.activo {
+    background: #f39c12; color: white;
+}
+
+/* 6. Tarjetas de Categorías (Barras que dicen Movilidad, etc) */
+.pantalla-fondo-claro.modo-oscuro .card-categoria {
+    background: linear-gradient(#1e1e1e, #1e1e1e) padding-box, 
+                linear-gradient(var(--angulo-borde), #d88909, #ffd700) border-box !important;
+}
+.pantalla-fondo-claro.modo-oscuro .card-categoria h4 { color: #f0f0f0 !important; }
+.pantalla-fondo-claro.modo-oscuro .card-categoria p { color: #aaa !important; }
+
+/* 7. Tarjetas de Ejercicios individuales */
+.pantalla-fondo-claro.modo-oscuro .card-ejercicio { background: #1e1e1e !important; }
+.pantalla-fondo-claro.modo-oscuro .info-ejercicio h4 { color: #f0f0f0 !important; }
+.pantalla-fondo-claro.modo-oscuro .detalle-ejercicio { color: #aaa !important; }
+
+/* 8. Menú inferior y botón de volver */
+.pantalla-fondo-claro.modo-oscuro .bottom-nav {
+    background: #121212; border-top: 1px solid #222; box-shadow: 0 -5px 15px rgba(0,0,0,0.6);
+}
+.pantalla-fondo-claro.modo-oscuro .bottom-nav .nav-item { color: #666; }
+.pantalla-fondo-claro.modo-oscuro .bottom-nav .nav-item.activo { color: #f39c12; }
+.pantalla-fondo-claro.modo-oscuro .btn-volver-categoria { background: #333; color: #f0f0f0; }
+
+/* 9. Botón flotante superior y lapicito */
+.pantalla-fondo-claro.modo-oscuro .btn-rendimiento-card,
+.pantalla-fondo-claro.modo-oscuro .btn-editar-alumno-card {
+    background: rgba(40, 40, 40, 0.95); color: #fff; border: 1px solid #444;
+}
