@@ -2031,3 +2031,102 @@ function alternarTemaInicio() { alternarTemaGlobal(); }
 function alternarTemaLogin() { alternarTemaGlobal(); }
 function alternarTemaPerfiles() { alternarTemaGlobal(); }
 function alternarTemaDashboard() { alternarTemaGlobal(); }
+
+
+// ==========================================
+// CONTROL DEL BOTÓN "ATRÁS" DEL CELULAR
+// ==========================================
+
+// 1. Apenas arranca la app, creamos un "historial falso" para atrapar el primer clic
+window.history.pushState({ appAbierta: true }, "", "");
+
+// 2. Escuchamos cuando el usuario aprieta el botón físico de "Atrás"
+window.addEventListener('popstate', function (event) {
+    let interceptado = false; // Bandera para saber si cerramos algo
+
+    // A. CHEQUEO DE VISTAS INTERNAS (Ej: Viendo ejercicios y querer volver a las categorías)
+    if (typeof vistaSliderActual !== 'undefined' && vistaSliderActual === 'ejercicios') {
+        cerrarCategoria();
+        interceptado = true;
+    }
+
+    // B. CHEQUEO DE MODALES Y VENTANAS EMERGENTES (De mayor a menor prioridad)
+    if (!interceptado) {
+        const modales = [
+            { id: "modal-confirmacion", cerrar: cerrarModalConfirmacion },
+            { id: "modal-alerta", cerrar: cerrarModalAlerta },
+            { id: "modal-error-login", cerrar: cerrarModalErrorLogin },
+            { id: "modal-notificaciones", cerrar: typeof cerrarModalNotificaciones !== "undefined" ? cerrarModalNotificaciones : () => document.getElementById("modal-notificaciones").style.display = "none" },
+            { id: "modal-seleccionar-pack", cerrar: () => document.getElementById("modal-seleccionar-pack").style.display = "none" },
+            { id: "modal-ejercicio-pack", cerrar: () => document.getElementById("modal-ejercicio-pack").style.display = "none" },
+            { id: "modal-crear-pack", cerrar: cerrarModalCrearPack },
+            { id: "modal-ejercicio", cerrar: cerrarModalEjercicio },
+            { id: "modal-editar-dias", cerrar: () => document.getElementById("modal-editar-dias").style.display = "none" },
+            { id: "modal-renombrar-categoria", cerrar: () => document.getElementById("modal-renombrar-categoria").style.display = "none" },
+            { id: "modal-opciones-categoria", cerrar: () => document.getElementById("modal-opciones-categoria").style.display = "none" },
+            { id: "modal-categoria", cerrar: () => document.getElementById("modal-categoria").style.display = "none" },
+            { id: "modal-rendimiento", cerrar: cerrarModalRendimiento },
+            { id: "modal-editar-alumno", cerrar: cerrarModalEditarAlumno },
+            { id: "modal-alumno", cerrar: cerrarModalAlumno },
+            { id: "modal-editar-profe", cerrar: cerrarModalEditarProfe },
+            { id: "modal-profe", cerrar: cerrarModalProfe }
+        ];
+
+        for (let modal of modales) {
+            const el = document.getElementById(modal.id);
+            // Si la ventanita existe y está visible en la pantalla
+            if (el && (el.style.display === "flex" || el.style.display === "block")) {
+                modal.cerrar();
+                interceptado = true;
+                break; // Cortamos acá para que el botón cierre solo UNA cosa por vez
+            }
+        }
+    }
+
+    // C. CHEQUEO DE PANTALLAS PRINCIPALES (Si no había modales para cerrar)
+    if (!interceptado) {
+        const esVisible = (id) => {
+            const el = document.getElementById(id);
+            return el && (el.style.display === "flex" || el.style.display === "block");
+        };
+
+        if (esVisible("pantalla-detalle-pack")) {
+            abrirPantallaRutinas();
+            interceptado = true;
+        } else if (esVisible("pantalla-rutinas")) {
+            volverAlDashboard();
+            interceptado = true;
+        } else if (esVisible("pantalla-detalle-alumno")) {
+            volverAlDashboard();
+            interceptado = true;
+        } else if (esVisible("pantalla-admin")) {
+            volverDesdeAdminAPerfiles();
+            interceptado = true;
+        } else if (esVisible("pantalla-dashboard")) {
+            volverAPerfiles();
+            interceptado = true;
+        } else if (esVisible("pantalla-login")) {
+            volverDesdeLoginAInicio();
+            interceptado = true;
+        } else if (esVisible("pantalla-alumno-proximamente")) {
+            volverDesdeAlumnoAInicio();
+            interceptado = true;
+        } else if (esVisible("pantalla-perfiles")) {
+            // Si no inició sesión, lo mandamos al inicio. Si inició sesión, Perfiles es la "raíz" y dejamos que salga.
+            const sesion = localStorage.getItem('sesionGimnasio');
+            if (!sesion) {
+                volverDesdePerfilesAInicio();
+                interceptado = true;
+            }
+        }
+    }
+
+    // 3. LA TRAMPA: Si atrapamos el botón y cerramos algo, volvemos a empujar el historial
+    // para que el usuario no se salga de la app en su próximo clic.
+    if (interceptado) {
+        window.history.pushState({ appAbierta: true }, "", "");
+    } else {
+        // Si no interceptamos nada (ej: estaba en la pantalla principal de Inicio), 
+        // no ponemos la trampa y permitimos que el celular cierre la app de forma natural.
+    }
+});
