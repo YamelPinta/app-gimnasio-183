@@ -13,6 +13,8 @@ let modoBorradoActivo = false;
 let accionPendiente = null; // Guarda temporalmente la orden de borrado
 let alumnoDataActual = null; // Guarda temporalmente toda la info del alumno actual
 
+let esAdminActual = false; // <--- NUEVA MEMORIA
+
 // --- DICCIONARIO DE EJERCICIOS ---
 const catalogoEjercicios = {
     "Pecho": ["Press de banca", "Press inclinado con mancuernas", "Cruces en polea", "Flexiones de brazos"],
@@ -158,14 +160,6 @@ async function cargarProfesores() {
     const contenedor = document.getElementById("grilla-profesores");
     contenedor.innerHTML = "";
 
-    // 1. Perfil fijo del Administrador
-    contenedor.innerHTML += `
-        <div class="tarjeta-perfil-moderna" onclick="entrarPerfil('admin', 'Administrador', '')">
-            <img src="imagenes/perfil2.png" class="avatar-profe">
-            <p>Admin</p>
-        </div>
-    `;
-
     // 2. Cargamos profes desde la base de datos
     try {
         const { data: profesores, error } = await clienteSupabase
@@ -194,7 +188,8 @@ async function cargarProfesores() {
 
 // --- LÓGICA PARA CREAR PROFESOR CON VENTANA EMERGENTE ---
 
-let fotoProfeElegida = "imagenes/perfil1.png"; // Memoria para guardar temporalmente la foto
+let fotoProfeElegida = "imagenes/perfil1.png"; // Guarda el texto (Ruta o URL)
+let archivoFotoProfeBlob = null; // NUEVO: Guarda el archivo físico comprimido listo para subir
 
 function abrirModalProfe() {
     document.getElementById("modal-profe").style.display = "flex";
@@ -220,18 +215,16 @@ function cambiarPreviewAvatar() {
     document.getElementById("input-foto-profe").value = ""; // Borra la foto real si se arrepiente y elige avatar
 }
 
-// Si el usuario saca una foto o elige de la galería (COMPRESIÓN AUTOMÁTICA)
 function procesarFotoSubida(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function(e) {
-        // Magia para comprimir la foto y que la base de datos no explote
         const img = new Image();
         img.onload = function() {
             const canvas = document.createElement("canvas");
-            const MAX_WIDTH = 300; // Tamaño perfecto y liviano para perfil
+            const MAX_WIDTH = 300; 
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
@@ -239,13 +232,15 @@ function procesarFotoSubida(event) {
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             
-            // Convertimos la imagen a código texto para guardarla fácil en Supabase
-            fotoProfeElegida = canvas.toDataURL("image/jpeg", 0.7); 
-            
-            // Actualizamos el circulito de la pantalla
-            document.getElementById("img-preview-profe").src = fotoProfeElegida;
-            // Ponemos el selector en blanco porque ahora está usando su foto
-            document.getElementById("select-profe-avatar").value = ""; 
+            // LA MAGIA DE LA OPTIMIZACIÓN: Convertimos el canvas a un archivo JPG miniatura puro (Blob)
+            canvas.toBlob((blob) => {
+                archivoFotoProfeBlob = blob; // Guardamos el archivo físico en la memoria
+                
+                // Creamos una URL temporal solo para que el profe se vea en la pantallita antes de guardar
+                fotoProfeElegida = URL.createObjectURL(blob); 
+                document.getElementById("img-preview-profe").src = fotoProfeElegida;
+                document.getElementById("select-profe-avatar").value = ""; 
+            }, "image/jpeg", 0.7);
         }
         img.src = e.target.result;
     };
@@ -266,66 +261,88 @@ async function guardarProfeEnBD() {
     const apellido = partes.slice(1).join(" ") || ""; 
 
     try {
-        // Enviamos todo a la base de datos
+        let urlFinalParaBaseDeDatos = fotoProfeElegida; // Por defecto, es el avatar que eligió
+
+        // Si el usuario subió una foto real (tenemos el archivo atrapado en la memoria)
+        if (archivoFotoProfeBlob) {
+            // 1. Le inventamos un nombre único para que no se pisen
+            const nombreArchivo = `profe_${Date.now()}.jpg`;
+            
+            // 2. Subimos la foto al Storage de Supabase (Al cajón 'avatares')
+            const { error: errStorage } = await clienteSupabase.storage
+                .from('avatares')
+                .upload(nombreArchivo, archivoFotoProfeBlob, { contentType: 'image/jpeg' });
+
+            if (errStorage) throw errStorage;
+
+            // 3. Le pedimos a Supabase el Link público de la foto que acabamos de subir
+            const { data: publicUrlData } = clienteSupabase.storage
+                .from('avatares')
+                .getPublicUrl(nombreArchivo);
+                
+            urlFinalParaBaseDeDatos = publicUrlData.publicUrl; // Guardamos el link limpio!
+        }
+
+        // 4. Guardamos todo en la base de datos (con la URL súper liviana)
         const { error } = await clienteSupabase.from('profesores').insert([{ 
             nombre: nombre, 
             apellido: apellido, 
-            foto_url: fotoProfeElegida // Acá viaja el Avatar o la Selfie real
+            foto_url: urlFinalParaBaseDeDatos 
         }]); 
         
         if (error) throw error;
 
+        // Limpiamos la memoria para el próximo profe
+        archivoFotoProfeBlob = null; 
+        
         cerrarModalProfe();
         cargarProfesores(); 
 
     } catch (error) {
-        mostrarAlerta("Error al guardar el profesor: " + error.message);
+        mostrarAlerta("Error al guardar el profesor", error.message);
     }
 }
 
 // --- 5. NAVEGACIÓN Y DASHBOARD DE ALUMNOS ---
 function entrarPerfil(id, nombre, apellido) {
-
-    if (id === 'admin') {
-        abrirPantallaAdmin();
-        return; 
-    }
-
     profeActivoId = id; 
     document.getElementById("nombre-profe-activo").innerText = "Profe " + nombre;
     
+    // MAGIA: Identificamos si es administrador (Si se llama Moye o Ana, por ejemplo)
+    esAdminActual = (nombre.toLowerCase().includes('moye'));
+    
+    // Mostramos u ocultamos los botones del menú inferior para admins
+    document.querySelectorAll('.nav-admin-only').forEach(btn => {
+        btn.style.display = esAdminActual ? 'flex' : 'none';
+    });
+
     // Apagamos TODAS las pantallas
     document.getElementById("pantalla-perfiles").style.display = "none";
     document.getElementById("pantalla-detalle-alumno").style.display = "none";
     document.getElementById("pantalla-rutinas").style.display = "none";
     document.getElementById("pantalla-detalle-pack").style.display = "none";
+    document.getElementById("pantalla-admin").style.display = "none"; // Apagamos el informe por si acaso
     
     // Encendemos solo el Dashboard (Alumnos)
     document.getElementById("pantalla-dashboard").style.display = "block";
     
     cargarAlumnos(); 
+    actualizarNavActivo('alumnos');
 }
-
 // ==========================================
 // FUNCIONES EXCLUSIVAS DEL PANEL DE ADMIN
 // ==========================================
 
-function abrirPantallaAdmin() {
-    // Apagamos todas las demás pantallas operativas
+function abrirPantallaInforme() {
     document.getElementById("pantalla-perfiles").style.display = "none";
     document.getElementById("pantalla-dashboard").style.display = "none";
     document.getElementById("pantalla-detalle-alumno").style.display = "none";
     document.getElementById("pantalla-rutinas").style.display = "none";
     document.getElementById("pantalla-detalle-pack").style.display = "none";
-    
-    // Encendemos Admin
+
     document.getElementById("pantalla-admin").style.display = "block";
     cargarPanelAdmin();
-}
-
-function volverDesdeAdminAPerfiles() {
-    document.getElementById("pantalla-admin").style.display = "none";
-    document.getElementById("pantalla-perfiles").style.display = "flex";
+    actualizarNavActivo('informe');
 }
 
 async function cargarPanelAdmin() {
@@ -437,27 +454,27 @@ function darDeBajaProfe(idAEliminar) {
 
 function volverAPerfiles() {
     profeActivoId = null;
+    esAdminActual = false; // Le sacamos la llave maestra al salir
     
-    // Apagamos TODAS las pantallas operativas
     document.getElementById("pantalla-dashboard").style.display = "none";
     document.getElementById("pantalla-detalle-alumno").style.display = "none";
     document.getElementById("pantalla-rutinas").style.display = "none";
     document.getElementById("pantalla-detalle-pack").style.display = "none";
+    document.getElementById("pantalla-admin").style.display = "none"; 
     
-    // Volvemos a Inicio
     document.getElementById("pantalla-perfiles").style.display = "flex";
 }
 
 function volverAlDashboard() {
-    // Apagamos TODAS las demás
     document.getElementById("pantalla-detalle-alumno").style.display = "none";
     document.getElementById("pantalla-rutinas").style.display = "none";
     document.getElementById("pantalla-detalle-pack").style.display = "none";
     document.getElementById("pantalla-perfiles").style.display = "none";
+    document.getElementById("pantalla-admin").style.display = "none"; 
     
-    // Encendemos solo Dashboard
     document.getElementById("pantalla-dashboard").style.display = "block";
     cargarAlumnos();
+    actualizarNavActivo('alumnos');
 }
 
 async function cargarAlumnos() {
@@ -568,6 +585,32 @@ async function cargarAlumnos() {
                 `;
             }
 
+            // ---> NUEVO: LÓGICA DE ÚLTIMA SESIÓN (ASISTENCIA)
+            let textoUltimaSesion = "Sin asistencias";
+            let colorUltimaSesion = "#777"; // Gris
+            let iconoUltimaSesion = `<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>`; // Reloj
+
+            if (alumno.ultima_sesion) {
+                const fechaUltima = new Date(alumno.ultima_sesion + 'T00:00:00');
+                const difTiempoSesion = hoy - fechaUltima;
+                const difDiasSesion = Math.floor(difTiempoSesion / (1000 * 60 * 60 * 24));
+
+                if (difDiasSesion === 0) {
+                    textoUltimaSesion = "Entrenó hoy";
+                    colorUltimaSesion = "#2ecc71"; // Verde
+                } else if (difDiasSesion === 1) {
+                    textoUltimaSesion = "Entrenó ayer";
+                    colorUltimaSesion = "#2ecc71"; // Verde
+                } else if (difDiasSesion <= 7) {
+                    textoUltimaSesion = `Última vez: hace ${difDiasSesion} días`;
+                    colorUltimaSesion = "#f39c12"; // Naranja
+                } else {
+                    textoUltimaSesion = `Ausente hace ${difDiasSesion} días`;
+                    colorUltimaSesion = "#e74c3c"; // Rojo alerta
+                    iconoUltimaSesion = `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>`; // Alerta triangular
+                }
+            }
+
             // Construcción final de la tarjeta
             contenedor.innerHTML += `
                 <div class="card-alumno" onclick="abrirGrillaAlumno('${alumno.id}')">
@@ -589,6 +632,14 @@ async function cargarAlumnos() {
                         <div class="info-detalle" style="margin-top: 2px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="14" height="14" style="margin-right: 5px;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                             <span style="color: #f39c12; font-weight: 600;">${cuotaTexto}</span>
+                        </div>
+
+                        <!-- NUEVO RENGLÓN: Seguimiento de última sesión -->
+                        <div class="info-detalle" style="margin-top: 2px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="${colorUltimaSesion}" stroke-width="2" width="14" height="14" style="margin-right: 5px;">
+                                ${iconoUltimaSesion}
+                            </svg>
+                            <span style="color: ${colorUltimaSesion}; font-weight: 500;">${textoUltimaSesion}</span>
                         </div>
                     </div>
 
@@ -890,7 +941,8 @@ function abrirModalEditar(id, zona, nombre, series, fuerza, descanso) {
 
 // --- EDICIÓN DE PROFESOR ---
 
-let fotoEditProfeElegida = ""; // Guarda temporalmente la foto durante la edición
+let fotoEditProfeElegida = ""; 
+let archivoEditFotoProfeBlob = null; // NUEVA memoria temporal para la edición
 
 // Abrir ventana y cargar los datos
 async function editarProfe() {
@@ -955,12 +1007,12 @@ function procesarFotoEditSubida(event) {
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             
-            // Guardamos la foto comprimida
-            fotoEditProfeElegida = canvas.toDataURL("image/jpeg", 0.7); 
-            
-            // Actualizamos la vista previa visual
-            document.getElementById("img-preview-edit-profe").src = fotoEditProfeElegida;
-            document.getElementById("select-edit-profe-avatar").value = ""; // Limpiamos el avatar
+            canvas.toBlob((blob) => {
+                archivoEditFotoProfeBlob = blob; 
+                fotoEditProfeElegida = URL.createObjectURL(blob); 
+                document.getElementById("img-preview-edit-profe").src = fotoEditProfeElegida;
+                document.getElementById("select-edit-profe-avatar").value = ""; 
+            }, "image/jpeg", 0.7);
         }
         img.src = e.target.result;
     };
@@ -978,17 +1030,36 @@ async function guardarEdicionProfe() {
     }
 
     try {
-        const { data: profeActualizado, error } = await clienteSupabase
+        let urlFinalParaBaseDeDatos = fotoEditProfeElegida;
+
+        if (archivoEditFotoProfeBlob) {
+            const nombreArchivo = `profe_edit_${Date.now()}.jpg`;
+            
+            const { error: errStorage } = await clienteSupabase.storage
+                .from('avatares')
+                .upload(nombreArchivo, archivoEditFotoProfeBlob, { contentType: 'image/jpeg' });
+
+            if (errStorage) throw errStorage;
+
+            const { data: publicUrlData } = clienteSupabase.storage
+                .from('avatares')
+                .getPublicUrl(nombreArchivo);
+                
+            urlFinalParaBaseDeDatos = publicUrlData.publicUrl;
+        }
+
+        const { error } = await clienteSupabase
             .from('profesores')
             .update({ 
                 nombre: nuevoNombre, 
                 apellido: nuevoApellido,
-                foto_url: fotoEditProfeElegida // Acá viaja la nueva foto (o la vieja si no la tocó)
+                foto_url: urlFinalParaBaseDeDatos 
             })
-            .eq('id', profeActivoId)
-            .select();
+            .eq('id', profeActivoId);
         
         if (error) throw error;
+
+        archivoEditFotoProfeBlob = null; // Limpiamos
 
         cerrarModalEditarProfe();
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nuevoNombre;
@@ -996,7 +1067,7 @@ async function guardarEdicionProfe() {
         cargarProfesores(); 
 
     } catch (e) { 
-        mostrarAlerta("Error al actualizar: " + e.message); 
+        mostrarAlerta("Error al actualizar", e.message); 
         console.error(e);
     }
 }
@@ -1437,12 +1508,35 @@ async function abrirGrillaAlumno(id) {
         // Mostramos el valor de la cuota
         document.getElementById("detalle-cuota").innerText = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "No definida";
 
+        // ... (código anterior que ya tenías) ...
+        
         let fechaFormateada = "Sin definir";
         if (alumno.vencimiento_cuota) {
             const partes = alumno.vencimiento_cuota.split('-'); // Cortamos el 2026-08-15
             fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; // Lo armamos como 15/08/2026
         }
         document.getElementById("detalle-vencimiento").innerText = fechaFormateada;
+
+        // ---> NUEVO: Formateamos la fecha a prueba de balas (adiós al NaN)
+        let fechaAltaVisual = "Sin registro";
+        
+        // Agarramos el campo (leemos creado_en y por las dudas created_at)
+        const fechaBase = alumno.creado_en || alumno.created_at; 
+        
+        if (fechaBase && fechaBase !== "null") {
+            try {
+                // Supabase devuelve un texto como "2026-07-16T18:45:35" o "2026-07-16"
+                const soloFecha = fechaBase.split('T')[0]; // Nos quedamos solo con la fecha "2026-07-16"
+                const partes = soloFecha.split('-'); // Cortamos los guiones: [2026, 07, 16]
+                
+                if (partes.length === 3) {
+                    fechaAltaVisual = `${partes[2]}/${partes[1]}/${partes[0]}`; // Lo armamos a la argentina: DD/MM/YYYY
+                }
+            } catch(e) {
+                console.error("Error al formatear fecha:", e);
+            }
+        }
+        document.getElementById("detalle-fecha-alta").innerText = fechaAltaVisual;
 
         // Reseteamos la vista al slider principal y cargamos los chips
         cerrarCategoria(); 
@@ -1605,7 +1699,8 @@ async function dibujarCategoriasAlumno() {
             .from('rutinas_planificadas')
             .select('categoria')
             .eq('alumno_id', alumnoSeleccionadoId)
-            .eq('dia_semana', diaSeleccionado);
+            .eq('dia_semana', diaSeleccionado)
+            .eq('semana', semanaActiva); // <--- NUEVO FILTRO
 
         contenedor.innerHTML = "";
         
@@ -1782,6 +1877,7 @@ async function cargarEjerciciosCategoriaBD() {
         let query = clienteSupabase.from('rutinas_planificadas').select('*')
             .eq('alumno_id', alumnoSeleccionadoId)
             .eq('dia_semana', diaSeleccionado) 
+            .eq('semana', semanaActiva)
             .order('orden', { ascending: true, nullsFirst: false }) 
             .order('id', { ascending: true }); 
 
@@ -1798,7 +1894,21 @@ async function cargarEjerciciosCategoriaBD() {
         contenedorEjercicios.innerHTML = ""; 
 
         if (ejercicios.length === 0) {
-            contenedorEjercicios.innerHTML = `<p style="text-align:center; color:#888; font-size: 0.9rem; margin-top: 30px;">No hay ejercicios acá. Tocá el + para añadir uno.</p>`;
+            let htmlBotonCopiar = "";
+            // Si está en la semana 2, 3 o 4, le ofrecemos clonar toda la semana 1
+            if (semanaActiva !== 1) {
+                htmlBotonCopiar = `
+                    <button class="btn-guardar" onclick="clonarSemanaCompleta(1, ${semanaActiva})" style="width: 100%; margin-top: 15px; background-color: #3498db; color: white;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" style="vertical-align: middle; margin-right: 5px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copiar toda la rutina de la Semana 1 acá
+                    </button>
+                `;
+            }
+
+            contenedorEjercicios.innerHTML = `
+                <p style="text-align:center; color:#888; font-size: 0.9rem; margin-top: 30px;">No hay ejercicios en esta semana.</p>
+                ${htmlBotonCopiar}
+            `;
             return;
         }
         
@@ -1854,6 +1964,7 @@ async function guardarEjercicioEnBD() {
             await clienteSupabase.from('rutinas_planificadas').insert([{
                 alumno_id: alumnoSeleccionadoId, 
                 dia_semana: diaSeleccionado, 
+                semana: semanaActiva,
                 categoria: categoriaSeleccionada, // AHORA SE GUARDA EN SU BARRA CORRESPONDIENTE
                 zona_muscular: zona,
                 ejercicio_nombre: nombre, 
@@ -1867,7 +1978,7 @@ async function guardarEjercicioEnBD() {
     } catch (e) { mostrarAlerta("Error", e.message); }
 }
 
-// --- 11. SISTEMA DE PACKS PREDEFINIDOS ---
+// --- 11. SISTEMA DE PACKS PREDEFINIDOS (Navegación Blindada) ---
 let packActivoId = null;
 let packActivoEjercicios = []; 
 
@@ -1875,8 +1986,25 @@ function abrirPantallaRutinas() {
     document.getElementById("pantalla-dashboard").style.display = "none";
     document.getElementById("pantalla-detalle-alumno").style.display = "none";
     document.getElementById("pantalla-perfiles").style.display = "none"; 
+    document.getElementById("pantalla-admin").style.display = "none"; 
+    
+    // --> ESTO ARREGLA LA SUPERPOSICIÓN (Apaga el detalle del pack)
+    document.getElementById("pantalla-detalle-pack").style.display = "none"; 
+    
     document.getElementById("pantalla-rutinas").style.display = "block";
     cargarPacks();
+    actualizarNavActivo('rutinas'); // Prende la luz naranja del botón
+}
+
+async function abrirDetallePack(id, nombre) {
+    packActivoId = id;
+    document.getElementById("pantalla-rutinas").style.display = "none"; 
+    document.getElementById("pantalla-detalle-pack").style.display = "block";
+    document.getElementById("detalle-nombre-pack").innerText = nombre; 
+    cargarEjerciciosDePack();
+    
+    // --> ESTO HACE QUE EL BOTÓN SIGA BRILLANDO CUANDO ENTRÁS AL PACK
+    actualizarNavActivo('rutinas'); 
 }
 
 async function cargarPacks() {
@@ -1929,14 +2057,6 @@ async function guardarPackNuevo() {
     } catch (e) { 
         console.error(e); 
     }
-}
-
-async function abrirDetallePack(id, nombre) {
-    packActivoId = id;
-    document.getElementById("pantalla-rutinas").style.display = "none"; 
-    document.getElementById("pantalla-detalle-pack").style.display = "block";
-    document.getElementById("detalle-nombre-pack").innerText = nombre; 
-    cargarEjerciciosDePack();
 }
 
 async function cargarEjerciciosDePack() {
@@ -1996,6 +2116,7 @@ async function importarPackAAlumno(packId) {
         const insertData = pack.ejercicios.map((ej, index) => ({
             alumno_id: alumnoSeleccionadoId, 
             dia_semana: diaSelec, 
+            semana: semanaActiva,
             categoria: categoriaSeleccionada, // LOS PACKS TAMBIÉN CAEN ADENTRO DE LA BARRA ACTIVA
             zona_muscular: ej.zona,
             ejercicio_nombre: ej.nombre, series_reps: ej.series, descanso: ej.descanso, orden: 999 + index
@@ -2222,7 +2343,7 @@ window.addEventListener('popstate', function (event) {
             volverAlDashboard();
             interceptado = true;
         } else if (esVisible("pantalla-admin")) {
-            volverDesdeAdminAPerfiles();
+            volverAlDashboard();
             interceptado = true;
         } else if (esVisible("pantalla-dashboard")) {
             volverAPerfiles();
@@ -2358,6 +2479,12 @@ async function procesarCheckin(diaSeleccionado) {
             return;
         }
 
+        // ---> NUEVO: ACTUALIZAMOS LA ÚLTIMA SESIÓN DEL ALUMNO EN LA BASE DE DATOS
+        await clienteSupabase.from('alumnos').update({ ultima_sesion: fechaHoy }).eq('id', idSeguro);
+        
+        // Refrescamos la lista de alumnos silenciosamente para que se actualice la pantalla principal
+        cargarAlumnos();
+
         // Feedback de éxito
         mostrarAlerta("¡Asistencia Registrada!", `El entrenamiento de ${diaSeleccionado} se guardó correctamente en el gráfico del alumno.`);
         
@@ -2366,3 +2493,102 @@ async function procesarCheckin(diaSeleccionado) {
         mostrarAlerta("Error Crítico", "No se pudo procesar la solicitud.");
     }
 }
+
+// ==========================================
+// CLONAR SEMANA COMPLETA
+// ==========================================
+async function clonarSemanaCompleta(semanaOrigen, semanaDestino) {
+    try {
+        // 1. Buscamos TODOS los ejercicios del alumno en la Semana 1 (de todos los días y barras)
+        const { data: ejerciciosOrigen, error: errOrig } = await clienteSupabase
+            .from('rutinas_planificadas')
+            .select('*')
+            .eq('alumno_id', alumnoSeleccionadoId)
+            .eq('semana', semanaOrigen);
+
+        if (errOrig) throw errOrig;
+
+        if (!ejerciciosOrigen || ejerciciosOrigen.length === 0) {
+            mostrarAlerta("Aviso", "La Semana 1 está completamente vacía. No hay nada para copiar.");
+            return;
+        }
+
+        // 2. Creamos copias exactas, pero le cambiamos el número de semana
+        const nuevasCopias = ejerciciosOrigen.map(ej => ({
+            alumno_id: ej.alumno_id,
+            dia_semana: ej.dia_semana,
+            semana: semanaDestino, // Le ponemos la semana nueva (ej: 2)
+            categoria: ej.categoria,
+            zona_muscular: ej.zona_muscular,
+            ejercicio_nombre: ej.ejercicio_nombre,
+            series_reps: ej.series_reps,
+            fuerza: ej.fuerza,
+            descanso: ej.descanso,
+            orden: ej.orden
+        }));
+
+        // 3. Insertamos todo de golpe en la base de datos
+        const { error: errInsert } = await clienteSupabase.from('rutinas_planificadas').insert(nuevasCopias);
+        if (errInsert) throw errInsert;
+
+        mostrarAlerta("¡Semana Copiada!", `Se clonó la rutina entera a la Semana ${semanaDestino}. Ahora podés modificarla sin alterar el resto.`);
+        
+        // 4. Refrescamos la pantalla para mostrar los ejercicios nuevos
+        dibujarCategoriasAlumno(); 
+        cargarEjerciciosCategoriaBD();
+
+    } catch (e) {
+        console.error(e);
+        mostrarAlerta("Error", "No se pudo copiar la semana.");
+    }
+}
+
+
+function actualizarNavActivo(pestaña) {
+    // Apagamos todas las pestañas primero
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('activo'));
+    
+    // Encendemos solo la que nos interesa
+    if (pestaña === 'alumnos') document.querySelectorAll('.tab-alumnos').forEach(btn => btn.classList.add('activo'));
+    if (pestaña === 'rutinas') document.querySelectorAll('.tab-rutinas').forEach(btn => btn.classList.add('activo'));
+    if (pestaña === 'informe') document.querySelectorAll('.tab-informe').forEach(btn => btn.classList.add('activo'));
+}
+
+function volverAlDashboardDesdeAdmin() {
+    // 1. Apagamos el panel de informe
+    document.getElementById("pantalla-admin").style.display = "none";
+    
+    // 2. Encendemos el Dashboard (el del profesor que está logueado)
+    document.getElementById("pantalla-dashboard").style.display = "block";
+    
+    // 3. Cargamos los alumnos específicos de este profesor
+    // (Como el ID ya está guardado en la variable 'profeActivoId', carga los suyos)
+    cargarAlumnos();
+    
+    // 4. Actualizamos el menú inferior para que marque "Alumnos" como activo
+    actualizarNavActivo('alumnos');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

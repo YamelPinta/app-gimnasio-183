@@ -132,7 +132,9 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> 
                     <span style="color: #333;">Agregar profesor</span>
                 </button>
+
                 <div class="separador-vertical"></div>
+                
                 <button class="btn-footer-icono" onclick="cerrarSesion()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 
                     <span style="color: #333;">Cerrar sesión</span>
@@ -221,26 +223,17 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     <span>Inicio</span>
                 </button>
-                <button class="nav-item activo">
+                <button class="nav-item tab-alumnos" onclick="volverAlDashboard()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     <span>Alumnos</span>
                 </button>
-                <button class="nav-item" onclick="abrirPantallaRutinas()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <!-- Contorno de la tabla -->
-                        <path d="M16 4h1.5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2H8"></path>
-                        <!-- Gancho superior -->
-                        <rect x="8.5" y="2" width="7" height="4" rx="1"></rect>
-                        <!-- Círculos (Puntos de la lista) -->
-                        <circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <circle cx="8" cy="18" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <!-- Líneas de la lista -->
-                        <line x1="12" y1="10" x2="16.5" y2="10"></line>
-                        <line x1="12" y1="14" x2="16.5" y2="14"></line>
-                        <line x1="12" y1="18" x2="16.5" y2="18"></line>
-                    </svg>
+                <button class="nav-item tab-rutinas" onclick="abrirPantallaRutinas()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h1.5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2H8"></path><rect x="8.5" y="2" width="7" height="4" rx="1"></rect><circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="8" cy="18" r="1.5" fill="currentColor" stroke="none"></circle><line x1="12" y1="10" x2="16.5" y2="10"></line><line x1="12" y1="14" x2="16.5" y2="14"></line><line x1="12" y1="18" x2="16.5" y2="18"></line></svg>
                     <span>Rutinas</span>
+                </button>
+                <button class="nav-item nav-admin-only tab-informe" style="display: none;" onclick="abrirPantallaInforme()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <span>Informe</span>
                 </button>
             </nav>
         </div>
@@ -264,6 +257,7 @@
                     <p>Edad: <span id="detalle-edad">-</span></p>
                     <p>Condición / salud: <span id="detalle-salud">-</span></p>
                     <p>Objetivo: <span id="detalle-objetivo">-</span></p>
+                    <p>Miembro desde: <span id="detalle-fecha-alta" style="color: #666; font-weight: 500;">-</span></p>
                 </div>
 
                 <button class="btn-rendimiento-card" onclick="abrirModalRendimiento()">
@@ -337,30 +331,21 @@
             </div>
 
             <nav class="bottom-nav">
-                <button class="nav-item" onclick="volverAlDashboard()">
+                <button class="nav-item" onclick="volverAPerfiles()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     <span>Inicio</span>
                 </button>
-                <button class="nav-item activo" onclick="volverAlDashboard()">
+                <button class="nav-item tab-alumnos" onclick="volverAlDashboard()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     <span>Alumnos</span>
                 </button>
-                <button class="nav-item" onclick="abrirPantallaRutinas()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <!-- Contorno de la tabla -->
-                        <path d="M16 4h1.5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2H8"></path>
-                        <!-- Gancho superior -->
-                        <rect x="8.5" y="2" width="7" height="4" rx="1"></rect>
-                        <!-- Círculos (Puntos de la lista) -->
-                        <circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <circle cx="8" cy="18" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <!-- Líneas de la lista -->
-                        <line x1="12" y1="10" x2="16.5" y2="10"></line>
-                        <line x1="12" y1="14" x2="16.5" y2="14"></line>
-                        <line x1="12" y1="18" x2="16.5" y2="18"></line>
-                    </svg>
+                <button class="nav-item tab-rutinas" onclick="abrirPantallaRutinas()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h1.5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2H8"></path><rect x="8.5" y="2" width="7" height="4" rx="1"></rect><circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="8" cy="18" r="1.5" fill="currentColor" stroke="none"></circle><line x1="12" y1="10" x2="16.5" y2="10"></line><line x1="12" y1="14" x2="16.5" y2="14"></line><line x1="12" y1="18" x2="16.5" y2="18"></line></svg>
                     <span>Rutinas</span>
+                </button>
+                <button class="nav-item nav-admin-only tab-informe" style="display: none;" onclick="abrirPantallaInforme()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <span>Informe</span>
                 </button>
             </nav>
         </div>
@@ -384,29 +369,32 @@
             <div id="lista-packs" class="lista-alumnos-moderna"></div>
 
             <nav class="bottom-nav">
-                <button class="nav-item" onclick="volverAPerfiles()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Inicio</span></button>
-                <button class="nav-item" onclick="volverAlDashboard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Alumnos</span></button>
-                <button class="nav-item activo">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <!-- Contorno de la tabla -->
-                        <path d="M16 4h1.5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2H8"></path>
-                        <!-- Gancho superior -->
-                        <rect x="8.5" y="2" width="7" height="4" rx="1"></rect>
-                        <!-- Círculos (Puntos de la lista) -->
-                        <circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <circle cx="8" cy="18" r="1.5" fill="currentColor" stroke="none"></circle>
-                        <!-- Líneas de la lista -->
-                        <line x1="12" y1="10" x2="16.5" y2="10"></line>
-                        <line x1="12" y1="14" x2="16.5" y2="14"></line>
-                        <line x1="12" y1="18" x2="16.5" y2="18"></line>
-                    </svg>
-                    <span>Rutinas</span></button>
+                <button class="nav-item" onclick="volverAPerfiles()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Inicio</span>
+                </button>
+                <button class="nav-item tab-alumnos" onclick="volverAlDashboard()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Alumnos</span>
+                </button>
+                <button class="nav-item tab-rutinas" onclick="abrirPantallaRutinas()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h1.5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2H8"></path><rect x="8.5" y="2" width="7" height="4" rx="1"></rect><circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="8" cy="18" r="1.5" fill="currentColor" stroke="none"></circle><line x1="12" y1="10" x2="16.5" y2="10"></line><line x1="12" y1="14" x2="16.5" y2="14"></line><line x1="12" y1="18" x2="16.5" y2="18"></line></svg>
+                    <span>Rutinas</span>
+                </button>
+                <button class="nav-item nav-admin-only tab-informe" style="display: none;" onclick="abrirPantallaInforme()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <span>Informe</span>
+                </button>
             </nav>
         </div>
 
         <div id="pantalla-detalle-pack" class="pantalla-fondo-claro" style="display: none;">
-            <div class="header-logo-centrado"><img src="imagenes/logo.png" alt="Logo" class="logo-top"></div>
+            <div class="header-logo-centrado">
+                <!-- Logo oscuro para modo claro -->
+                <img src="imagenes/logo.png" alt="18.3 Clubhouse" class="logo-top logo-modo-claro-top">
+                <!-- Logo blanco para modo oscuro -->
+                <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="logo-top logo-modo-oscuro-top">
+            </div>
             
             <div class="tarjeta-info-alumno" style="background-image: none; background-color: #2c2c2c; color: white;">
                 <div class="avatar-gris" style="background-color: rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" fill="white" width="28"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
@@ -417,19 +405,40 @@
             </div>
 
             <div id="lista-ejercicios-pack" class="contenedor-ejercicios"></div>
+            
+            <!-- Botones flotantes (FAB) correctos -->
             <div class="contenedor-fab">
                 <button class="btn-fab-amarillo" onclick="abrirModalEjercicioPack()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="26" height="26">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>  
+                </button>
+                <button class="btn-flotante-atras" onclick="abrirPantallaRutinas()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
                 </button>
             </div>
 
+            <!-- Menú Inferior Estándar (El mismo de todas las pantallas) -->
             <nav class="bottom-nav">
-                <button class="nav-item activo" onclick="abrirPantallaRutinas()" style="width: 100%; flex-direction: row; gap: 10px; color: #2c2c2c;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                    <span style="font-size: 1rem; border:none;">Volver a mis Rutinas</span>
+                <button class="nav-item" onclick="volverAPerfiles()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Inicio</span>
+                </button>
+                <button class="nav-item tab-alumnos" onclick="volverAlDashboard()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Alumnos</span>
+                </button>
+                <button class="nav-item tab-rutinas" onclick="abrirPantallaRutinas()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h1.5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2H8"></path><rect x="8.5" y="2" width="7" height="4" rx="1"></rect><circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="8" cy="14" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="8" cy="18" r="1.5" fill="currentColor" stroke="none"></circle><line x1="12" y1="10" x2="16.5" y2="10"></line><line x1="12" y1="14" x2="16.5" y2="14"></line><line x1="12" y1="18" x2="16.5" y2="18"></line></svg>
+                    <span>Rutinas</span>
+                </button>
+                <button class="nav-item nav-admin-only tab-informe" style="display: none;" onclick="abrirPantallaInforme()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <span>Informe</span>
                 </button>
             </nav>
         </div>
@@ -444,9 +453,9 @@
             </div>
             <div id="contenedor-admin-general" style="display: flex; flex-direction: column; gap: 20px; padding-bottom: 80px;"></div>
             <nav class="bottom-nav">
-                <button class="nav-item activo" onclick="volverDesdeAdminAPerfiles()" style="width: 100%; flex-direction: row; gap: 10px; color: #2c2c2c;">
+                <button class="nav-item activo" onclick="volverAlDashboardDesdeAdmin()" style="width: 100%; flex-direction: row; gap: 10px; color: #2c2c2c;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                    <span style="font-size: 1rem; border:none;">Volver a los Perfiles</span>
+                    <span style="font-size: 1rem; border:none;">Volver al Perfil</span>
                 </button>
             </nav>
         </div>
