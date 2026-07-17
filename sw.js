@@ -1,5 +1,5 @@
-const CACHE_ESTATICO = 'gimnasio-estatico-v4';
-const CACHE_DINAMICO = 'gimnasio-dinamico-v4';
+const CACHE_ESTATICO = 'gimnasio-estatico-v5'; // <-- ACORDATE DE CAMBIAR EL NÚMERO A V5
+const CACHE_DINAMICO = 'gimnasio-dinamico-v5'; // <-- PARA FORZAR LA ACTUALIZACIÓN
 
 const ASSETS_CORE = [
     '/',
@@ -13,12 +13,18 @@ const ASSETS_CORE = [
 ];
 
 self.addEventListener('install', (evento) => {
+    // 1. LA MAGIA: Obliga a la nueva versión a instalarse y tomar el control INMEDIATAMENTE
+    self.skipWaiting(); 
+    
     evento.waitUntil(
         caches.open(CACHE_ESTATICO).then((cache) => cache.addAll(ASSETS_CORE))
     );
 });
 
 self.addEventListener('activate', (evento) => {
+    // 2. LA MAGIA PARTE 2: Hace que la nueva versión controle todas las pestañas abiertas al instante
+    evento.waitUntil(self.clients.claim()); 
+
     evento.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
@@ -32,6 +38,7 @@ self.addEventListener('activate', (evento) => {
     );
 });
 
+// ... (Acá sigue tu evento 'fetch' exactamente igual que como lo tenés) ...
 self.addEventListener('fetch', (evento) => {
     const url = evento.request.url;
 

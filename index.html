@@ -172,9 +172,15 @@
                 </div>
             </div>
 
-            <div class="titulo-dashboard">
-                <h2 id="nombre-profe-activo">Profe</h2>
-                <p id="contador-alumnos">0 alumnos asignados</p>
+            <div class="titulo-dashboard" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 id="nombre-profe-activo">Profe</h2>
+                    <p id="contador-alumnos">0 alumnos asignados</p>
+                </div>
+                <button class="btn-informe-cuadrado" onclick="abrirModalInformeProfe()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Informe</span>
+                </button>
             </div>
 
             <div class="contenedor-agregar-alumno">
@@ -894,6 +900,61 @@
                 </div>
                 
                 <button class="btn-cancelar" onclick="cerrarModalCheckin()" style="width: 100%;">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- MODAL INFORME EXCEL DEL PROFESOR -->
+        <div id="modal-informe-profe" class="modal-overlay" style="display: none; z-index: 6500;">
+            <div class="modal-contenido modal-informe-grande">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; color: #f39c12;">Informes y Planillas</h3>
+                    <button onclick="cerrarModalInformeProfe()" style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                </div>
+
+                <!-- Pestañas para deslizar -->
+                <div class="tabs-informe">
+                    <button id="tab-informe-actual" class="tab-btn activo" onclick="cambiarVistaInforme('actual')">Planilla Actual</button>
+                    <button id="tab-informe-historial" class="tab-btn" onclick="cambiarVistaInforme('historial')">Historial</button>
+                </div>
+
+                <!-- Contenedor del Slider -->
+                <div class="viewport-slider" style="flex-grow: 1; margin-top: 10px; height: 0; min-height: 0;">
+                    <div id="track-informe" class="track-slider" style="height: 100%;">
+                        
+                        <!-- VISTA 1: PLANILLA ACTUAL -->
+                        <div class="vista-slider" style="display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
+                            
+                            <!-- Hacemos que la tabla no se aplaste y permita scrollear hacia los costados si es ancha -->
+                            <div class="contenedor-tabla-excel" style="flex-shrink: 0; overflow-x: auto; overflow-y: hidden; margin-bottom: 15px;">
+                                <table id="tabla-informe-alumnos" class="tabla-excel">
+                                    <!-- Se llena con JS -->
+                                </table>
+                            </div>
+                            
+                            <!-- Resumen / KPIs -->
+                            <div id="resumen-informe-kpis" class="resumen-kpis-grid" style="flex-shrink: 0;">
+                                <!-- Se llena con JS -->
+                            </div>
+
+                            <button class="btn-guardar" onclick="descargarExcelProfe()" style="width: 100%; margin-top: 15px; margin-bottom: 20px; display: flex; justify-content: center; gap: 8px; flex-shrink: 0;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Descargar como Excel (CSV)
+                            </button>
+                        </div>
+
+                        <!-- VISTA 2: HISTORIAL DE DESCARGAS -->
+                        <div class="vista-slider" style="display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
+                            <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px; text-align: center; flex-shrink: 0;">Registro de planillas descargadas previamente.</p>
+                            
+                            <div id="lista-historial-informes" style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; padding-bottom: 20px;">
+                                <!-- Se llena con JS -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
         </div>
 

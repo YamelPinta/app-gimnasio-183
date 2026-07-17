@@ -308,8 +308,15 @@ function entrarPerfil(id, nombre, apellido) {
     profeActivoId = id; 
     document.getElementById("nombre-profe-activo").innerText = "Profe " + nombre;
     
-    // MAGIA: Identificamos si es administrador (Si se llama Moye o Ana, por ejemplo)
-    esAdminActual = (nombre.toLowerCase().includes('moye'));
+    // MAGIA: Unimos el nombre y apellido para buscar, pasándolo a minúsculas
+    const nombreCompleto = (nombre + " " + apellido).toLowerCase();
+    
+    // Le damos superpoderes de Admin a Moye y a German Varelli
+    esAdminActual = (
+        nombreCompleto.includes('moye') || 
+        nombreCompleto.includes('german varelli') || 
+        nombreCompleto.includes('germán varelli') // Por si acaso lo guardaron con tilde
+    );
     
     // Mostramos u ocultamos los botones del menú inferior para admins
     document.querySelectorAll('.nav-admin-only').forEach(btn => {
@@ -2312,7 +2319,8 @@ window.addEventListener('popstate', function (event) {
             { id: "modal-alumno", cerrar: cerrarModalAlumno },
             { id: "modal-editar-profe", cerrar: cerrarModalEditarProfe },
             { id: "modal-profe", cerrar: cerrarModalProfe },
-            { id: "modal-checkin", cerrar: cerrarModalCheckin }
+            { id: "modal-checkin", cerrar: cerrarModalCheckin },
+            { id: "modal-informe-profe", cerrar: cerrarModalInformeProfe }
         ];
 
         for (let modal of modales) {
@@ -2573,10 +2581,285 @@ function volverAlDashboardDesdeAdmin() {
 
 
 
+// ==========================================
+// SISTEMA DE INFORME EXCEL Y PLANILLAS
+// ==========================================
+let alumnosParaInformeActual = []; // Memoria de los alumnos que procesamos
 
+function abrirModalInformeProfe() {
+    document.getElementById("modal-informe-profe").style.display = "flex";
+    cambiarVistaInforme('actual'); // Siempre arranca en la tabla
+    cargarDatosParaInforme();
+}
 
+function cerrarModalInformeProfe() {
+    document.getElementById("modal-informe-profe").style.display = "none";
+}
 
+function cambiarVistaInforme(vista) {
+    const track = document.getElementById("track-informe");
+    const btnActual = document.getElementById("tab-informe-actual");
+    const btnHistorial = document.getElementById("tab-informe-historial");
 
+    if (vista === 'actual') {
+        track.style.transform = 'translateX(0%)';
+        btnActual.classList.add("activo");
+        btnHistorial.classList.remove("activo");
+    } else {
+        track.style.transform = 'translateX(-50%)';
+        btnHistorial.classList.add("activo");
+        btnActual.classList.remove("activo");
+        dibujarHistorialInformes(); // Cargamos las fechas guardadas
+    }
+}
+
+async function cargarDatosParaInforme() {
+    const tabla = document.getElementById("tabla-informe-alumnos");
+    const kpis = document.getElementById("resumen-informe-kpis");
+    
+    tabla.innerHTML = "<tr><td style='text-align:center;'>Cargando datos de la base...</td></tr>";
+
+    try {
+        const { data: alumnos, error } = await clienteSupabase
+            .from('alumnos')
+            .select('*')
+            .eq('profesor_id', profeActivoId)
+            .order('actividad', { ascending: true }) // Ordenamos por actividad primero
+            .order('nombre', { ascending: true });
+
+        if (error) throw error;
+
+        alumnosParaInformeActual = alumnos; // Guardamos en memoria
+
+        // 1. DIBUJAR LA TABLA DIVIDIDA POR CATEGORÍAS
+        tabla.innerHTML = `
+            <tr>
+                <th>Nombre</th>
+                <th>Vencimiento</th>
+                <th>Cuota</th>
+                <th>Estado</th>
+            </tr>
+        `;
+
+        if (alumnos.length === 0) {
+            tabla.innerHTML += `<tr><td colspan="4" style="text-align:center;">No hay alumnos.</td></tr>`;
+        } else {
+            let actividadActual = "";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+
+            alumnos.forEach(a => {
+                // Separador si cambiamos de categoría (Ej: de Musculación a Calistenia)
+                const actividadAlumno = a.actividad || "Sin Categoría";
+                if (actividadAlumno !== actividadActual) {
+                    tabla.innerHTML += `<tr><td colspan="4" class="tabla-separador-cat">${actividadAlumno.toUpperCase()}</td></tr>`;
+                    actividadActual = actividadAlumno;
+                }
+
+                // Cálculo de estado (Al día o Vencido)
+                let estado = "Al día";
+                let colorEstado = "#2ecc71";
+                let fechaArg = "-";
+
+                if (a.vencimiento_cuota) {
+                    const fechaVencimiento = new Date(a.vencimiento_cuota + 'T00:00:00');
+                    const diferenciaDias = Math.ceil((fechaVencimiento - hoy) / (1000 * 60 * 60 * 24));
+                    fechaArg = a.vencimiento_cuota.split('-').reverse().join('/');
+                    
+                    if (diferenciaDias < 0) {
+                        estado = "Vencida"; colorEstado = "#e74c3c";
+                    } else if (diferenciaDias <= 5) {
+                        estado = "Pronto a vencer"; colorEstado = "#f39c12";
+                    }
+                }
+
+                const cuotaMonto = a.cuota ? `$${a.cuota.toLocaleString('es-AR')}` : "$0";
+
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${a.nombre} ${a.apellido}</td>
+                        <td>${fechaArg}</td>
+                        <td>${cuotaMonto}</td>
+                        <td style="color: ${colorEstado}; font-weight:bold;">${estado}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 2. CÁLCULO DE RESUMEN Y KPIS
+        let totalDinero = 0;
+        let conteoActividades = {};
+
+        alumnos.forEach(a => {
+            if (a.cuota) totalDinero += a.cuota;
+            const act = a.actividad || "Sin Categoría";
+            conteoActividades[act] = (conteoActividades[act] || 0) + 1;
+        });
+
+        // Armamos el texto chiquito de "Cuántos hay por categoría"
+        let desgloseCategorias = "";
+        for (const [cat, cantidad] of Object.entries(conteoActividades)) {
+            desgloseCategorias += `${cat}: ${cantidad} | `;
+        }
+
+        const fechaEmision = new Date().toLocaleDateString('es-AR');
+
+        kpis.innerHTML = `
+            <div class="kpi-item">
+                <span>Total Alumnos</span>
+                <strong>${alumnos.length}</strong>
+            </div>
+            <div class="kpi-item kpi-destacado">
+                <span>Cuotas Acumuladas</span>
+                <strong>$${totalDinero.toLocaleString('es-AR')}</strong>
+            </div>
+            <div class="kpi-item" style="grid-column: span 2;">
+                <span>Desglose</span>
+                <strong style="font-size: 0.8rem; font-weight: 500;">${desgloseCategorias || "Sin datos"}</strong>
+            </div>
+            <div class="kpi-item" style="grid-column: span 2; text-align: center; margin-top: 5px;">
+                <span>Fecha de emisión: ${fechaEmision}</span>
+            </div>
+        `;
+
+    } catch (e) {
+        tabla.innerHTML = `<tr><td style="color:red; text-align:center;">Error al cargar: ${e.message}</td></tr>`;
+    }
+}
+
+// ==========================================
+// GENERADOR DE ARCHIVO CSV (EXCEL)
+// ==========================================
+// ==========================================
+// GENERADOR DE ARCHIVO CSV (EXCEL)
+// ==========================================
+function descargarExcelProfe() {
+    if (!alumnosParaInformeActual || alumnosParaInformeActual.length === 0) {
+        mostrarAlerta("Sin datos", "No hay alumnos para generar el informe.");
+        return;
+    }
+
+    // 1. Armamos las columnas (Cabeceras). Usamos \uFEFF para que Excel reconozca los acentos (UTF-8 BOM)
+    let contenidoCSV = "\uFEFF";
+    contenidoCSV += "Nombre,Apellido,Actividad,Edad,Condicion,Objetivo,Vencimiento,Cuota Mensual\n";
+
+    // 2. Llenamos fila por fila con cuidado de no romper las comas
+    alumnosParaInformeActual.forEach(a => {
+        let nombre = `"${a.nombre || ""}"`;
+        let apellido = `"${a.apellido || ""}"`;
+        let actividad = `"${a.actividad || ""}"`;
+        let edad = a.edad || "";
+        let condicion = `"${a.condicion_medica || ""}"`;
+        let objetivo = `"${a.objetivo || ""}"`;
+        
+        let vencimiento = "-";
+        if (a.vencimiento_cuota) {
+            vencimiento = a.vencimiento_cuota.split('-').reverse().join('/');
+        }
+        
+        let cuota = a.cuota || 0;
+
+        // Armamos el renglón
+        contenidoCSV += `${nombre},${apellido},${actividad},${edad},${condicion},${objetivo},${vencimiento},${cuota}\n`;
+    });
+
+    // 3. Generamos el archivo virtual y obligamos al celular a descargarlo
+    const blob = new Blob([contenidoCSV], { type: 'text/csv;charset=utf-8;' });
+    const urlVirtual = URL.createObjectURL(blob);
+    const linkDescarga = document.createElement("a");
+    
+    // Le ponemos fecha al archivo (Ej: Informe_Alumnos_25-10-2026.csv)
+    const fechaArchivo = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+    linkDescarga.setAttribute("href", urlVirtual);
+    linkDescarga.setAttribute("download", `Informe_Alumnos_${fechaArchivo}.csv`);
+    
+    document.body.appendChild(linkDescarga);
+    linkDescarga.click();
+    document.body.removeChild(linkDescarga);
+
+    // 4. EL TRUCO: Guardamos en el Historial pasándole todo el texto del archivo
+    guardarEnHistorial(fechaArchivo, contenidoCSV);
+    mostrarAlerta("¡Descarga Exitosa!", "El informe se guardó en tu dispositivo en formato CSV (Abre con Excel).");
+}
+
+function guardarEnHistorial(fechaString, contenidoDelExcel) {
+    const llaveMemoria = 'historial_informes_' + profeActivoId;
+    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
+    
+    // Guardamos la fecha, la hora y también los datos exactos del archivo
+    const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    historial.unshift({ fecha: fechaString, hora: hora, datos: contenidoDelExcel }); 
+    
+    // BLINDAJE: Para proteger la memoria del celular, guardamos solo los últimos 15 informes.
+    if (historial.length > 15) {
+        historial.pop(); // Borra el más antiguo
+    }
+    
+    localStorage.setItem(llaveMemoria, JSON.stringify(historial));
+}
+
+function dibujarHistorialInformes() {
+    const contenedor = document.getElementById("lista-historial-informes");
+    const llaveMemoria = 'historial_informes_' + profeActivoId;
+    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
+
+    contenedor.innerHTML = "";
+
+    if (historial.length === 0) {
+        contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size: 0.9rem; margin-top:20px;'>Aún no descargaste ninguna planilla.</p>";
+        return;
+    }
+
+    historial.forEach((registro, index) => {
+        // Rediseñamos la tarjeta para agregar el botón de volver a descargar abajo
+        contenedor.innerHTML += `
+            <div class="tarjeta-historial" style="display: flex; flex-direction: column; gap: 10px; align-items: stretch;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p>Planilla de Alumnos</p>
+                        <span>Descargado el ${registro.fecha} a las ${registro.hora}</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                
+                <!-- NUEVO BOTÓN: Volver a descargar -->
+                <button onclick="volverADescargarExcel(${index})" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px; font-size: 0.8rem; border-radius: 8px; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; transition: background 0.2s;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Volver a descargar
+                </button>
+            </div>
+        `;
+    });
+}
+
+// ---> LA NUEVA FUNCIÓN MAGICA
+function volverADescargarExcel(index) {
+    const llaveMemoria = 'historial_informes_' + profeActivoId;
+    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
+    
+    const registro = historial[index];
+    
+    // Si justo presiona uno muy viejo que se guardó antes de implementar este nuevo código:
+    if (!registro || !registro.datos) {
+        mostrarAlerta("Error", "Este informe es muy antiguo y no tiene los datos guardados. Por favor, genera uno nuevo desde la pestaña 'Planilla Actual'.");
+        return;
+    }
+
+    // Le pasamos el texto viejo y generamos la misma descarga
+    const blob = new Blob([registro.datos], { type: 'text/csv;charset=utf-8;' });
+    const urlVirtual = URL.createObjectURL(blob);
+    const linkDescarga = document.createElement("a");
+    
+    // Le agregamos la palabra "Copia_" para que no se confunda
+    linkDescarga.setAttribute("href", urlVirtual);
+    linkDescarga.setAttribute("download", `Copia_Informe_${registro.fecha}.csv`);
+    
+    document.body.appendChild(linkDescarga);
+    linkDescarga.click();
+    document.body.removeChild(linkDescarga);
+    
+    mostrarAlerta("¡Re-descarga Exitosa!", "El informe guardado en el historial se bajó nuevamente a tu dispositivo.");
+}
 
 
 

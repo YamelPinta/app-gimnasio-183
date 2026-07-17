@@ -1434,3 +1434,83 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 
 
 
+/* =========================================
+   SISTEMA DE INFORMES Y TABLAS EXCEL
+   ========================================= */
+
+/* El botón cuadrado del encabezado */
+.btn-informe-cuadrado {
+    background: rgba(243, 156, 18, 0.15);
+    border: 1px solid #f39c12;
+    color: #f39c12;
+    border-radius: 12px;
+    width: 65px;
+    height: 65px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.1);
+}
+.btn-informe-cuadrado svg { width: 24px; height: 24px; }
+.btn-informe-cuadrado span { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+.pantalla-dashboard-moderna.modo-oscuro .btn-informe-cuadrado { background: rgba(243, 156, 18, 0.08); }
+
+/* La ventana más alta para que entre la tabla */
+.modal-informe-grande {
+    width: 95% !important;
+    max-width: 600px !important;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sistema de Pestañas (Tabs) */
+.tabs-informe { display: flex; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+.tab-btn { flex: 1; background: transparent; border: none; color: #888; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: color 0.2s; padding-bottom: 5px; }
+.tab-btn.activo { color: #f39c12; border-bottom: 2px solid #f39c12; }
+
+/* Tabla estilo Excel */
+.contenedor-tabla-excel {
+    flex-grow: 1;
+    overflow: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+.tabla-excel { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem; color: #ddd; }
+.tabla-excel th { background: rgba(243, 156, 18, 0.2); color: #f39c12; padding: 10px; position: sticky; top: 0; z-index: 1; font-weight: 600; white-space: nowrap; }
+.tabla-excel td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); white-space: nowrap; }
+.tabla-excel tr:hover { background: rgba(255,255,255,0.05); }
+
+/* Fila separadora de categorías */
+.tabla-separador-cat { background: rgba(255,255,255,0.1); color: white; font-weight: bold; text-align: center; font-size: 0.85rem; padding: 6px !important; }
+
+/* Grid de Resumen (KPIs) */
+.resumen-kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    background: rgba(255,255,255,0.05);
+    padding: 12px;
+    border-radius: 8px;
+}
+.kpi-item { display: flex; flex-direction: column; }
+.kpi-item span { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
+.kpi-item strong { font-size: 1.1rem; color: white; }
+.kpi-destacado strong { color: #2ecc71; } /* Verde para el dinero */
+
+/* Tarjetas del Historial */
+.tarjeta-historial {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
+}
+.tarjeta-historial p { margin: 0; color: white; font-size: 0.9rem; font-weight: 500; }
+.tarjeta-historial span { color: #888; font-size: 0.75rem; }
+
+
+
+
