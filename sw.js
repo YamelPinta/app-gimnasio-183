@@ -1,5 +1,5 @@
-const CACHE_ESTATICO = 'gimnasio-estatico-v5'; // <-- ACORDATE DE CAMBIAR EL NÚMERO A V5
-const CACHE_DINAMICO = 'gimnasio-dinamico-v5'; // <-- PARA FORZAR LA ACTUALIZACIÓN
+const CACHE_ESTATICO = 'gimnasio-estatico-v6'; // <-- ACORDATE DE CAMBIAR EL NÚMERO A V5
+const CACHE_DINAMICO = 'gimnasio-dinamico-v6'; // <-- PARA FORZAR LA ACTUALIZACIÓN
 
 const ASSETS_CORE = [
     '/',

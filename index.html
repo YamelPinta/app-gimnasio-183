@@ -478,6 +478,10 @@
                     <input type="text" id="input-alumno-nombre" class="input-modal" placeholder="Nombre y Apellido">
                 </div>
                 <div class="campo-detalle">
+                    <label class="label-modal">DNI:</label>
+                    <input type="number" id="input-alumno-dni" class="input-modal" placeholder="Ej: 35123456">
+                </div>
+                <div class="campo-detalle">
                     <label class="label-modal">Actividad principal:</label>
                     <select id="select-alumno-actividad" class="input-modal">
                         <option value="Musculación">Musculación</option>
@@ -523,6 +527,10 @@
                 <div class="campo-detalle">
                     <label class="label-modal">Nombre y Apellido:</label>
                     <input type="text" id="input-edit-alumno-nombre" class="input-modal">
+                </div>
+                <div class="campo-detalle">
+                    <label class="label-modal">DNI:</label>
+                    <input type="number" id="input-alumno-dni" class="input-modal" placeholder="Ej: 35123456">
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Actividad principal:</label>
@@ -916,6 +924,16 @@
                 <div class="tabs-informe">
                     <button id="tab-informe-actual" class="tab-btn activo" onclick="cambiarVistaInforme('actual')">Planilla Actual</button>
                     <button id="tab-informe-historial" class="tab-btn" onclick="cambiarVistaInforme('historial')">Historial</button>
+                </div>
+
+                <!-- NUEVO: Selector de Ordenamiento -->
+                <div id="contenedor-filtros-informe" style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
+                    <span style="font-size: 0.85rem; color: #aaa;">Ordenar por:</span>
+                    <select id="select-orden-informe" class="input-modal" style="width: auto; padding: 6px 10px; font-size: 0.85rem; background-color: rgba(255,255,255,0.05);" onchange="cargarDatosParaInforme()">
+                        <option value="actividad">Categoría (Defecto)</option>
+                        <option value="alfabetico">Orden Alfabético (A-Z)</option>
+                        <option value="ingreso">Fecha de Ingreso (Más antiguos)</option>
+                    </select>
                 </div>
 
                 <!-- Contenedor del Slider -->

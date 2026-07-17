@@ -317,7 +317,7 @@ function entrarPerfil(id, nombre, apellido) {
         nombreCompleto.includes('german varelli') || 
         nombreCompleto.includes('germán varelli') // Por si acaso lo guardaron con tilde
     );
-    
+
     // Mostramos u ocultamos los botones del menú inferior para admins
     document.querySelectorAll('.nav-admin-only').forEach(btn => {
         btn.style.display = esAdminActual ? 'flex' : 'none';
@@ -703,6 +703,7 @@ function abrirModalAlumno() {
 
 async function guardarAlumnoEnBD() {
     const nombreCompleto = document.getElementById("input-alumno-nombre").value.trim();
+    const dni = document.getElementById("input-alumno-dni").value.trim();
     const actividad = document.getElementById("select-alumno-actividad").value;
     let objetivo = document.getElementById("input-alumno-objetivo").value.trim();
     const edad = document.getElementById("input-alumno-edad").value.trim();
@@ -730,6 +731,7 @@ async function guardarAlumnoEnBD() {
             .insert([{ 
                 nombre: nombre, 
                 apellido: apellido, 
+                dni: dni || null,
                 profesor_id: profeActivoId, 
                 vencimiento_cuota: vencimientoCuota || null, // ACA GUARDAMOS LA FECHA MANUAL
                 actividad: actividad,
@@ -741,6 +743,9 @@ async function guardarAlumnoEnBD() {
             }]); 
 
         if (error) throw error;
+
+        // Limpiamos el campo DNI para la próxima
+        document.getElementById("input-alumno-dni").value = "";
         
         cerrarModalAlumno();
         cargarAlumnos(); 
@@ -883,13 +888,22 @@ async function modificarCicloPago(alumnoId, fechaVencimientoActual, yaEstabaPaga
 // Pequeña función auxiliar para no repetir código en los pagos
 async function ejecutarCambioDePago(alumnoId, baseFecha, estadoActivo) {
     const nuevaFecha = baseFecha.toISOString().split('T')[0];
+    
+    // NUEVO: Capturamos el día exacto en el que el profe apretó el botón
+    const fechaHoy = estadoActivo ? new Date().toISOString().split('T')[0] : null;
+
     try {
         const { error } = await clienteSupabase.from('alumnos').update({ 
-            vencimiento_cuota: nuevaFecha, activo: estadoActivo 
+            vencimiento_cuota: nuevaFecha, 
+            activo: estadoActivo,
+            fecha_ultimo_pago: fechaHoy // <-- Guardamos la fecha del clic en la base de datos
         }).eq('id', alumnoId);
+        
         if (error) throw error;
         cargarAlumnos();
-    } catch (error) { mostrarAlerta("Error al actualizar pago: " + error.message); }
+    } catch (error) { 
+        mostrarAlerta("Error al actualizar pago: " + error.message); 
+    }
 }
 
 // --- 10. LÓGICA DE DÍAS Y RUTINAS (CON SUPABASE) ---
@@ -1120,6 +1134,7 @@ function abrirModalEditarAlumno() {
     
     // Rellenamos TODOS los campos con la info que ya existía para que no estén vacíos
     document.getElementById("input-edit-alumno-nombre").value = `${alumnoDataActual.nombre} ${alumnoDataActual.apellido}`;
+    document.getElementById("input-edit-alumno-dni").value = alumnoDataActual.dni || "";
     document.getElementById("select-edit-alumno-actividad").value = alumnoDataActual.actividad || "Musculación";
     document.getElementById("input-edit-alumno-objetivo").value = alumnoDataActual.objetivo || "";
     document.getElementById("input-edit-alumno-edad").value = alumnoDataActual.edad || "";
@@ -1134,6 +1149,7 @@ function cerrarModalEditarAlumno() {
 
 async function guardarEdicionAlumnoEnBD() {
     const nombreCompleto = document.getElementById("input-edit-alumno-nombre").value.trim();
+    const dni = document.getElementById("input-edit-alumno-dni").value.trim(); 
     const actividad = document.getElementById("select-edit-alumno-actividad").value;
     const objetivo = document.getElementById("input-edit-alumno-objetivo").value.trim();
     const edad = document.getElementById("input-edit-alumno-edad").value.trim();
@@ -1158,6 +1174,7 @@ async function guardarEdicionAlumnoEnBD() {
             .update({ 
                 nombre: nombre, 
                 apellido: apellido, 
+                dni: dni || null,
                 actividad: actividad,
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
@@ -2600,63 +2617,93 @@ function cambiarVistaInforme(vista) {
     const track = document.getElementById("track-informe");
     const btnActual = document.getElementById("tab-informe-actual");
     const btnHistorial = document.getElementById("tab-informe-historial");
+    const filtroOrden = document.getElementById("contenedor-filtros-informe"); // Capturamos el nuevo filtro
 
     if (vista === 'actual') {
         track.style.transform = 'translateX(0%)';
         btnActual.classList.add("activo");
         btnHistorial.classList.remove("activo");
+        if (filtroOrden) filtroOrden.style.display = "flex"; // Lo mostramos en la tabla
     } else {
         track.style.transform = 'translateX(-50%)';
         btnHistorial.classList.add("activo");
         btnActual.classList.remove("activo");
-        dibujarHistorialInformes(); // Cargamos las fechas guardadas
+        if (filtroOrden) filtroOrden.style.display = "none"; // Lo ocultamos en el historial
+        dibujarHistorialInformes(); 
     }
 }
 
 async function cargarDatosParaInforme() {
     const tabla = document.getElementById("tabla-informe-alumnos");
     const kpis = document.getElementById("resumen-informe-kpis");
+    const ordenElegido = document.getElementById("select-orden-informe").value; // Leemos qué elegiste
     
     tabla.innerHTML = "<tr><td style='text-align:center;'>Cargando datos de la base...</td></tr>";
 
     try {
-        const { data: alumnos, error } = await clienteSupabase
+        // Traemos todos los alumnos del profe (sin ordenar todavía)
+        const { data: alumnosBD, error } = await clienteSupabase
             .from('alumnos')
             .select('*')
-            .eq('profesor_id', profeActivoId)
-            .order('actividad', { ascending: true }) // Ordenamos por actividad primero
-            .order('nombre', { ascending: true });
+            .eq('profesor_id', profeActivoId);
 
         if (error) throw error;
 
-        alumnosParaInformeActual = alumnos; // Guardamos en memoria
+        let alumnos = [...alumnosBD];
 
-        // 1. DIBUJAR LA TABLA DIVIDIDA POR CATEGORÍAS
+        // APLICAMOS EL ORDENAMIENTO DE MANERA INTELIGENTE
+        if (ordenElegido === 'actividad') {
+            alumnos.sort((a, b) => {
+                const actA = (a.actividad || "Sin Categoría").toLowerCase();
+                const actB = (b.actividad || "Sin Categoría").toLowerCase();
+                if (actA === actB) return (a.nombre || "").localeCompare(b.nombre || "");
+                return actA.localeCompare(actB);
+            });
+        } else if (ordenElegido === 'alfabetico') {
+            alumnos.sort((a, b) => {
+                const nombreA = (a.nombre || "").toLowerCase();
+                const nombreB = (b.nombre || "").toLowerCase();
+                return nombreA.localeCompare(nombreB);
+            });
+        } else if (ordenElegido === 'ingreso') {
+            alumnos.sort((a, b) => {
+                // Buscamos la fecha de creación en Supabase
+                const fechaA = new Date(a.creado_en || a.created_at || 0);
+                const fechaB = new Date(b.creado_en || b.created_at || 0);
+                return fechaA - fechaB; // Los más antiguos van primero
+            });
+        }
+
+        alumnosParaInformeActual = alumnos; // Guardamos en memoria la lista ya ORDENADA
+
+        // DIBUJAR LA TABLA VISUAL
         tabla.innerHTML = `
             <tr>
                 <th>Nombre</th>
                 <th>Vencimiento</th>
+                <th>Día de Pago</th>
                 <th>Cuota</th>
                 <th>Estado</th>
             </tr>
         `;
 
         if (alumnos.length === 0) {
-            tabla.innerHTML += `<tr><td colspan="4" style="text-align:center;">No hay alumnos.</td></tr>`;
+            tabla.innerHTML += `<tr><td colspan="5" style="text-align:center;">No hay alumnos.</td></tr>`;
         } else {
             let actividadActual = "";
             const hoy = new Date();
             hoy.setHours(0,0,0,0);
 
             alumnos.forEach(a => {
-                // Separador si cambiamos de categoría (Ej: de Musculación a Calistenia)
-                const actividadAlumno = a.actividad || "Sin Categoría";
-                if (actividadAlumno !== actividadActual) {
-                    tabla.innerHTML += `<tr><td colspan="4" class="tabla-separador-cat">${actividadAlumno.toUpperCase()}</td></tr>`;
-                    actividadActual = actividadAlumno;
+                // Solo ponemos el separador oscuro si estamos agrupando por Categoría (Actividad)
+                if (ordenElegido === 'actividad') {
+                    const actividadAlumno = a.actividad || "Sin Categoría";
+                    if (actividadAlumno !== actividadActual) {
+                        tabla.innerHTML += `<tr><td colspan="5" class="tabla-separador-cat">${actividadAlumno.toUpperCase()}</td></tr>`;
+                        actividadActual = actividadAlumno;
+                    }
                 }
 
-                // Cálculo de estado (Al día o Vencido)
                 let estado = "Al día";
                 let colorEstado = "#2ecc71";
                 let fechaArg = "-";
@@ -2673,12 +2720,18 @@ async function cargarDatosParaInforme() {
                     }
                 }
 
+                let fechaPagoArg = "-";
+                if (a.fecha_ultimo_pago) {
+                    fechaPagoArg = a.fecha_ultimo_pago.split('-').reverse().join('/');
+                }
+
                 const cuotaMonto = a.cuota ? `$${a.cuota.toLocaleString('es-AR')}` : "$0";
 
                 tabla.innerHTML += `
                     <tr>
                         <td>${a.nombre} ${a.apellido}</td>
                         <td>${fechaArg}</td>
+                        <td style="color: #3498db; font-weight: 500;">${fechaPagoArg}</td>
                         <td>${cuotaMonto}</td>
                         <td style="color: ${colorEstado}; font-weight:bold;">${estado}</td>
                     </tr>
@@ -2686,7 +2739,7 @@ async function cargarDatosParaInforme() {
             });
         }
 
-        // 2. CÁLCULO DE RESUMEN Y KPIS
+        // CÁLCULO DE RESUMEN Y KPIS
         let totalDinero = 0;
         let conteoActividades = {};
 
@@ -2696,7 +2749,9 @@ async function cargarDatosParaInforme() {
             conteoActividades[act] = (conteoActividades[act] || 0) + 1;
         });
 
-        // Armamos el texto chiquito de "Cuántos hay por categoría"
+        const porcentajeGimnasio = totalDinero * 0.30;
+        const porcentajeProfesor = totalDinero * 0.70;
+
         let desgloseCategorias = "";
         for (const [cat, cantidad] of Object.entries(conteoActividades)) {
             desgloseCategorias += `${cat}: ${cantidad} | `;
@@ -2709,9 +2764,15 @@ async function cargarDatosParaInforme() {
                 <span>Total Alumnos</span>
                 <strong>${alumnos.length}</strong>
             </div>
-            <div class="kpi-item kpi-destacado">
-                <span>Cuotas Acumuladas</span>
+            <div class="kpi-item kpi-destacado" style="display: flex; flex-direction: column;">
+                <span>Recaudación Total</span>
                 <strong>$${totalDinero.toLocaleString('es-AR')}</strong>
+                <span style="color: #e74c3c; font-size: 0.75rem; margin-top: 5px; font-weight: 600; text-transform: none;">
+                    Gym (30%): -$${porcentajeGimnasio.toLocaleString('es-AR')}
+                </span>
+                <span style="color: #3498db; font-size: 0.75rem; margin-top: 2px; font-weight: 600; text-transform: none;">
+                    Tu parte (70%): $${porcentajeProfesor.toLocaleString('es-AR')}
+                </span>
             </div>
             <div class="kpi-item" style="grid-column: span 2;">
                 <span>Desglose</span>
@@ -2730,46 +2791,88 @@ async function cargarDatosParaInforme() {
 // ==========================================
 // GENERADOR DE ARCHIVO CSV (EXCEL)
 // ==========================================
-// ==========================================
-// GENERADOR DE ARCHIVO CSV (EXCEL)
-// ==========================================
 function descargarExcelProfe() {
     if (!alumnosParaInformeActual || alumnosParaInformeActual.length === 0) {
         mostrarAlerta("Sin datos", "No hay alumnos para generar el informe.");
         return;
     }
 
-    // 1. Armamos las columnas (Cabeceras). Usamos \uFEFF para que Excel reconozca los acentos (UTF-8 BOM)
+    const fechaEmision = new Date().toLocaleDateString('es-AR');
+    const horaEmision = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    
     let contenidoCSV = "\uFEFF";
-    contenidoCSV += "Nombre,Apellido,Actividad,Edad,Condicion,Objetivo,Vencimiento,Cuota Mensual\n";
+    contenidoCSV += `INFORME GENERAL DE ALUMNOS\n`;
+    contenidoCSV += `Fecha de emision:,${fechaEmision}\n`;
+    contenidoCSV += `Hora de emision:,${horaEmision}\n`;
+    
+    // Dejamos constancia de cómo se ordenó el archivo
+    const tipoOrden = document.getElementById("select-orden-informe").options[document.getElementById("select-orden-informe").selectedIndex].text;
+    contenidoCSV += `Ordenado por:,${tipoOrden}\n\n`;
 
-    // 2. Llenamos fila por fila con cuidado de no romper las comas
+    // AGREGAMOS LA COLUMNA DE FECHA DE INGRESO AL EXCEL
+    contenidoCSV += "Nombre,Apellido,DNI,Fecha de Ingreso,Actividad,Edad,Condicion,Objetivo,Vencimiento,Dia de Pago,Cuota Mensual\n";
+
+    let totalDinero = 0;
+    let conteoActividades = {};
+
+    // El array 'alumnosParaInformeActual' ya está ordenado mágicamente según lo que elegiste
     alumnosParaInformeActual.forEach(a => {
         let nombre = `"${a.nombre || ""}"`;
         let apellido = `"${a.apellido || ""}"`;
+        let dni = a.dni || "-";
         let actividad = `"${a.actividad || ""}"`;
-        let edad = a.edad || "";
+        let edad = a.edad || "-";
         let condicion = `"${a.condicion_medica || ""}"`;
         let objetivo = `"${a.objetivo || ""}"`;
         
+        // Calculamos la fecha de Ingreso para imprimirla
+        let fechaIngreso = "-";
+        const fechaBase = a.creado_en || a.created_at; 
+        if (fechaBase && fechaBase !== "null") {
+            try {
+                const soloFecha = fechaBase.split('T')[0]; 
+                fechaIngreso = soloFecha.split('-').reverse().join('/'); 
+            } catch(e) {}
+        }
+
         let vencimiento = "-";
         if (a.vencimiento_cuota) {
             vencimiento = a.vencimiento_cuota.split('-').reverse().join('/');
         }
         
+        let diaDePago = "-";
+        if (a.fecha_ultimo_pago) {
+            diaDePago = a.fecha_ultimo_pago.split('-').reverse().join('/');
+        }
+        
         let cuota = a.cuota || 0;
+        
+        totalDinero += cuota;
+        const act = a.actividad || "Sin Categoría";
+        conteoActividades[act] = (conteoActividades[act] || 0) + 1;
 
-        // Armamos el renglón
-        contenidoCSV += `${nombre},${apellido},${actividad},${edad},${condicion},${objetivo},${vencimiento},${cuota}\n`;
+        contenidoCSV += `${nombre},${apellido},${dni},${fechaIngreso},${actividad},${edad},${condicion},${objetivo},${vencimiento},${diaDePago},${cuota}\n`;
     });
 
-    // 3. Generamos el archivo virtual y obligamos al celular a descargarlo
+    const porcentajeGimnasio = totalDinero * 0.30;
+    const porcentajeProfesor = totalDinero * 0.70;
+
+    contenidoCSV += `\n\n,,,RESUMEN DEL INFORME\n`; 
+    contenidoCSV += `,,,Total Alumnos Registrados:,${alumnosParaInformeActual.length}\n`;
+    contenidoCSV += `,,,Total Recaudado:,$${totalDinero.toLocaleString('es-AR')}\n`;
+    contenidoCSV += `,,,Descuento Gimnasio (30%):,-$${porcentajeGimnasio.toLocaleString('es-AR')}\n`;
+    contenidoCSV += `,,,Neto para Profesor (70%):,$${porcentajeProfesor.toLocaleString('es-AR')}\n\n`;
+    
+    contenidoCSV += `,,,ALUMNOS POR CATEGORIA\n`;
+    for (const [cat, cantidad] of Object.entries(conteoActividades)) {
+        contenidoCSV += `,,,${cat}:,${cantidad}\n`;
+    }
+
     const blob = new Blob([contenidoCSV], { type: 'text/csv;charset=utf-8;' });
     const urlVirtual = URL.createObjectURL(blob);
     const linkDescarga = document.createElement("a");
     
-    // Le ponemos fecha al archivo (Ej: Informe_Alumnos_25-10-2026.csv)
-    const fechaArchivo = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+    const fechaArchivo = fechaEmision.replace(/\//g, '-'); 
     linkDescarga.setAttribute("href", urlVirtual);
     linkDescarga.setAttribute("download", `Informe_Alumnos_${fechaArchivo}.csv`);
     
@@ -2777,7 +2880,6 @@ function descargarExcelProfe() {
     linkDescarga.click();
     document.body.removeChild(linkDescarga);
 
-    // 4. EL TRUCO: Guardamos en el Historial pasándole todo el texto del archivo
     guardarEnHistorial(fechaArchivo, contenidoCSV);
     mostrarAlerta("¡Descarga Exitosa!", "El informe se guardó en tu dispositivo en formato CSV (Abre con Excel).");
 }
