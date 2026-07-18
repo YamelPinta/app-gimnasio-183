@@ -684,34 +684,47 @@ async function cargarAlumnos() {
 
 // --- LÓGICA PARA CREAR ALUMNO CON VENTANA EMERGENTE ---
 
+// --- LÓGICA DE ALUMNOS (A PRUEBA DE FALLOS) ---
 function abrirModalAlumno() {
     document.getElementById("modal-alumno").style.display = "flex";
     
-    // Limpiamos los campos
-    document.getElementById("input-alumno-nombre").value = "";
-    document.getElementById("select-alumno-actividad").value = "Musculación";
-    document.getElementById("input-alumno-objetivo").value = "";
-    document.getElementById("input-alumno-edad").value = "";
-    document.getElementById("input-alumno-condicion").value = "";
-    document.getElementById("input-alumno-cuota").value = "";
+    // Función salvavidas para escribir sin que se rompa nada si falta el HTML
+    const setValor = (id, valor) => {
+        const el = document.getElementById(id);
+        if (el) el.value = valor;
+    };
 
-    // NUEVO: Sugerimos un vencimiento de 1 mes por defecto
+    setValor("input-alumno-nombre", "");
+    setValor("input-alumno-dni", "");
+    setValor("select-alumno-actividad", "Musculación");
+    setValor("input-alumno-objetivo", "");
+    setValor("input-alumno-edad", "");
+    setValor("input-alumno-condicion", "");
+    setValor("input-alumno-cuota", "");
+
     const fecha = new Date();
     fecha.setMonth(fecha.getMonth() + 1);
-    document.getElementById("input-alumno-vencimiento").value = fecha.toISOString().split('T')[0];
+    setValor("input-alumno-vencimiento", fecha.toISOString().split('T')[0]);
 }
 
 async function guardarAlumnoEnBD() {
-    const nombreCompleto = document.getElementById("input-alumno-nombre").value.trim();
-    const dni = document.getElementById("input-alumno-dni").value.trim();
-    const actividad = document.getElementById("select-alumno-actividad").value;
-    let objetivo = document.getElementById("input-alumno-objetivo").value.trim();
-    const edad = document.getElementById("input-alumno-edad").value.trim();
-    let condicion = document.getElementById("input-alumno-condicion").value.trim();
-    const cuota = document.getElementById("input-alumno-cuota").value.trim();
+    // Función salvavidas para leer sin que explote la app
+    const getValor = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : "";
+    };
+
+    const nombreCompleto = getValor("input-alumno-nombre");
+    const dni = getValor("input-alumno-dni");
     
-    // NUEVO: Capturamos la fecha que eligió el profe
-    let vencimientoCuota = document.getElementById("input-alumno-vencimiento").value;
+    const selectActividad = document.getElementById("select-alumno-actividad");
+    const actividad = selectActividad ? selectActividad.value : "Musculación";
+    
+    let objetivo = getValor("input-alumno-objetivo");
+    const edad = getValor("input-alumno-edad");
+    let condicion = getValor("input-alumno-condicion");
+    const cuota = getValor("input-alumno-cuota");
+    let vencimientoCuota = getValor("input-alumno-vencimiento");
 
     if (!nombreCompleto) {
         mostrarAlerta("Faltan datos", "Por favor, ingresá el nombre y apellido del alumno.");
@@ -731,27 +744,97 @@ async function guardarAlumnoEnBD() {
             .insert([{ 
                 nombre: nombre, 
                 apellido: apellido, 
-                dni: dni || null,
+                dni: dni || null, 
                 profesor_id: profeActivoId, 
-                vencimiento_cuota: vencimientoCuota || null, // ACA GUARDAMOS LA FECHA MANUAL
+                vencimiento_cuota: vencimientoCuota || null,
                 actividad: actividad,
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
                 condicion_medica: condicion,
-                // Adentro del insert de guardarAlumnoEnBD:
                 cuota: cuota ? parseInt(cuota.replace(/\./g, '')) : null
             }]); 
 
         if (error) throw error;
-
-        // Limpiamos el campo DNI para la próxima
-        document.getElementById("input-alumno-dni").value = "";
         
         cerrarModalAlumno();
         cargarAlumnos(); 
         
     } catch (error) {
         mostrarAlerta("Error", "Error al añadir alumno: " + error.message);
+    }
+}
+
+function abrirModalEditarAlumno() {
+    if (!alumnoDataActual) return; 
+    
+    document.getElementById("modal-editar-alumno").style.display = "flex";
+    
+    const setValor = (id, valor) => {
+        const el = document.getElementById(id);
+        if (el) el.value = valor;
+    };
+
+    setValor("input-edit-alumno-nombre", `${alumnoDataActual.nombre} ${alumnoDataActual.apellido}`);
+    setValor("input-edit-alumno-dni", alumnoDataActual.dni || "");
+    setValor("select-edit-alumno-actividad", alumnoDataActual.actividad || "Musculación");
+    setValor("input-edit-alumno-objetivo", alumnoDataActual.objetivo || "");
+    setValor("input-edit-alumno-edad", alumnoDataActual.edad || "");
+    setValor("input-edit-alumno-condicion", alumnoDataActual.condicion_medica || "");
+    setValor("input-edit-alumno-vencimiento", alumnoDataActual.vencimiento_cuota || "");
+    setValor("input-edit-alumno-cuota", alumnoDataActual.cuota ? alumnoDataActual.cuota.toLocaleString('es-AR') : "");
+}
+
+async function guardarEdicionAlumnoEnBD() {
+    const getValor = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : "";
+    };
+
+    const nombreCompleto = getValor("input-edit-alumno-nombre");
+    const dni = getValor("input-edit-alumno-dni");
+    
+    const selectActividad = document.getElementById("select-edit-alumno-actividad");
+    const actividad = selectActividad ? selectActividad.value : "Musculación";
+    
+    const objetivo = getValor("input-edit-alumno-objetivo");
+    const edad = getValor("input-edit-alumno-edad");
+    const condicion = getValor("input-edit-alumno-condicion");
+    const cuota = getValor("input-edit-alumno-cuota");
+    const vencimiento = getValor("input-edit-alumno-vencimiento");
+
+    if (!nombreCompleto) {
+        mostrarAlerta("Faltan datos", "El nombre no puede estar vacío.");
+        return;
+    }
+
+    const partes = nombreCompleto.split(" ");
+    const nombre = partes[0];
+    const apellido = partes.slice(1).join(" ") || "";
+
+    try {
+        const { error } = await clienteSupabase
+            .from('alumnos')
+            .update({ 
+                nombre: nombre, 
+                apellido: apellido, 
+                dni: dni || null,
+                actividad: actividad,
+                objetivo: objetivo,
+                edad: edad ? parseInt(edad) : null,
+                condicion_medica: condicion,
+                vencimiento_cuota: vencimiento || null,
+                cuota: cuota ? parseInt(cuota.replace(/\./g, '')) : null
+            })
+            .eq('id', alumnoSeleccionadoId);
+        
+        if (error) throw error;
+
+        cerrarModalEditarAlumno();
+        cargarAlumnos(); 
+        abrirGrillaAlumno(alumnoSeleccionadoId); 
+
+    } catch (e) { 
+        mostrarAlerta("Error al actualizar la base de datos", e.message); 
     }
 }
 
@@ -1126,75 +1209,11 @@ function activarModoBorrado() {
 }
 
 
-// --- EDICIÓN DE ALUMNO ---
-function abrirModalEditarAlumno() {
-    if (!alumnoDataActual) return; 
-    
-    document.getElementById("modal-editar-alumno").style.display = "flex";
-    
-    // Rellenamos TODOS los campos con la info que ya existía para que no estén vacíos
-    document.getElementById("input-edit-alumno-nombre").value = `${alumnoDataActual.nombre} ${alumnoDataActual.apellido}`;
-    document.getElementById("input-edit-alumno-dni").value = alumnoDataActual.dni || "";
-    document.getElementById("select-edit-alumno-actividad").value = alumnoDataActual.actividad || "Musculación";
-    document.getElementById("input-edit-alumno-objetivo").value = alumnoDataActual.objetivo || "";
-    document.getElementById("input-edit-alumno-edad").value = alumnoDataActual.edad || "";
-    document.getElementById("input-edit-alumno-condicion").value = alumnoDataActual.condicion_medica || "";
-    document.getElementById("input-edit-alumno-vencimiento").value = alumnoDataActual.vencimiento_cuota || "";
-    document.getElementById("input-edit-alumno-cuota").value = alumnoDataActual.cuota ? alumnoDataActual.cuota.toLocaleString('es-AR') : "";
-}
 
 function cerrarModalEditarAlumno() {
     document.getElementById("modal-editar-alumno").style.display = "none";
 }
 
-async function guardarEdicionAlumnoEnBD() {
-    const nombreCompleto = document.getElementById("input-edit-alumno-nombre").value.trim();
-    const dni = document.getElementById("input-edit-alumno-dni").value.trim(); 
-    const actividad = document.getElementById("select-edit-alumno-actividad").value;
-    const objetivo = document.getElementById("input-edit-alumno-objetivo").value.trim();
-    const edad = document.getElementById("input-edit-alumno-edad").value.trim();
-    const condicion = document.getElementById("input-edit-alumno-condicion").value.trim();
-    const cuota = document.getElementById("input-edit-alumno-cuota").value.trim();
-    
-    // NUEVO: Capturamos la fecha editada
-    const vencimiento = document.getElementById("input-edit-alumno-vencimiento").value;
-
-    if (!nombreCompleto) {
-        mostrarAlerta("Faltan datos", "El nombre no puede estar vacío.");
-        return;
-    }
-
-    const partes = nombreCompleto.split(" ");
-    const nombre = partes[0];
-    const apellido = partes.slice(1).join(" ") || "";
-
-    try {
-        const { error } = await clienteSupabase
-            .from('alumnos')
-            .update({ 
-                nombre: nombre, 
-                apellido: apellido, 
-                dni: dni || null,
-                actividad: actividad,
-                objetivo: objetivo,
-                edad: edad ? parseInt(edad) : null,
-                condicion_medica: condicion,
-                vencimiento_cuota: vencimiento || null, // NUEVO: Guardamos la fecha
-                // Adentro del update de guardarEdicionAlumnoEnBD:
-                cuota: cuota ? parseInt(cuota.replace(/\./g, '')) : null
-            })
-            .eq('id', alumnoSeleccionadoId);
-        
-        if (error) throw error;
-
-        cerrarModalEditarAlumno();
-        cargarAlumnos(); 
-        abrirGrillaAlumno(alumnoSeleccionadoId); 
-
-    } catch (e) { 
-        mostrarAlerta("Error", "Error al actualizar: " + e.message); 
-    }
-}
 
 // --- GUARDAR EL ORDEN AL ARRASTRAR ---
 async function guardarOrdenEjercicios() {
@@ -2636,12 +2655,11 @@ function cambiarVistaInforme(vista) {
 async function cargarDatosParaInforme() {
     const tabla = document.getElementById("tabla-informe-alumnos");
     const kpis = document.getElementById("resumen-informe-kpis");
-    const ordenElegido = document.getElementById("select-orden-informe").value; // Leemos qué elegiste
+    const ordenElegido = document.getElementById("select-orden-informe").value; 
     
     tabla.innerHTML = "<tr><td style='text-align:center;'>Cargando datos de la base...</td></tr>";
 
     try {
-        // Traemos todos los alumnos del profe (sin ordenar todavía)
         const { data: alumnosBD, error } = await clienteSupabase
             .from('alumnos')
             .select('*')
@@ -2651,7 +2669,6 @@ async function cargarDatosParaInforme() {
 
         let alumnos = [...alumnosBD];
 
-        // APLICAMOS EL ORDENAMIENTO DE MANERA INTELIGENTE
         if (ordenElegido === 'actividad') {
             alumnos.sort((a, b) => {
                 const actA = (a.actividad || "Sin Categoría").toLowerCase();
@@ -2667,19 +2684,18 @@ async function cargarDatosParaInforme() {
             });
         } else if (ordenElegido === 'ingreso') {
             alumnos.sort((a, b) => {
-                // Buscamos la fecha de creación en Supabase
                 const fechaA = new Date(a.creado_en || a.created_at || 0);
                 const fechaB = new Date(b.creado_en || b.created_at || 0);
-                return fechaA - fechaB; // Los más antiguos van primero
+                return fechaA - fechaB; 
             });
         }
 
-        alumnosParaInformeActual = alumnos; // Guardamos en memoria la lista ya ORDENADA
+        alumnosParaInformeActual = alumnos; 
 
-        // DIBUJAR LA TABLA VISUAL
         tabla.innerHTML = `
             <tr>
                 <th>Nombre</th>
+                <th>Actividad</th>
                 <th>Vencimiento</th>
                 <th>Día de Pago</th>
                 <th>Cuota</th>
@@ -2695,7 +2711,6 @@ async function cargarDatosParaInforme() {
             hoy.setHours(0,0,0,0);
 
             alumnos.forEach(a => {
-                // Solo ponemos el separador oscuro si estamos agrupando por Categoría (Actividad)
                 if (ordenElegido === 'actividad') {
                     const actividadAlumno = a.actividad || "Sin Categoría";
                     if (actividadAlumno !== actividadActual) {
@@ -2705,7 +2720,7 @@ async function cargarDatosParaInforme() {
                 }
 
                 let estado = "Al día";
-                let colorEstado = "#2ecc71";
+                let colorEstado = "#888"; // <-- COLOR GRIS (Neutro)
                 let fechaArg = "-";
 
                 if (a.vencimiento_cuota) {
@@ -2714,9 +2729,9 @@ async function cargarDatosParaInforme() {
                     fechaArg = a.vencimiento_cuota.split('-').reverse().join('/');
                     
                     if (diferenciaDias < 0) {
-                        estado = "Vencida"; colorEstado = "#e74c3c";
+                        estado = "Vencida"; colorEstado = "#d32f2f"; // Mantenemos el rojo solo para alerta visual fuerte
                     } else if (diferenciaDias <= 5) {
-                        estado = "Pronto a vencer"; colorEstado = "#f39c12";
+                        estado = "Pronto a vencer"; colorEstado = "#f39c12"; // Naranja sutil
                     }
                 }
 
@@ -2729,17 +2744,17 @@ async function cargarDatosParaInforme() {
 
                 tabla.innerHTML += `
                     <tr>
-                        <td>${a.nombre} ${a.apellido}</td>
+                        <td style="color: #eee; font-weight: 500;">${a.nombre} ${a.apellido}</td>
+                        <td style="color: #aaa;">${a.actividad || "Sin Categoría"}</td> <!-- ACÁ IMPRIMIMOS LA CATEGORÍA -->
                         <td>${fechaArg}</td>
-                        <td style="color: #3498db; font-weight: 500;">${fechaPagoArg}</td>
+                        <td>${fechaPagoArg}</td>
                         <td>${cuotaMonto}</td>
-                        <td style="color: ${colorEstado}; font-weight:bold;">${estado}</td>
+                        <td style="color: ${colorEstado}; font-weight:500;">${estado}</td>
                     </tr>
                 `;
             });
         }
 
-        // CÁLCULO DE RESUMEN Y KPIS
         let totalDinero = 0;
         let conteoActividades = {};
 
@@ -2759,27 +2774,28 @@ async function cargarDatosParaInforme() {
 
         const fechaEmision = new Date().toLocaleDateString('es-AR');
 
+        // DISEÑO DE RESUMEN MINIMALISTA
         kpis.innerHTML = `
             <div class="kpi-item">
                 <span>Total Alumnos</span>
-                <strong>${alumnos.length}</strong>
+                <strong style="font-size: 1.2rem; color: #eee;">${alumnos.length}</strong>
             </div>
-            <div class="kpi-item kpi-destacado" style="display: flex; flex-direction: column;">
+            <div class="kpi-item" style="display: flex; flex-direction: column;">
                 <span>Recaudación Total</span>
-                <strong>$${totalDinero.toLocaleString('es-AR')}</strong>
-                <span style="color: #e74c3c; font-size: 0.75rem; margin-top: 5px; font-weight: 600; text-transform: none;">
+                <strong style="font-size: 1.2rem; color: #eee;">$${totalDinero.toLocaleString('es-AR')}</strong>
+                <span style="color: #888; font-size: 0.75rem; margin-top: 5px; text-transform: none;">
                     Gym (30%): -$${porcentajeGimnasio.toLocaleString('es-AR')}
                 </span>
-                <span style="color: #3498db; font-size: 0.75rem; margin-top: 2px; font-weight: 600; text-transform: none;">
+                <span style="color: #eee; font-size: 0.75rem; margin-top: 2px; text-transform: none;">
                     Tu parte (70%): $${porcentajeProfesor.toLocaleString('es-AR')}
                 </span>
             </div>
             <div class="kpi-item" style="grid-column: span 2;">
                 <span>Desglose</span>
-                <strong style="font-size: 0.8rem; font-weight: 500;">${desgloseCategorias || "Sin datos"}</strong>
+                <strong style="font-size: 0.8rem; font-weight: 500; color: #aaa;">${desgloseCategorias || "Sin datos"}</strong>
             </div>
             <div class="kpi-item" style="grid-column: span 2; text-align: center; margin-top: 5px;">
-                <span>Fecha de emisión: ${fechaEmision}</span>
+                <span style="color: #666;">Fecha de emisión: ${fechaEmision}</span>
             </div>
         `;
 
@@ -2788,6 +2804,38 @@ async function cargarDatosParaInforme() {
     }
 }
 
+function dibujarHistorialInformes() {
+    const contenedor = document.getElementById("lista-historial-informes");
+    const llaveMemoria = 'historial_informes_' + profeActivoId;
+    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
+
+    contenedor.innerHTML = "";
+
+    if (historial.length === 0) {
+        contenedor.innerHTML = "<p style='text-align:center; color:#555; font-size: 0.9rem; margin-top:20px;'>Aún no descargaste ninguna planilla.</p>";
+        return;
+    }
+
+    historial.forEach((registro, index) => {
+        // Tarjetas oscuras y botón sobrio
+        contenedor.innerHTML += `
+            <div class="tarjeta-historial" style="display: flex; flex-direction: column; align-items: stretch;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p>Planilla de Alumnos</p>
+                        <span>Descargado el ${registro.fecha} a las ${registro.hora}</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                
+                <button class="btn-re-descarga" onclick="volverADescargarExcel(${index})">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Volver a descargar
+                </button>
+            </div>
+        `;
+    });
+}
 // ==========================================
 // GENERADOR DE ARCHIVO CSV (EXCEL)
 // ==========================================
@@ -2898,40 +2946,6 @@ function guardarEnHistorial(fechaString, contenidoDelExcel) {
     }
     
     localStorage.setItem(llaveMemoria, JSON.stringify(historial));
-}
-
-function dibujarHistorialInformes() {
-    const contenedor = document.getElementById("lista-historial-informes");
-    const llaveMemoria = 'historial_informes_' + profeActivoId;
-    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
-
-    contenedor.innerHTML = "";
-
-    if (historial.length === 0) {
-        contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size: 0.9rem; margin-top:20px;'>Aún no descargaste ninguna planilla.</p>";
-        return;
-    }
-
-    historial.forEach((registro, index) => {
-        // Rediseñamos la tarjeta para agregar el botón de volver a descargar abajo
-        contenedor.innerHTML += `
-            <div class="tarjeta-historial" style="display: flex; flex-direction: column; gap: 10px; align-items: stretch;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <p>Planilla de Alumnos</p>
-                        <span>Descargado el ${registro.fecha} a las ${registro.hora}</span>
-                    </div>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                </div>
-                
-                <!-- NUEVO BOTÓN: Volver a descargar -->
-                <button onclick="volverADescargarExcel(${index})" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px; font-size: 0.8rem; border-radius: 8px; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; transition: background 0.2s;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Volver a descargar
-                </button>
-            </div>
-        `;
-    });
 }
 
 // ---> LA NUEVA FUNCIÓN MAGICA

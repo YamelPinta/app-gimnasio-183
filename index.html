@@ -471,6 +471,7 @@
             <button class="btn-guardar" onclick="volverDesdeAlumnoAInicio()">Volver al Inicio</button>
         </div>
 
+        <!-- MODAL AÑADIR ALUMNO -->
         <div id="modal-alumno" class="modal-overlay" style="display: none;">
             <div class="modal-contenido">
                 <h3>Añadir Alumno</h3>
@@ -511,7 +512,6 @@
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Monto de la Cuota ($):</label>
-                    <!-- Cambiamos a type="text", sumamos inputmode para que abra el teclado numérico en celulares, y le agregamos oninput -->
                     <input type="text" inputmode="numeric" id="input-alumno-cuota" class="input-modal" placeholder="(Ej: 15.000)" oninput="formatearMiles(this)">
                 </div>
                 <div class="modal-botones">
@@ -521,6 +521,7 @@
             </div>
         </div>
 
+        <!-- MODAL EDITAR ALUMNO -->
         <div id="modal-editar-alumno" class="modal-overlay" style="display: none;">
             <div class="modal-contenido">
                 <h3>Editar Alumno</h3>
@@ -530,7 +531,7 @@
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">DNI:</label>
-                    <input type="number" id="input-alumno-dni" class="input-modal" placeholder="Ej: 35123456">
+                    <input type="number" id="input-edit-alumno-dni" class="input-modal">
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Actividad principal:</label>
@@ -570,7 +571,7 @@
                 </div>
             </div>
         </div>
-
+        
         <div id="modal-profe" class="modal-overlay" style="display: none;">
             <div class="modal-contenido">
                 <h3>Añadir Profesor</h3>
@@ -916,7 +917,7 @@
             <div class="modal-contenido modal-informe-grande">
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h3 style="margin: 0; color: #f39c12;">Informes y Planillas</h3>
+                    <h3 style="margin: 0; color: #eee; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; font-weight: 500;">Informes y Planillas</h3>
                     <button onclick="cerrarModalInformeProfe()" style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
                 </div>
 
