@@ -368,8 +368,10 @@ function entrarPerfil(id, nombre, apellido) {
     actualizarNavActivo('alumnos');
 }
 // ==========================================
-// FUNCIONES EXCLUSIVAS DEL PANEL DE ADMIN
+// FUNCIONES EXCLUSIVAS DEL PANEL DE ADMIN (ESTILO EXCEL)
 // ==========================================
+
+let datosAdminActualParaExcel = null; // Memoria para armar el Excel rápido
 
 function abrirPantallaInforme() {
     document.getElementById("pantalla-perfiles").style.display = "none";
@@ -378,86 +380,186 @@ function abrirPantallaInforme() {
     document.getElementById("pantalla-rutinas").style.display = "none";
     document.getElementById("pantalla-detalle-pack").style.display = "none";
 
-    document.getElementById("pantalla-admin").style.display = "block";
+    // ---> LA MAGIA: Cambiamos "block" por "flex" para que no se aplaste
+    document.getElementById("pantalla-admin").style.display = "flex"; 
+    
+    cambiarVistaAdmin('actual');
     cargarPanelAdmin();
     actualizarNavActivo('informe');
 }
 
+function cambiarVistaAdmin(vista) {
+    const track = document.getElementById("track-admin");
+    const btnActual = document.getElementById("tab-admin-actual");
+    const btnHistorial = document.getElementById("tab-admin-historial");
+
+    if (vista === 'actual') {
+        track.style.transform = 'translateX(0%)';
+        btnActual.classList.add("activo");
+        btnHistorial.classList.remove("activo");
+    } else {
+        track.style.transform = 'translateX(-50%)';
+        btnHistorial.classList.add("activo");
+        btnActual.classList.remove("activo");
+        dibujarHistorialAdmin(); 
+    }
+}
+
 async function cargarPanelAdmin() {
-    const contenedor = document.getElementById("contenedor-admin-general");
-    contenedor.innerHTML = "<p style='text-align:center;'>Cargando base de datos...</p>";
+    const contenedor = document.getElementById("contenedor-admin-columnas");
+    
+    // Configuración general del contenedor (Sin scroll visible)
+    contenedor.style.display = "block"; 
+    contenedor.style.overflowY = "auto";
+    contenedor.style.scrollbarWidth = "none"; 
+    contenedor.style.msOverflowStyle = "none"; 
+    
+    contenedor.innerHTML = `
+        <style>
+            #contenedor-admin-columnas::-webkit-scrollbar {
+                display: none;
+            }
+        </style>
+        <p style='text-align:center; width: 100%; padding-top: 20px; color: #888;'>Cargando base de datos...</p>
+    `;
     
     try {
-        // Traemos toda la info de golpe
         const { data: profes } = await clienteSupabase.from('profesores').select('*');
         const { data: alumnos } = await clienteSupabase.from('alumnos').select('*');
-        const { data: rutinas } = await clienteSupabase.from('rutinas_planificadas').select('*');
         
-        contenedor.innerHTML = "";
+        let htmlFilasProfes = "";
         
         if (!profes || profes.length === 0) {
-            contenedor.innerHTML = "<p style='text-align:center; color:#888;'>No hay profesores registrados.</p>";
+            contenedor.innerHTML = "<p style='text-align:center; width: 100%; color:#888;'>No hay profesores registrados.</p>";
             return;
         }
 
-        // Armamos la tarjeta por cada profe
+        let granTotalGym = 0;
+        datosAdminActualParaExcel = { profesores: [], granTotal: 0 }; 
+
         profes.forEach(profe => {
-            const alumnosDelProfe = alumnos.filter(a => a.profesor_id === profe.id);
-            let htmlAlumnos = "";
-            
-            if (alumnosDelProfe.length === 0) {
-                htmlAlumnos = "<p style='font-size:0.85rem; color:#888; margin-top: 10px;'>Aún no tiene alumnos asignados.</p>";
-            } else {
-                // Por cada alumno, buscamos sus ejercicios
-                alumnosDelProfe.forEach(alumno => {
-                    const rutinasAlumno = rutinas.filter(r => r.alumno_id === alumno.id);
-                    // Juntamos los nombres de los ejercicios sin repetir
-                    let listaEjercicios = [...new Set(rutinasAlumno.map(r => r.ejercicio_nombre))].join(", ");
-                    if(!listaEjercicios) listaEjercicios = "Sin rutina configurada";
+            const alumnosProfe = alumnos.filter(a => a.profesor_id === profe.id);
+            let totalProfeGym = 0;
+            let conteoCat = {};
+            let htmlFilasAlumnos = "";
+
+            alumnosProfe.forEach(a => {
+                let cuota = a.cuota || 0;
+                let gymCut = cuota * 0.30; 
+                totalProfeGym += gymCut;
+                granTotalGym += gymCut;
+
+                let act = a.actividad || "Sin Categoría";
+                conteoCat[act] = (conteoCat[act] || 0) + 1;
+
+                htmlFilasAlumnos += `
+                    <tr style="border-bottom: 1px solid #222;">
+                        <td style="padding: 10px 15px; color: #ddd; font-weight: 400; font-size: 0.85rem;">${a.nombre} ${a.apellido}</td>
+                        <td style="padding: 10px 15px; color: #777; font-size: 0.75rem;">${act}</td>
+                        <td style="padding: 10px 15px; text-align: right; color: #aaa; font-weight: 500; font-size: 0.75rem;">$${gymCut.toLocaleString('es-AR')}</td>
+                    </tr>
+                `;
+            });
+
+            let strCategorias = Object.entries(conteoCat).map(([c, v]) => `${c}: ${v}`).join(' | ');
+
+            datosAdminActualParaExcel.profesores.push({
+                nombre: `${profe.nombre} ${profe.apellido}`,
+                alumnos: alumnosProfe,
+                totalGym: totalProfeGym,
+                categorias: strCategorias
+            });
+
+            // TARJETA DEL PROFESOR
+            htmlFilasProfes += `
+                <div style="background: #141414; border: 1px solid #262626; border-radius: 10px; margin-bottom: 15px; overflow: hidden; display: block;">
                     
-                    htmlAlumnos += `
-                        <div style="margin-top: 10px; padding: 12px; background: #f9f9f9; border-radius: 10px; border-left: 4px solid #f39c12;">
-                            <strong style="font-size: 0.95rem; color: #2c2c2c;">${alumno.nombre} ${alumno.apellido}</strong> 
-                            <span style="font-size:0.75rem; color:#666; background: #eee; padding: 2px 6px; border-radius: 8px; margin-left: 5px;">${alumno.actividad}</span>
-                            <p style="font-size: 0.8rem; margin-top:5px; color:#555; line-height: 1.4;">
-                                <strong>Ejercicios activos:</strong> ${listaEjercicios}
-                            </p>
-                        </div>
-                    `;
-                });
-            }
-            
-            // Dibujamos la caja blanca que envuelve al profe y a sus alumnos
-            contenedor.innerHTML += `
-                <div style="background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom:12px;">
+                    <!-- BARRA DEL PROFESOR DESPLEGABLE -->
+                    <div onclick="toggleAcordeonAdmin('tabla-profe-${profe.id}', 'flecha-profe-${profe.id}')" style="background: #141414; padding: 18px; display: flex; justify-content: space-between; align-items: center; gap: 15px; cursor: pointer;">
                         
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <img src="${profe.foto_url || 'imagenes/perfil1.png'}" style="width: 45px; height: 45px; border-radius: 50%; object-fit:cover; border: 2px solid #f39c12;" onerror="this.src='imagenes/perfil1.png'">
-                            <div>
-                                <h3 style="font-size: 1.1rem; color:#2c2c2c; margin-bottom: 2px;">${profe.nombre} ${profe.apellido}</h3>
-                                <p style="font-size: 0.75rem; color:#888;">${alumnosDelProfe.length} alumnos asignados</p>
+                        <!-- Bloque Izquierdo: Flecha más pegada (gap: 10px) y textos -->
+                        <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0;">
+                            <svg id="flecha-profe-${profe.id}" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.5" width="16" style="transition: transform 0.3s; flex-shrink: 0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            <div style="display: flex; flex-direction: column; min-width: 0;">
+                                <strong style="font-size: 1rem; color: #ffffff; letter-spacing: 0.3px;">${profe.nombre} ${profe.apellido}</strong>
+                                <span style="font-size: 0.7rem; color: #777; margin-top: 2px;">${alumnosProfe.length} alumnos | ${strCategorias || "Sin alumnos"}</span>
                             </div>
                         </div>
 
-                        <button class="btn-accion-admin peligro" onclick="darDeBajaProfe('${profe.id}')" style="margin:0;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="margin-right: 4px;"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            Borrar
-                        </button>
+                        <!-- Bloque Derecho: Precio y Eliminar (Con separación garantizada) -->
+                        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0; padding-left: 10px;">
+                            <strong style="color: #ffffff; font-size: 1.1rem; font-weight: 600;">$${totalProfeGym.toLocaleString('es-AR')}</strong>
+                            <span onclick="event.stopPropagation(); darDeBajaProfe('${profe.id}')" style="color: #ff4d4d; font-size: 0.65rem; margin-top: 5px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Eliminar</span>
+                        </div>
+                        
                     </div>
-                    
-                    <div style="margin-top: 5px;">
-                        ${htmlAlumnos}
+
+                    <!-- TABLA OCULTA -->
+                    <div id="tabla-profe-${profe.id}" style="display: none; background: #0a0a0a;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead style="background: #111;">
+                                <tr style="color: #555; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">
+                                    <th style="padding: 10px 15px; font-weight: 600;">Alumno</th>
+                                    <th style="padding: 10px 15px; font-weight: 600;">Act.</th>
+                                    <th style="padding: 10px 15px; font-weight: 600; text-align: right;">30% Gym</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${htmlFilasAlumnos || "<tr><td colspan='3' style='text-align:center; padding: 15px; color: #555; font-size: 0.8rem;'>Sin alumnos asignados</td></tr>"}
+                            </tbody>
+                        </table>
                     </div>
+
                 </div>
             `;
         });
         
+        datosAdminActualParaExcel.granTotal = granTotalGym;
+        contenedor.innerHTML = htmlFilasProfes;
+        
+        // CAJA DE RECAUDACIÓN TOTAL (Mantiene proporciones idénticas)
+        const cajaGranTotal = document.getElementById("monto-gran-total").parentElement;
+        cajaGranTotal.style.background = "#141414";
+        cajaGranTotal.style.border = "1px solid #262626";
+        cajaGranTotal.style.borderLeft = "none"; 
+        cajaGranTotal.style.borderRadius = "10px";
+        cajaGranTotal.style.boxShadow = "none";
+        cajaGranTotal.style.padding = "18px";
+        cajaGranTotal.style.marginBottom = "15px";
+        
+        const tituloTotal = cajaGranTotal.querySelector("h3");
+        tituloTotal.style.color = "#777";
+        tituloTotal.style.letterSpacing = "1px";
+        
+        const monto = document.getElementById("monto-gran-total");
+        monto.style.color = "#ffffff";
+        monto.style.fontSize = "2.2rem";
+        monto.style.marginTop = "4px";
+        monto.innerText = `$${granTotalGym.toLocaleString('es-AR')}`;
+        
     } catch (e) {
         console.error(e);
-        contenedor.innerHTML = "<p>Error al cargar el panel.</p>";
+        contenedor.innerHTML = "<p style='color:red; text-align:center;'>Error al cargar el panel.</p>";
     }
 }
+
+// ---> NUEVA FUNCIÓN: EL MOTOR DEL ACORDEÓN <---
+// (Pegá esto justo debajo de cargarPanelAdmin)
+function toggleAcordeonAdmin(idTabla, idFlecha) {
+    const tabla = document.getElementById(idTabla);
+    const flecha = document.getElementById(idFlecha);
+    
+    // Si está oculto, lo mostramos y giramos la flechita
+    if (tabla.style.display === "none" || tabla.style.display === "") {
+        tabla.style.display = "block";
+        flecha.style.transform = "rotate(180deg)"; 
+    } else {
+        // Si está abierto, lo ocultamos y la flecha vuelve a apuntar abajo
+        tabla.style.display = "none";
+        flecha.style.transform = "rotate(0deg)"; 
+    }
+}
+
 
 function darDeBajaProfe(idAEliminar) {
     pedirConfirmacion(
@@ -482,12 +584,133 @@ function darDeBajaProfe(idAEliminar) {
                 if (error) throw error;
                 
                 // Actualizamos las listas al instante
-                cargarPanelAdmin(); // Refresca la pantalla que estamos viendo
-                cargarProfesores(); // Refresca la grilla principal de forma invisible
+                cargarPanelAdmin(); // Refresca la pantalla del panel admin
+                cargarProfesores(); // Refresca la grilla principal de perfiles
                 
             } catch (e) { mostrarAlerta("Error al dar de baja: " + e.message); }
         }
     );
+}
+
+// Lógica de Descarga Global
+function descargarExcelAdmin() {
+    if (!datosAdminActualParaExcel || datosAdminActualParaExcel.profesores.length === 0) {
+        mostrarAlerta("Sin datos", "No hay información para generar el reporte.");
+        return;
+    }
+
+    const fechaEmision = new Date().toLocaleDateString('es-AR');
+    const horaEmision = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+
+    let matrizExcel = [];
+
+    matrizExcel.push(["INFORME GLOBAL DE PROFESORES Y GIMNASIO"]);
+    matrizExcel.push(["Fecha de emisión:", fechaEmision, "Hora:", horaEmision]);
+    matrizExcel.push([]);
+    matrizExcel.push(["RECAUDACIÓN TOTAL DEL GIMNASIO (30%):", `$${datosAdminActualParaExcel.granTotal.toLocaleString('es-AR')}`]);
+    matrizExcel.push([]);
+
+    datosAdminActualParaExcel.profesores.forEach(profe => {
+        matrizExcel.push(["PROFESOR:", profe.nombre]);
+        matrizExcel.push(["Total Alumnos:", profe.alumnos.length, "Recaudación Gym (30%):", `$${profe.totalGym.toLocaleString('es-AR')}`]);
+        matrizExcel.push(["Desglose por Categoría:", profe.categorias]);
+        matrizExcel.push([]); // Espacio
+        
+        // Cabeceras de los alumnos de ESTE profe
+        matrizExcel.push(["Nombre Alumno", "Categoría", "Cuota Total", "Aporte al Gym (30%)"]);
+        
+        profe.alumnos.forEach(a => {
+            let cuota = a.cuota || 0;
+            let gymCut = cuota * 0.30;
+            matrizExcel.push([
+                `${a.nombre} ${a.apellido}`,
+                a.actividad || "Sin Categoría",
+                `$${cuota.toLocaleString('es-AR')}`,
+                `$${gymCut.toLocaleString('es-AR')}`
+            ]);
+        });
+        
+        matrizExcel.push([]); // Separador visual entre profes
+        matrizExcel.push([]);
+    });
+
+    const libroExcel = XLSX.utils.book_new();
+    const hojaExcel = XLSX.utils.aoa_to_sheet(matrizExcel);
+    
+    hojaExcel['!cols'] = [{wch: 30}, {wch: 20}, {wch: 25}, {wch: 25}];
+
+    XLSX.utils.book_append_sheet(libroExcel, hojaExcel, "Resumen Global");
+
+    const fechaArchivo = fechaEmision.replace(/\//g, '-');
+    XLSX.writeFile(libroExcel, `Informe_GLOBAL_Gimnasio_${fechaArchivo}.xlsx`);
+
+    guardarHistorialAdmin(fechaArchivo, JSON.stringify(matrizExcel));
+    mostrarAlerta("¡Descarga Exitosa!", "La planilla global del gimnasio se descargó correctamente.");
+}
+
+function guardarHistorialAdmin(fechaString, contenidoDelExcel) {
+    const llaveMemoria = 'historial_admin_global';
+    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
+    
+    const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    historial.unshift({ fecha: fechaString, hora: hora, datos: contenidoDelExcel }); 
+    
+    if (historial.length > 15) historial.pop(); 
+    localStorage.setItem(llaveMemoria, JSON.stringify(historial));
+}
+
+function dibujarHistorialAdmin() {
+    const contenedor = document.getElementById("lista-historial-admin");
+    const llaveMemoria = 'historial_admin_global';
+    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
+
+    contenedor.innerHTML = "";
+
+    if (historial.length === 0) {
+        contenedor.innerHTML = "<p style='text-align:center; color:#555; font-size: 0.9rem; margin-top:20px;'>Aún no descargaste ninguna planilla global.</p>";
+        return;
+    }
+
+    historial.forEach((registro, index) => {
+        contenedor.innerHTML += `
+            <div class="tarjeta-historial" style="display: flex; flex-direction: column; align-items: stretch;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p>Planilla Global (Gimnasio)</p>
+                        <span>Descargado el ${registro.fecha} a las ${registro.hora}</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                
+                <button class="btn-re-descarga" onclick="volverADescargarExcelAdmin(${index})">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Volver a descargar
+                </button>
+            </div>
+        `;
+    });
+}
+
+function volverADescargarExcelAdmin(index) {
+    const llaveMemoria = 'historial_admin_global';
+    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
+    const registro = historial[index];
+    
+    if (!registro || !registro.datos) return;
+
+    try {
+        const matrizRecuperada = JSON.parse(registro.datos);
+        const libroExcel = XLSX.utils.book_new();
+        const hojaExcel = XLSX.utils.aoa_to_sheet(matrizRecuperada);
+        hojaExcel['!cols'] = [{wch: 30}, {wch: 20}, {wch: 25}, {wch: 25}];
+        
+        XLSX.utils.book_append_sheet(libroExcel, hojaExcel, "Copia Global");
+        XLSX.writeFile(libroExcel, `Copia_GLOBAL_${registro.fecha}.xlsx`);
+        mostrarAlerta("¡Re-descarga Exitosa!", "El informe global se descargó nuevamente.");
+    } catch (e) {
+        console.error(e);
+        mostrarAlerta("Error", "No se pudo recuperar el archivo.");
+    }
 }
 
 function volverAPerfiles() {
