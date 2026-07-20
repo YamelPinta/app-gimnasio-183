@@ -668,7 +668,7 @@
         <div id="modal-ejercicio" class="modal-overlay" style="display: none;">
             <div class="modal-contenido">
                 <h3>Añadir Ejercicio</h3>
-                <button onclick="abrirModalSeleccionarPack()" style="width: 100%; margin: 15px 0; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; background-color: rgba(255, 255, 255, 0.863); color: #111; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.15);">
+                <button onclick="abrirModalSeleccionarPack()" style="width: 100%; margin: 15px 0; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; background-color: #ff9900; color: #ffffff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 153, 0, 0.35);">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                     Elegir de Rutinas Predefinidas
                 </button>
@@ -688,10 +688,13 @@
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Ejercicio:</label>
-                    <!-- NUEVO: Ahora es un input de texto, pero está conectado a una lista -->
-                    <input type="text" id="input-ej-nombre" class="input-modal" placeholder="Elegí de la lista o escribí uno nuevo..." list="opciones-ejercicios">
-                    <!-- ACÁ SE INYECTAN LAS OPCIONES INVISIBLES -->
-                    <datalist id="opciones-ejercicios"></datalist>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="input-ej-nombre" class="input-modal" placeholder="Escribí o buscá en la lista..." style="flex: 1; margin: 0;">
+                        <!-- BOTÓN QUE ABRE LA VENTANA DE LA LISTA -->
+                        <button type="button" class="btn-guardar" onclick="abrirModalListaEjercicios('input-ej-nombre', 'select-ej-zona')" style="padding: 0 15px; margin: 0; background: #ff9900;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Series y Repeticiones:</label>
@@ -732,8 +735,14 @@
                 <h3>Añadir al Pack</h3>
                 <div class="campo-detalle"><select id="select-pack-ej-zona" class="input-modal" onchange="actualizarListaEjerciciosPack()"><option value="">Zona muscular...</option><option value="Pecho">Pecho</option><option value="Espalda">Espalda</option><option value="Hombros">Hombros</option><option value="Piernas">Piernas</option><option value="Glúteos">Glúteos</option><option value="Brazos">Brazos</option><option value="Core">Core / Abdominales</option></select></div>
                 <div class="campo-detalle">
-                    <input type="text" id="input-pack-ej-nombre" class="input-modal" placeholder="Elegí o escribí un ejercicio..." list="opciones-pack-ejercicios">
-                    <datalist id="opciones-pack-ejercicios"></datalist>
+                    <label class="label-modal">Ejercicio:</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="input-pack-ej-nombre" class="input-modal" placeholder="Escribí o buscá en la lista..." style="flex: 1; margin: 0;">
+                        <!-- BOTÓN QUE ABRE LA VENTANA DE LA LISTA -->
+                        <button type="button" class="btn-guardar" onclick="abrirModalListaEjerciciosPack('input-pack-ej-nombre', 'select-pack-ej-zona')" style="padding: 0 15px; margin: 0; background: #ff9900;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="campo-detalle"><input type="text" id="input-pack-ej-series" class="input-modal" placeholder="Series y Reps"></div>
                 <div class="campo-detalle"><input type="text" id="input-pack-ej-descanso" class="input-modal" placeholder="Descanso"></div>
@@ -1019,6 +1028,19 @@
                 <p style="font-size: 0.95rem; color: #e4e4e4; margin-bottom: 20px; line-height: 1.5;">Parece que te quedaste sin señal. No podrás guardar o modificar datos hasta que vuelva la conexión.</p>
                 <!-- Botón rojo en lugar de naranja para indicar precaución -->
                 <button class="btn-guardar btn-rojo" onclick="document.getElementById('modal-offline').style.display='none'" style="width: 100%; font-size: 1.05rem; padding: 12px;">Entendido</button>
+            </div>
+        </div>
+
+        <!-- NUEVO: MODAL SELECTOR EMERGENTE DE EJERCICIOS -->
+        <div id="modal-lista-ejercicios" class="modal-overlay" style="display: none; z-index: 99999;">
+            <div class="modal-contenido" style="max-height: 80vh; display: flex; flex-direction: column; padding: 20px;">
+                <h3 style="margin-bottom: 15px; text-align: center; color: #fff;">Elegí un ejercicio</h3>
+                
+                <!-- ACÁ ADENTRO SE CREAN LOS BOTONES SOLOS -->
+                <div id="contenedor-botones-ejercicios" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; padding-right: 5px;">
+                </div>
+                
+                <button class="btn-guardar btn-rojo" onclick="document.getElementById('modal-lista-ejercicios').style.display='none'" style="margin-top: 15px; width: 100%;">Cancelar</button>
             </div>
         </div>
 

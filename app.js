@@ -45,26 +45,7 @@ const catalogoGlobal = {
     }
 };
 
-// Actualiza la lista desplegable del ejercicio normal
-function actualizarListaEjercicios() {
-    const zonaSeleccionada = document.getElementById("select-ej-zona").value;
-    const datalistNombre = document.getElementById("opciones-ejercicios");
-    datalistNombre.innerHTML = "";
-    if (!zonaSeleccionada) return;
 
-    // Detectamos en qué barra estamos
-    let catActual = "ENTRENAMIENTO"; 
-    if (categoriaSeleccionada) {
-        const cat = categoriaSeleccionada.toUpperCase();
-        if (cat === "MOVILIDAD" || cat === "ENTRADA EN CALOR") catActual = cat;
-    }
-
-    // Buscamos los ejercicios de esa barra y esa zona
-    const ejercicios = catalogoGlobal[catActual][zonaSeleccionada] || [];
-    ejercicios.forEach(ej => {
-        datalistNombre.innerHTML += `<option value="${ej}">`;
-    });
-}
 
 function pedirConfirmacion(titulo, mensaje, textoBoton, funcionAConfirmar) {
     document.getElementById("titulo-confirmacion").innerText = titulo;
@@ -2313,25 +2294,88 @@ function abrirModalEjercicioPack() {
     document.getElementById("input-pack-ej-descanso").value = "";
 }
 
-// Actualiza la lista desplegable del modal de Packs
-function actualizarListaEjerciciosPack() {
-    const zonaSeleccionada = document.getElementById("select-pack-ej-zona").value;
-    const datalistNombre = document.getElementById("opciones-pack-ejercicios");
-    datalistNombre.innerHTML = ""; 
-    if(!zonaSeleccionada) return;
+// ==========================================
+// NUEVO SISTEMA DE LISTA DE EJERCICIOS EMERGENTE
+// ==========================================
+let inputDestinoEjercicio = ""; // Memoria para saber qué cajita rellenar
+
+// 1. Abre la lista para una rutina normal
+function abrirModalListaEjercicios(idInputDestino, idSelectZona) {
+    const zona = document.getElementById(idSelectZona).value;
+    if (!zona) {
+        mostrarAlerta("Atención", "Primero elegí una Zona Muscular / Tipo en la cajita de arriba.");
+        return;
+    }
+
+    inputDestinoEjercicio = idInputDestino; // Guardamos si es el input normal o el del pack
+    const contenedor = document.getElementById("contenedor-botones-ejercicios");
+    contenedor.innerHTML = ""; // Limpiamos la lista anterior
+
+    let catActual = "ENTRENAMIENTO"; 
+    if (categoriaSeleccionada) {
+        const cat = categoriaSeleccionada.toUpperCase();
+        if (cat === "MOVILIDAD" || cat === "ENTRADA EN CALOR") catActual = cat;
+    }
+
+    const ejercicios = catalogoGlobal[catActual][zona] || [];
     
+    if (ejercicios.length === 0) {
+         contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>No hay ejercicios precargados en esta zona.</p>";
+    } else {
+        ejercicios.forEach(ej => {
+            const btn = document.createElement("button");
+            btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; border-radius: 10px; font-size: 1.05rem; background: #2c3e50; color: #fff; border: 1px solid #34495e; cursor: pointer; transition: 0.2s;";
+            btn.innerText = ej;
+            btn.onclick = () => seleccionarEjercicioDesdeLista(ej);
+            contenedor.appendChild(btn);
+        });
+    }
+    document.getElementById("modal-lista-ejercicios").style.display = "flex";
+}
+
+// 2. Abre la lista para los packs predefinidos (mezcla todas las zonas)
+function abrirModalListaEjerciciosPack(idInputDestino, idSelectZona) {
+    const zona = document.getElementById(idSelectZona).value;
+    if (!zona) {
+        mostrarAlerta("Atención", "Primero elegí una Zona Muscular / Tipo en la cajita de arriba.");
+        return;
+    }
+
+    inputDestinoEjercicio = idInputDestino;
+    const contenedor = document.getElementById("contenedor-botones-ejercicios");
+    contenedor.innerHTML = "";
+
     let ejerciciosDelPack = [];
     Object.keys(catalogoGlobal).forEach(granCategoria => {
-        if (catalogoGlobal[granCategoria][zonaSeleccionada]) {
-            catalogoGlobal[granCategoria][zonaSeleccionada].forEach(ej => {
+        if (catalogoGlobal[granCategoria][zona]) {
+            catalogoGlobal[granCategoria][zona].forEach(ej => {
                 if (!ejerciciosDelPack.includes(ej)) ejerciciosDelPack.push(ej);
             });
         }
     });
 
-    ejerciciosDelPack.sort().forEach(ej => {
-        datalistNombre.innerHTML += `<option value="${ej}">`;
-    });
+    ejerciciosDelPack.sort();
+
+    if (ejerciciosDelPack.length === 0) {
+         contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>No hay ejercicios.</p>";
+    } else {
+        ejerciciosDelPack.forEach(ej => {
+            const btn = document.createElement("button");
+            btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; border-radius: 10px; font-size: 1.05rem; background: #2c3e50; color: #fff; border: 1px solid #34495e; cursor: pointer; transition: 0.2s;";
+            btn.innerText = ej;
+            btn.onclick = () => seleccionarEjercicioDesdeLista(ej);
+            contenedor.appendChild(btn);
+        });
+    }
+    document.getElementById("modal-lista-ejercicios").style.display = "flex";
+}
+
+// 3. Cuando el profe toca un botón de la lista emergente
+function seleccionarEjercicioDesdeLista(nombreEjercicio) {
+    // Escribe el nombre en la cajita correcta
+    document.getElementById(inputDestinoEjercicio).value = nombreEjercicio;
+    // Cierra la ventana emergente de la lista
+    document.getElementById("modal-lista-ejercicios").style.display = "none";
 }
 
 async function guardarEjercicioEnPack() {
