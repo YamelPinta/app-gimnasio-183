@@ -125,10 +125,9 @@ function cerrarModalAlerta() {
 document.addEventListener("DOMContentLoaded", () => {
     
     // ---> NUEVO: Bloquear el gestor de contraseñas de Google en toda la app
-    document.querySelectorAll('input').forEach(input => {
-        // Le pasamos una palabra inventada para que Chrome no entienda qué es y apague la barra
+    // EXCEPTO en los inputs que tienen un "list" (para que el desplegable de ejercicios funcione en el celu)
+    document.querySelectorAll('input:not([list])').forEach(input => {
         input.setAttribute('autocomplete', 'nope'); 
-        // Esta línea extra apaga otros gestores como LastPass o Samsung Pass
         input.setAttribute('data-lpignore', 'true'); 
     });
 
