@@ -1,6 +1,6 @@
 {
-  "name": "Gimnasio 18.3",
-  "short_name": "18.3",
+  "name": "Gimnasio ClubHouse 18.3",
+  "short_name": "ClubHouse",
   "description": "App de gestión de alumnos y rutinas",
   "start_url": ".",
   "display": "standalone",

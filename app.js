@@ -15,34 +15,54 @@ let alumnoDataActual = null; // Guarda temporalmente toda la info del alumno act
 
 let esAdminActual = false; // <--- NUEVA MEMORIA
 
-// --- DICCIONARIO DE EJERCICIOS ---
-const catalogoEjercicios = {
-    "Pecho": ["Press de banca", "Press inclinado con mancuernas", "Cruces en polea", "Flexiones de brazos"],
-    "Espalda": ["Peso muerto", "Dominadas", "Remo con barra", "Remo en polea baja"],
-    "Hombros": ["Vuelos laterales", "Press militar", "Vuelos frontales"],
-    "Piernas": ["Back squat","Sentadilla","Peso muerto", "Estocadas"],
-    "Glúteos": ["Hip thrust", "Peso muerto","Patada de glúteo en polea", "Sentadilla búlgara"],
-    "Brazos": ["Curl de bíceps con barra", "Curl martillo", "Extensiones de tríceps en polea"],
-    "Core": ["Plancha abdominal", "Elevación de piernas"]
+// --- SÚPER DICCIONARIO DE EJERCICIOS (3 CATEGORÍAS PRINCIPALES) ---
+const catalogoGlobal = {
+    "MOVILIDAD": {
+        "Cuello y Cervical": ["Flexión-extensión de cuello", "Rotación de cuello", "Inclinación cervical", "Círculos cervicales"],
+        "Hombros y Escápulas": ["Círculos de hombros", "Círculos de brazos", "Aperturas de brazos", "Rotación de hombro", "Pasadas de hombro", "Elevación escapular", "Movilidad escapular", "Ángeles en pared", "Rotación en cuadrupedia", "Dislocaciones con banda"],
+        "Columna y Tronco": ["Gato-vaca", "Rotación torácica", "Enhebrar la aguja", "Rotación de tronco", "Flexión lateral", "Extensión torácica", "Libro abierto", "Ondulación de columna"],
+        "Muñecas y Codos": ["Círculos de muñeca", "Flexión-extensión de muñeca", "Balanceo de muñecas", "Muñecas invertidas", "Rotación de antebrazo", "Movilidad de codos"],
+        "Cadera": ["Círculos de cadera", "Apertura de cadera", "CARs de cadera", "Balanceo frontal", "Balanceo lateral", "Cadera 90/90", "Rotación 90/90", "Estocada de cadera", "Estocada con rotación", "Sentadilla profunda", "Balanceo de aductores", "Movilidad de rana"],
+        "Rodillas y Tobillos": ["Flexión de rodilla", "Círculos de rodilla", "Rodilla al frente", "Movilidad de rodilla", "Rotación de tibia", "Círculos de tobillo", "Flexión de tobillo", "Rodilla a la pared", "Punta-talón", "Movilidad de dedos", "Movilidad del pie", "Tobillos en sentadilla"],
+        "Global": ["World's Greatest Stretch", "Inchworm", "Spiderman con rotación", "Sentadilla y alcance", "Estocadas multidireccionales", "Oso a cobra", "Perro alternado", "Plancha a sentadilla"]
+    },
+    "ENTRADA EN CALOR": {
+        "Activación y Cardio": ["Marcha", "Trote suave", "Jumping jacks", "Pasos laterales", "Talones al glúteo", "Rodillas arriba", "Skaters", "Saltos suaves", "Salto de soga", "Trote continuo", "Caminata rápida", "Trote frontal", "Trote hacia atrás", "Shuffle lateral", "Carioca", "Caminata en puntas", "Caminata sobre talones", "Progresiones", "Zigzag", "Shuttle run"],
+        "Piernas": ["Sentadilla libre", "Sentadilla con pausa", "Sentadilla y alcance", "Estocadas alternadas", "Estocadas atrás", "Estocadas laterales", "Estocadas caminando", "Buenos días", "Bisagra de cadera", "Puente de glúteos", "Puente alternado", "Elevación de gemelos", "Step-up", "Pulsos de sentadilla", "Monster walk", "Pasos laterales con banda"],
+        "Tren Superior": ["Flexiones con rodillas", "Flexiones", "Flexiones en pared", "Flexiones escapulares", "Toques de hombro", "Inchworm", "Remo con banda", "Pull-aparts", "Rotación externa", "Press con banda", "Jalón con banda", "Elevaciones frontales", "Golpes al aire", "Círculos de brazos"],
+        "Core": ["Plancha", "Plancha lateral", "Plancha alta", "Toques de hombro", "Escaladores lentos", "Mountain climbers", "Dead bug", "Bird dog", "Hollow hold suave", "Hollow hold", "Rodillas al pecho", "Bear hold", "Caminata de oso", "Bear crawl", "Plancha a perro", "Rotaciones de tronco"],
+        "Dinámicos y Coordinación": ["Pies rápidos", "Dentro-fuera lateral", "Dentro-fuera frontal", "Saltos laterales", "Saltos frontal-trasero", "Toque lateral", "Skipping bajo", "Skipping alto", "Saltos alternados", "Cambios de dirección", "Escalera básica", "Dos apoyos", "Escalera lateral", "Ejercicio de reacción", "Inchworm con flexión", "Spiderman", "Estocada y rodilla", "Burpee caminando", "Plancha a sentadilla", "Sentadilla con salto", "Burpee básico", "Oso lateral", "Estocada con rotación", "Squat thrust"],
+        "Con Elementos": ["Remo suave", "Bicicleta suave", "Caminata en cinta", "Trote en cinta", "Air bike", "Soga", "Battle rope suave", "Empuje de trineo liviano", "Arrastre de trineo", "Step-up bajo", "Swing liviano", "Peso muerto técnico", "Remo técnico", "Press técnico"]
+    },
+    "ENTRENAMIENTO": {
+        "Piernas y Glúteos": ["Sentadilla", "Back squat", "Front squat", "Goblet squat", "Sentadilla sumo", "Búlgara", "Pistol squat", "Estocada frontal", "Estocada atrás", "Estocada lateral", "Estocadas caminando", "Prensa", "Hack squat", "Extensión de piernas", "Curl femoral", "Curl femoral sentado", "Peso muerto", "Peso muerto rumano", "Buenos días", "Hip thrust", "Puente de glúteos", "Patada de glúteo", "Abducción de cadera", "Aducción de cadera", "Step-up", "Gemelos de pie", "Gemelos sentado", "Thruster", "Clean", "Snatch"],
+        "Pecho": ["Press banca", "Press con mancuernas", "Press inclinado", "Press inclinado mancuernas", "Press declinado", "Press de pecho", "Flexiones", "Flexiones asistidas", "Flexiones inclinadas", "Flexiones declinadas", "Aperturas", "Peck deck", "Cruce de poleas", "Fondos de pecho", "Press con banda"],
+        "Espalda": ["Dominadas", "Dominadas asistidas", "Chin-ups", "Jalón al pecho", "Jalón cerrado", "Remo con barra", "Remo con mancuerna", "Remo en polea", "Remo en máquina", "Remo apoyado", "Remo invertido", "Pullover en polea", "Pullover", "Peso muerto", "Peso muerto rumano", "Hiperextensiones", "Buenos días", "Face pull", "Clean", "Snatch", "Muscle-up"],
+        "Hombros": ["Press militar", "Press de hombros", "Press Arnold", "Press en máquina", "Elevaciones laterales", "Elevaciones frontales", "Pájaros con mancuernas", "Posteriores en máquina", "Face pull", "Remo al mentón", "Encogimientos", "Parada de manos", "Flexión vertical", "Pike push-up"],
+        "Brazos": ["Curl con barra", "Curl barra EZ", "Curl con mancuernas", "Curl alternado", "Curl martillo", "Curl concentrado", "Curl predicador", "Curl inclinado", "Curl en polea", "Curl con banda", "Chin-ups", "Triceps en polea", "Tríceps con cuerda", "Press francés", "Extensión sobre cabeza", "Patada de tríceps", "Press cerrado", "Fondos", "Fondos en banco", "Flexiones diamante", "Tríceps unilateral"],
+        "Core y Abdomen": ["Plancha", "Plancha lateral", "Toques de hombro", "Crunch", "Crunch en máquina", "Elevación de piernas", "Rodillas colgado", "Piernas colgado", "Rueda abdominal", "Dead bug", "Bird dog", "Hollow hold", "Arch hold", "Superman", "Mountain climbers", "Giro ruso", "Crunch bicicleta", "Pallof press", "Leñador en polea", "L-sit", "Front lever", "Back lever"],
+        "Cuerpo Completo / Cardio": ["Burpee", "Burpee con salto", "Thruster", "Thruster mancuernas", "Devil press", "Clean", "Power clean", "Clean and jerk", "Snatch", "Snatch mancuerna", "Peso muerto y remo", "Kettlebell swing", "Swing ruso", "Swing americano", "Turkish get-up", "Sentadilla y press", "Man maker", "Caminata de oso", "Caminata del granjero", "Arrastre de trineo", "Empuje de trineo", "Correr", "Sprint", "Bicicleta", "Air bike", "Remo", "Ski erg", "Soga", "Box jump", "Battle ropes", "Shuttle run", "Saltos laterales"]
+    }
 };
 
-// Esta función actualiza la segunda cajita cuando cambias la zona
+// Actualiza la lista desplegable del ejercicio normal
 function actualizarListaEjercicios() {
     const zonaSeleccionada = document.getElementById("select-ej-zona").value;
-    const selectNombre = document.getElementById("select-ej-nombre");
-    
-    // Limpiamos la lista anterior
-    selectNombre.innerHTML = "";
+    const datalistNombre = document.getElementById("opciones-ejercicios");
+    datalistNombre.innerHTML = "";
+    if (!zonaSeleccionada) return;
 
-    if (!zonaSeleccionada) {
-        selectNombre.innerHTML = '<option value="">Primero elegí una zona...</option>';
-        return;
+    // Detectamos en qué barra estamos
+    let catActual = "ENTRENAMIENTO"; 
+    if (categoriaSeleccionada) {
+        const cat = categoriaSeleccionada.toUpperCase();
+        if (cat === "MOVILIDAD" || cat === "ENTRADA EN CALOR") catActual = cat;
     }
 
-    // Buscamos los ejercicios correspondientes y los agregamos
-    const ejercicios = catalogoEjercicios[zonaSeleccionada];
+    // Buscamos los ejercicios de esa barra y esa zona
+    const ejercicios = catalogoGlobal[catActual][zonaSeleccionada] || [];
     ejercicios.forEach(ej => {
-        selectNombre.innerHTML += `<option value="${ej}">${ej}</option>`;
+        datalistNombre.innerHTML += `<option value="${ej}">`;
     });
 }
 
@@ -68,10 +88,32 @@ document.getElementById("btn-confirmar-accion").addEventListener("click", () => 
     }
 });
 
-// --- SISTEMA DE ALERTA VISUAL (Reemplaza al alert común) ---
+// --- SISTEMA DE ALERTA VISUAL INTELIGENTE ---
 function mostrarAlerta(titulo, mensaje) {
     document.getElementById("titulo-alerta").innerText = titulo;
     document.getElementById("texto-alerta").innerText = mensaje;
+    
+    // El cerebro: Detecta palabras clave en el título para saber si es un éxito
+    const tituloMin = titulo.toLowerCase();
+    const esExito = tituloMin.includes('éxito') || 
+                    tituloMin.includes('exitosa') || 
+                    tituloMin.includes('registrada') || 
+                    tituloMin.includes('copiada') || 
+                    tituloMin.includes('limpio');
+
+    const contenedorIcono = document.getElementById("contenedor-icono-alerta");
+    const tituloDOM = document.getElementById("titulo-alerta");
+
+    if (esExito) {
+        // Ícono SVG de Pulgar Arriba (Verde) con animación
+        contenedorIcono.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" class="anim-exito"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`;
+        tituloDOM.style.color = "#2ecc71"; // Título verde
+    } else {
+        // Ícono SVG de Peligro / Warning (Naranja) con animación
+        contenedorIcono.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2.5" width="48" height="48" class="anim-alerta"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+        tituloDOM.style.color = "#ffffff"; // Título blanco
+    }
+
     document.getElementById("modal-alerta").style.display = "flex";
 }
 
@@ -81,6 +123,15 @@ function cerrarModalAlerta() {
 
 // --- 2. ARRANQUE DE LA APP, MEMORIA Y NAVEGACIÓN INICIAL ---
 document.addEventListener("DOMContentLoaded", () => {
+    
+    // ---> NUEVO: Bloquear el gestor de contraseñas de Google en toda la app
+    document.querySelectorAll('input').forEach(input => {
+        // Le pasamos una palabra inventada para que Chrome no entienda qué es y apague la barra
+        input.setAttribute('autocomplete', 'nope'); 
+        // Esta línea extra apaga otros gestores como LastPass o Samsung Pass
+        input.setAttribute('data-lpignore', 'true'); 
+    });
+
     const sesionGuardada = localStorage.getItem('sesionGimnasio');
 
     if (sesionGuardada === 'activa') {
@@ -579,8 +630,8 @@ async function cargarAlumnos() {
             const textoBotonPago = estaAlDia ? "Pagado" : "Marcar Pago";
             const claseBotonPago = estaAlDia ? "btn-pago-realizado" : "btn-pago-pendiente";
 
-            // ---> NUEVO: Preparamos el texto de la cuota para mostrarlo
-            const cuotaTexto = alumno.cuota ? `$${alumno.cuota}` : "$ -";
+            // ---> CORRECCIÓN: Preparamos el texto de la cuota SIN el $ duplicado y con puntos
+            const cuotaTexto = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "-";
 
             // Lógica del botón borrar (solo aparece si el modo está activo)
             let htmlBotonBorrar = "";
@@ -592,10 +643,13 @@ async function cargarAlumnos() {
                 `;
             }
 
-            // ---> NUEVO: LÓGICA DE ÚLTIMA SESIÓN (ASISTENCIA)
+            // LÓGICA DE ÚLTIMA SESIÓN (ASISTENCIA)
             let textoUltimaSesion = "Sin asistencias";
             let colorUltimaSesion = "#777"; // Gris
             let iconoUltimaSesion = `<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>`; // Reloj
+
+            const fechaHoyStr = new Date().toISOString().split('T')[0]; // Saca la fecha de hoy
+            const estaPresenteHoy = (alumno.ultima_sesion === fechaHoyStr); // Revisa si ya vino hoy
 
             if (alumno.ultima_sesion) {
                 const fechaUltima = new Date(alumno.ultima_sesion + 'T00:00:00');
@@ -618,6 +672,29 @@ async function cargarAlumnos() {
                 }
             }
 
+            // CREAMOS EL BOTÓN INTELIGENTE (Presente vs Asistencia)
+            let htmlBotonAsistencia = "";
+            if (estaPresenteHoy) {
+                htmlBotonAsistencia = `
+                    <button class="btn-asistencia-presente" onclick="event.stopPropagation(); deshacerAsistencia('${alumno.id}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Presente
+                    </button>
+                `;
+            } else {
+                htmlBotonAsistencia = `
+                    <button class="btn-asistencia-pendiente" onclick="event.stopPropagation(); abrirModalCheckin('${alumno.id}')">
+                        Asistencia
+                    </button>
+                `;
+            }
+
+            // LÓGICA DE ETIQUETA DE MODALIDAD CON LA TIPOGRAFÍA DEL NOMBRE (Poppins)
+            const modalidad = alumno.tipo_rutina || "Con rutina";
+            let etiquetaModalidad = modalidad === "Libre" 
+                ? `<span class="badge-libre" style="margin-left: 0; font-family: inherit; font-size: 0.7rem;">ALUMNO LIBRE</span>` 
+                : `<span style="font-family: inherit; font-size: 0.75rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">CON RUTINA</span>`;
+
             // Construcción final de la tarjeta
             contenedor.innerHTML += `
                 <div class="card-alumno" onclick="abrirGrillaAlumno('${alumno.id}')">
@@ -626,24 +703,23 @@ async function cargarAlumnos() {
                     <div class="info-central">
                         <h3>${alumno.nombre} ${alumno.apellido}</h3>
                         
-                        <div class="info-detalle">
-                            <div class="punto-naranja"></div> ${actividadReal}
+                        <div class="info-detalle" style="margin-bottom: 6px;">
+                            ${etiquetaModalidad}
                         </div>
                         
+                        <!-- CORRECCIÓN: El punto naranja ahora es más grande (r="7.5" en vez de 5) -->
                         <div class="info-detalle">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 5px;"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-                            ${objetivoReal}
+                            <svg viewBox="0 0 24 24" fill="#f39c12" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;"><circle cx="12" cy="12" r="7.5"></circle></svg>
+                            ${actividadReal}
                         </div>
                         
-                        <!-- NUEVO RENGLÓN: Cuota debajo del objetivo -->
                         <div class="info-detalle" style="margin-top: 2px;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="14" height="14" style="margin-right: 5px;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                             <span style="color: #f39c12; font-weight: 600;">${cuotaTexto}</span>
                         </div>
 
-                        <!-- NUEVO RENGLÓN: Seguimiento de última sesión -->
                         <div class="info-detalle" style="margin-top: 2px;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="${colorUltimaSesion}" stroke-width="2" width="14" height="14" style="margin-right: 5px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="${colorUltimaSesion}" stroke-width="2" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;">
                                 ${iconoUltimaSesion}
                             </svg>
                             <span style="color: ${colorUltimaSesion}; font-weight: 500;">${textoUltimaSesion}</span>
@@ -658,11 +734,7 @@ async function cargarAlumnos() {
                                 onclick="event.stopPropagation(); modificarCicloPago('${alumno.id}', '${alumno.vencimiento_cuota}', ${estaAlDia})">
                                 ${textoBotonPago}
                             </button>
-                            <!-- NUEVO: BOTÓN DE ASISTENCIA RÁPIDA -->
-                            <button class="btn-checkin-rapido" onclick="event.stopPropagation(); abrirModalCheckin('${alumno.id}')">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                Asistencia
-                            </button>
+                            ${htmlBotonAsistencia}
                         </div>
                     </div>
                 </div>
@@ -688,7 +760,6 @@ async function cargarAlumnos() {
 function abrirModalAlumno() {
     document.getElementById("modal-alumno").style.display = "flex";
     
-    // Función salvavidas para escribir sin que se rompa nada si falta el HTML
     const setValor = (id, valor) => {
         const el = document.getElementById(id);
         if (el) el.value = valor;
@@ -696,6 +767,7 @@ function abrirModalAlumno() {
 
     setValor("input-alumno-nombre", "");
     setValor("input-alumno-dni", "");
+    setValor("select-alumno-tipo", "Con rutina"); // <-- NUEVO
     setValor("select-alumno-actividad", "Musculación");
     setValor("input-alumno-objetivo", "");
     setValor("input-alumno-edad", "");
@@ -708,7 +780,6 @@ function abrirModalAlumno() {
 }
 
 async function guardarAlumnoEnBD() {
-    // Función salvavidas para leer sin que explote la app
     const getValor = (id) => {
         const el = document.getElementById(id);
         return el ? el.value.trim() : "";
@@ -717,6 +788,9 @@ async function guardarAlumnoEnBD() {
     const nombreCompleto = getValor("input-alumno-nombre");
     const dni = getValor("input-alumno-dni");
     
+    const selectTipo = document.getElementById("select-alumno-tipo");
+    const tipoRutina = selectTipo ? selectTipo.value : "Con rutina"; 
+
     const selectActividad = document.getElementById("select-alumno-actividad");
     const actividad = selectActividad ? selectActividad.value : "Musculación";
     
@@ -728,6 +802,12 @@ async function guardarAlumnoEnBD() {
 
     if (!nombreCompleto) {
         mostrarAlerta("Faltan datos", "Por favor, ingresá el nombre y apellido del alumno.");
+        return;
+    }
+
+    // ---> ESCUDO OFFLINE: Frena la función si no hay internet
+    if (!navigator.onLine) {
+        mostrarAlerta("Sin conexión", "No tenés internet. Conectate a una red para poder guardar al alumno nuevo.");
         return;
     }
 
@@ -745,6 +825,7 @@ async function guardarAlumnoEnBD() {
                 nombre: nombre, 
                 apellido: apellido, 
                 dni: dni || null, 
+                tipo_rutina: tipoRutina, 
                 profesor_id: profeActivoId, 
                 vencimiento_cuota: vencimientoCuota || null,
                 actividad: actividad,
@@ -758,9 +839,15 @@ async function guardarAlumnoEnBD() {
         
         cerrarModalAlumno();
         cargarAlumnos(); 
+        mostrarAlerta("¡Guardado con Éxito!", "El alumno se registró correctamente.");
         
     } catch (error) {
-        mostrarAlerta("Error", "Error al añadir alumno: " + error.message);
+        // Segundo escudo por si el internet se corta justo a la mitad del proceso
+        if (error.message.includes("Failed to fetch")) {
+            mostrarAlerta("Sin conexión", "Se cortó el internet intentando guardar. Revisá tu señal e intentá de nuevo.");
+        } else {
+            mostrarAlerta("Error", "Error al añadir alumno: " + error.message);
+        }
     }
 }
 
@@ -776,6 +863,7 @@ function abrirModalEditarAlumno() {
 
     setValor("input-edit-alumno-nombre", `${alumnoDataActual.nombre} ${alumnoDataActual.apellido}`);
     setValor("input-edit-alumno-dni", alumnoDataActual.dni || "");
+    setValor("select-edit-alumno-tipo", alumnoDataActual.tipo_rutina || "Con rutina"); // <-- NUEVO
     setValor("select-edit-alumno-actividad", alumnoDataActual.actividad || "Musculación");
     setValor("input-edit-alumno-objetivo", alumnoDataActual.objetivo || "");
     setValor("input-edit-alumno-edad", alumnoDataActual.edad || "");
@@ -793,6 +881,9 @@ async function guardarEdicionAlumnoEnBD() {
     const nombreCompleto = getValor("input-edit-alumno-nombre");
     const dni = getValor("input-edit-alumno-dni");
     
+    const selectTipo = document.getElementById("select-edit-alumno-tipo");
+    const tipoRutina = selectTipo ? selectTipo.value : "Con rutina"; 
+
     const selectActividad = document.getElementById("select-edit-alumno-actividad");
     const actividad = selectActividad ? selectActividad.value : "Musculación";
     
@@ -807,6 +898,12 @@ async function guardarEdicionAlumnoEnBD() {
         return;
     }
 
+    // ---> ESCUDO OFFLINE: Frena la función si no hay internet
+    if (!navigator.onLine) {
+        mostrarAlerta("Sin conexión", "No tenés internet. Conectate a una red para guardar los cambios.");
+        return;
+    }
+
     const partes = nombreCompleto.split(" ");
     const nombre = partes[0];
     const apellido = partes.slice(1).join(" ") || "";
@@ -818,6 +915,7 @@ async function guardarEdicionAlumnoEnBD() {
                 nombre: nombre, 
                 apellido: apellido, 
                 dni: dni || null,
+                tipo_rutina: tipoRutina, 
                 actividad: actividad,
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
@@ -832,9 +930,14 @@ async function guardarEdicionAlumnoEnBD() {
         cerrarModalEditarAlumno();
         cargarAlumnos(); 
         abrirGrillaAlumno(alumnoSeleccionadoId); 
+        mostrarAlerta("¡Edición Exitosa!", "Los datos del alumno se actualizaron correctamente.");
 
-    } catch (e) { 
-        mostrarAlerta("Error al actualizar la base de datos", e.message); 
+    } catch (error) { 
+        if (error.message.includes("Failed to fetch")) {
+            mostrarAlerta("Sin conexión", "Se cortó el internet intentando guardar. Revisá tu señal e intentá de nuevo.");
+        } else {
+            mostrarAlerta("Error al actualizar", error.message); 
+        }
     }
 }
 
@@ -919,26 +1022,73 @@ function filtrarAlumnos() {
     });
 }
 
-// --- 8. FILTROS POR CHIPS (BOTONES) ---
+// --- 8. FILTROS POR CHIPS (BOTONES MÚLTIPLES E INTELIGENTES) ---
 function filtrarPorChip(botonClickeado, textoFiltro) {
-    // 1. Le sacamos el color naranja a todos los botones y se lo ponemos solo al que tocaste
-    const todosLosChips = document.querySelectorAll(".chip");
-    todosLosChips.forEach(chip => chip.classList.remove("activo"));
-    botonClickeado.classList.add("activo");
+    const todosLosChips = Array.from(document.querySelectorAll(".chip"));
+    const chipTodos = todosLosChips[0]; // El primero siempre es "Todos"
 
-    // 2. Limpiamos la barra de búsqueda por si había algo escrito
+    // 1. Lógica de prendido y apagado visual
+    if (textoFiltro === 'Todos') {
+        todosLosChips.forEach(chip => chip.classList.remove("activo"));
+        chipTodos.classList.add("activo");
+    } else {
+        chipTodos.classList.remove("activo");
+        botonClickeado.classList.toggle("activo");
+
+        const hayAlgunoPrendido = todosLosChips.some(c => c.classList.contains("activo"));
+        if (!hayAlgunoPrendido) {
+            chipTodos.classList.add("activo");
+        }
+    }
+
+    // 2. Limpiamos la barra de búsqueda escrita por las dudas
     document.getElementById("buscador-alumnos").value = "";
 
-    // 3. Agarramos todas las tarjetas y las revisamos
+    // 3. Recolectamos qué cosas están prendidas separándolas en 3 Grupos Lógicos
+    let actividadesPrendidas = [];
+    let estadosPrendidos = [];
+    let modalidadesPrendidas = []; // <-- NUEVO GRUPO
+
+    todosLosChips.forEach(chip => {
+        if (chip.classList.contains("activo") && chip !== chipTodos) {
+            const textoBoton = chip.innerText.trim();
+            
+            if (textoBoton === 'Cuota al día') {
+                estadosPrendidos.push('al día');
+            } else if (textoBoton === 'Vencida') {
+                estadosPrendidos.push('vencida');
+            } else if (textoBoton === 'Con rutina') {
+                modalidadesPrendidas.push('con rutina');
+            } else if (textoBoton === 'Libre') {
+                modalidadesPrendidas.push('alumno libre'); // Busca el texto exacto que armamos en la etiqueta de la tarjeta
+            } else {
+                actividadesPrendidas.push(textoBoton.toLowerCase());
+            }
+        }
+    });
+
+    // 4. Filtramos las tarjetas (Motor Lógico Inteligente)
     const tarjetas = document.querySelectorAll("#lista-alumnos .card-alumno");
     
     tarjetas.forEach(tarjeta => {
-        const contenidoTarjeta = tarjeta.innerText.toLowerCase();
-        
-        // Si tocaste "Todos", mostramos la tarjeta. Si no, revisamos si contiene la palabra buscada
-        if (textoFiltro === 'Todos') {
+        if (chipTodos.classList.contains("activo")) {
             tarjeta.style.display = "flex";
-        } else if (contenidoTarjeta.includes(textoFiltro.toLowerCase())) {
+            return;
+        }
+
+        const contenidoTarjeta = tarjeta.innerText.toLowerCase();
+
+        // REGLA 1: ¿Cumple con la actividad? 
+        const pasaActividad = actividadesPrendidas.length === 0 || actividadesPrendidas.some(act => contenidoTarjeta.includes(act));
+
+        // REGLA 2: ¿Cumple con el estado del pago?
+        const pasaEstado = estadosPrendidos.length === 0 || estadosPrendidos.some(est => contenidoTarjeta.includes(est));
+
+        // REGLA 3: ¿Cumple con la modalidad? (Nueva regla)
+        const pasaModalidad = modalidadesPrendidas.length === 0 || modalidadesPrendidas.some(mod => contenidoTarjeta.includes(mod));
+
+        // RESULTADO: Si pasa el embudo de las 3 Reglas al mismo tiempo, lo mostramos.
+        if (pasaActividad && pasaEstado && pasaModalidad) {
             tarjeta.style.display = "flex";
         } else {
             tarjeta.style.display = "none";
@@ -991,24 +1141,37 @@ async function ejecutarCambioDePago(alumnoId, baseFecha, estadoActivo) {
 
 // --- 10. LÓGICA DE DÍAS Y RUTINAS (CON SUPABASE) ---
 
-// Abrir y cerrar la ventanita
+// Abrir y cerrar la ventanita normal
 function abrirModalEjercicio() {
     document.getElementById("modal-ejercicio").style.display = "flex";
+
+    // El cerebro: Detectamos dónde estamos parados
+    let catActual = "ENTRENAMIENTO"; 
+    if (categoriaSeleccionada) {
+        const cat = categoriaSeleccionada.toUpperCase();
+        if (cat === "MOVILIDAD" || cat === "ENTRADA EN CALOR") catActual = cat;
+    }
+
+    // Llenamos la cajita de "Zonas" SOLO con las zonas de esa categoría
+    const selectZona = document.getElementById("select-ej-zona");
+    selectZona.innerHTML = '<option value="">Seleccioná una zona / tipo...</option>';
     
-    // Reiniciamos las listas y los campos
-    document.getElementById("select-ej-zona").value = "";
-    actualizarListaEjercicios(); // Esto resetea la lista de nombres
+    const zonasDeEstaCategoria = Object.keys(catalogoGlobal[catActual]);
+    zonasDeEstaCategoria.forEach(zona => {
+        selectZona.innerHTML += `<option value="${zona}">${zona}</option>`;
+    });
+
+    document.getElementById("input-ej-nombre").value = "";
+    document.getElementById("opciones-ejercicios").innerHTML = ""; 
     document.getElementById("input-ej-series").value = "";
     document.getElementById("input-ej-fuerza").value = "";
     document.getElementById("input-ej-descanso").value = "";
-
 }
 
 function cerrarModalEjercicio() {
     ejercicioEditandoId = null;
     document.getElementById("modal-ejercicio").style.display = "none";
 }
-
 
 // --- LÓGICA DE EDICIÓN Y BORRADO ---
 
@@ -1031,13 +1194,23 @@ function abrirModalEditar(id, zona, nombre, series, fuerza, descanso) {
     ejercicioEditandoId = id; 
     document.getElementById("modal-ejercicio").style.display = "flex";
     
-    // 1. Cargamos la zona y forzamos a que se cree la lista de ejercicios
+    let catActual = "ENTRENAMIENTO"; 
+    if (categoriaSeleccionada) {
+        const cat = categoriaSeleccionada.toUpperCase();
+        if (cat === "MOVILIDAD" || cat === "ENTRADA EN CALOR") catActual = cat;
+    }
+
+    const selectZona = document.getElementById("select-ej-zona");
+    selectZona.innerHTML = '<option value="">Seleccioná una zona / tipo...</option>';
+    const zonasDeEstaCategoria = Object.keys(catalogoGlobal[catActual]);
+    zonasDeEstaCategoria.forEach(z => {
+        selectZona.innerHTML += `<option value="${z}">${z}</option>`;
+    });
+
     document.getElementById("select-ej-zona").value = zona;
     actualizarListaEjercicios();
     
-    // 2. Ahora sí podemos seleccionar el ejercicio específico
-    document.getElementById("select-ej-nombre").value = nombre;
-    
+    document.getElementById("input-ej-nombre").value = nombre;
     document.getElementById("input-ej-series").value = series;
     document.getElementById("input-ej-fuerza").value = fuerza !== 'undefined' && fuerza !== 'null' ? fuerza : "";
     document.getElementById("input-ej-descanso").value = descanso;
@@ -1249,26 +1422,26 @@ async function guardarOrdenEjercicios() {
 // SISTEMA GLOBAL DE VIBRACIÓN (FEEDBACK HÁPTICO)
 // ==========================================
 document.addEventListener('click', function(e) {
-    // Verificamos si el navegador del celular soporta vibración
     if (!navigator.vibrate) return; 
-
-    // 1. Buscamos si lo que tocó el usuario es algo interactivo
     const elementoTocado = e.target.closest('button, .card-alumno, .tarjeta-perfil-moderna, .tarjeta-rol, .chip, svg[onclick]');
-    
-    // Si tocó algo interactivo, hacemos una vibración cortita y elegante (15 milisegundos)
-    if (elementoTocado) {
-        navigator.vibrate(15); 
-    }
+    if (elementoTocado) navigator.vibrate(15); 
 });
 
-// También podemos mejorar nuestra alerta visual para que vibre fuerte cuando hay un error
 const funcionAlertaOriginal = mostrarAlerta;
 mostrarAlerta = function(titulo, mensaje) {
     if (navigator.vibrate) {
-        // Vibra dos veces rápido para llamar la atención (Alerta)
-        navigator.vibrate([50, 50, 50]); 
+        const tituloMin = titulo.toLowerCase();
+        const esExito = tituloMin.includes('éxito') || tituloMin.includes('exitosa') || tituloMin.includes('registrada') || tituloMin.includes('copiada') || tituloMin.includes('limpio');
+        
+        if (esExito) {
+            // Vibración de éxito: Una sola vibración larga y satisfactoria
+            navigator.vibrate(100); 
+        } else {
+            // Vibración de error: Tres cortitas de alerta
+            navigator.vibrate([50, 50, 50]); 
+        }
     }
-    funcionAlertaOriginal(titulo, mensaje); // Llama a tu alerta gráfica normal
+    funcionAlertaOriginal(titulo, mensaje); 
 };
 
 // ==========================================
@@ -1989,7 +2162,9 @@ async function cargarEjerciciosCategoriaBD() {
 async function guardarEjercicioEnBD() {
     const fuerza = document.getElementById("input-ej-fuerza").value.trim();
     const zona = document.getElementById("select-ej-zona").value; 
-    const nombre = document.getElementById("select-ej-nombre").value.trim();
+    // Ahora capturamos el texto del INPUT en vez del select
+    const nombre = document.getElementById("input-ej-nombre").value.trim(); 
+    
     if (!zona || !nombre) { mostrarAlerta("Faltan datos","Ponele zona y nombre."); return; }
 
     let dias = ["D1", "D2", "D3", "D4", "D5"];
@@ -2008,7 +2183,7 @@ async function guardarEjercicioEnBD() {
                 alumno_id: alumnoSeleccionadoId, 
                 dia_semana: diaSeleccionado, 
                 semana: semanaActiva,
-                categoria: categoriaSeleccionada, // AHORA SE GUARDA EN SU BARRA CORRESPONDIENTE
+                categoria: categoriaSeleccionada, 
                 zona_muscular: zona,
                 ejercicio_nombre: nombre, 
                 series_reps: document.getElementById("input-ej-series").value,
@@ -2117,18 +2292,62 @@ async function cargarEjerciciosDePack() {
 
 function abrirModalEjercicioPack() { 
     document.getElementById("modal-ejercicio-pack").style.display = "flex"; 
+    
+    const selectZonaPack = document.getElementById("select-pack-ej-zona");
+    selectZonaPack.innerHTML = '<option value="">Seleccioná una zona / tipo...</option>';
+
+    // Como en los Packs no estamos adentro de una barra, le mostramos TODAS las zonas de la BD mezcladas
+    let todasLasZonas = [];
+    Object.keys(catalogoGlobal).forEach(granCategoria => {
+        Object.keys(catalogoGlobal[granCategoria]).forEach(zona => {
+            if (!todasLasZonas.includes(zona)) todasLasZonas.push(zona);
+        });
+    });
+
+    todasLasZonas.sort().forEach(zona => {
+        selectZonaPack.innerHTML += `<option value="${zona}">${zona}</option>`;
+    });
+
+    document.getElementById("input-pack-ej-nombre").value = "";
+    document.getElementById("opciones-pack-ejercicios").innerHTML = "";
+    document.getElementById("input-pack-ej-series").value = "";
+    document.getElementById("input-pack-ej-descanso").value = "";
 }
 
+// Actualiza la lista desplegable del modal de Packs
 function actualizarListaEjerciciosPack() {
-    const z = document.getElementById("select-pack-ej-zona").value;
-    const s = document.getElementById("select-pack-ej-nombre");
-    s.innerHTML = ""; if(!z) return;
-    catalogoEjercicios[z].forEach(ej => { s.innerHTML += `<option value="${ej}">${ej}</option>`; });
+    const zonaSeleccionada = document.getElementById("select-pack-ej-zona").value;
+    const datalistNombre = document.getElementById("opciones-pack-ejercicios");
+    datalistNombre.innerHTML = ""; 
+    if(!zonaSeleccionada) return;
+    
+    let ejerciciosDelPack = [];
+    Object.keys(catalogoGlobal).forEach(granCategoria => {
+        if (catalogoGlobal[granCategoria][zonaSeleccionada]) {
+            catalogoGlobal[granCategoria][zonaSeleccionada].forEach(ej => {
+                if (!ejerciciosDelPack.includes(ej)) ejerciciosDelPack.push(ej);
+            });
+        }
+    });
+
+    ejerciciosDelPack.sort().forEach(ej => {
+        datalistNombre.innerHTML += `<option value="${ej}">`;
+    });
 }
 
 async function guardarEjercicioEnPack() {
-    packActivoEjercicios.push({ zona: document.getElementById("select-pack-ej-zona").value, nombre: document.getElementById("select-pack-ej-nombre").value, series: document.getElementById("input-pack-ej-series").value, descanso: document.getElementById("input-pack-ej-descanso").value });
-    try { await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId); document.getElementById("modal-ejercicio-pack").style.display = "none"; cargarEjerciciosDePack(); } catch(e) { console.error(e); }
+    packActivoEjercicios.push({ 
+        zona: document.getElementById("select-pack-ej-zona").value, 
+        // Capturamos del nuevo input
+        nombre: document.getElementById("input-pack-ej-nombre").value.trim(), 
+        series: document.getElementById("input-pack-ej-series").value, 
+        descanso: document.getElementById("input-pack-ej-descanso").value 
+    });
+    try { 
+        await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId); 
+        document.getElementById("modal-ejercicio-pack").style.display = "none"; 
+        cargarEjerciciosDePack(); 
+    } catch(e) { console.error(e); }
 }
 
 async function borrarEjercicioDePack(index) { 
@@ -2538,6 +2757,52 @@ async function procesarCheckin(diaSeleccionado) {
     }
 }
 
+// 4. El motor para DESHACER la asistencia
+function deshacerAsistencia(alumnoId) {
+    pedirConfirmacion(
+        "Deshacer Asistencia",
+        "¿Querés deshacer la Asistencia de este alumno?",
+        "Aceptar",
+        async () => {
+            const fechaHoyStr = new Date().toISOString().split('T')[0];
+            try {
+                // 1. Borramos el historial de ejercicios de hoy (para que no sume kilos falsos)
+                await clienteSupabase
+                    .from('registro_ejercicios')
+                    .delete()
+                    .eq('alumno_id', alumnoId)
+                    .eq('fecha', fechaHoyStr);
+
+                // 2. Buscamos la fecha anterior a la que vino (por si entrenó ayer) para no dejarlo en blanco
+                const { data: historialViejo } = await clienteSupabase
+                    .from('registro_ejercicios')
+                    .select('fecha')
+                    .eq('alumno_id', alumnoId)
+                    .lt('fecha', fechaHoyStr)
+                    .order('fecha', { ascending: false })
+                    .limit(1);
+
+                let fechaAnterior = null;
+                if (historialViejo && historialViejo.length > 0) {
+                    fechaAnterior = historialViejo[0].fecha;
+                }
+
+                // 3. Devolvemos el alumno a su estado anterior en la base de datos
+                await clienteSupabase
+                    .from('alumnos')
+                    .update({ ultima_sesion: fechaAnterior })
+                    .eq('id', alumnoId);
+
+                // 4. Refrescamos la pantalla (el botón vuelve a estar gris automáticamente)
+                cargarAlumnos();
+                
+            } catch (error) {
+                mostrarAlerta("Error", "No se pudo deshacer la asistencia: " + error.message);
+            }
+        }
+    );
+}
+
 // ==========================================
 // CLONAR SEMANA COMPLETA
 // ==========================================
@@ -2695,6 +2960,7 @@ async function cargarDatosParaInforme() {
         tabla.innerHTML = `
             <tr>
                 <th>Nombre</th>
+                <th>Modalidad</th> <!-- NUEVA COLUMNA -->
                 <th>Actividad</th>
                 <th>Vencimiento</th>
                 <th>Día de Pago</th>
@@ -2704,7 +2970,7 @@ async function cargarDatosParaInforme() {
         `;
 
         if (alumnos.length === 0) {
-            tabla.innerHTML += `<tr><td colspan="5" style="text-align:center;">No hay alumnos.</td></tr>`;
+            tabla.innerHTML += `<tr><td colspan="7" style="text-align:center;">No hay alumnos.</td></tr>`;
         } else {
             let actividadActual = "";
             const hoy = new Date();
@@ -2714,13 +2980,13 @@ async function cargarDatosParaInforme() {
                 if (ordenElegido === 'actividad') {
                     const actividadAlumno = a.actividad || "Sin Categoría";
                     if (actividadAlumno !== actividadActual) {
-                        tabla.innerHTML += `<tr><td colspan="5" class="tabla-separador-cat">${actividadAlumno.toUpperCase()}</td></tr>`;
+                        tabla.innerHTML += `<tr><td colspan="7" class="tabla-separador-cat">${actividadAlumno.toUpperCase()}</td></tr>`;
                         actividadActual = actividadAlumno;
                     }
                 }
 
                 let estado = "Al día";
-                let colorEstado = "#888"; // <-- COLOR GRIS (Neutro)
+                let colorEstado = "#888"; 
                 let fechaArg = "-";
 
                 if (a.vencimiento_cuota) {
@@ -2729,9 +2995,9 @@ async function cargarDatosParaInforme() {
                     fechaArg = a.vencimiento_cuota.split('-').reverse().join('/');
                     
                     if (diferenciaDias < 0) {
-                        estado = "Vencida"; colorEstado = "#d32f2f"; // Mantenemos el rojo solo para alerta visual fuerte
+                        estado = "Vencida"; colorEstado = "#d32f2f"; 
                     } else if (diferenciaDias <= 5) {
-                        estado = "Pronto a vencer"; colorEstado = "#f39c12"; // Naranja sutil
+                        estado = "Pronto a vencer"; colorEstado = "#f39c12"; 
                     }
                 }
 
@@ -2741,11 +3007,13 @@ async function cargarDatosParaInforme() {
                 }
 
                 const cuotaMonto = a.cuota ? `$${a.cuota.toLocaleString('es-AR')}` : "$0";
+                const modalidad = a.tipo_rutina || "Con rutina"; // Rescatamos el dato
 
                 tabla.innerHTML += `
                     <tr>
                         <td style="color: #eee; font-weight: 500;">${a.nombre} ${a.apellido}</td>
-                        <td style="color: #aaa;">${a.actividad || "Sin Categoría"}</td> <!-- ACÁ IMPRIMIMOS LA CATEGORÍA -->
+                        <td style="color: #3498db; font-weight: 500;">${modalidad}</td>
+                        <td style="color: #aaa;">${a.actividad || "Sin Categoría"}</td> 
                         <td>${fechaArg}</td>
                         <td>${fechaPagoArg}</td>
                         <td>${cuotaMonto}</td>
@@ -2774,7 +3042,6 @@ async function cargarDatosParaInforme() {
 
         const fechaEmision = new Date().toLocaleDateString('es-AR');
 
-        // DISEÑO DE RESUMEN MINIMALISTA
         kpis.innerHTML = `
             <div class="kpi-item">
                 <span>Total Alumnos</span>
@@ -2837,7 +3104,7 @@ function dibujarHistorialInformes() {
     });
 }
 // ==========================================
-// GENERADOR DE ARCHIVO CSV (EXCEL)
+// GENERADOR DE ARCHIVO EXCEL REAL (.xlsx) - RESUMEN LADO A LADO
 // ==========================================
 function descargarExcelProfe() {
     if (!alumnosParaInformeActual || alumnosParaInformeActual.length === 0) {
@@ -2847,89 +3114,102 @@ function descargarExcelProfe() {
 
     const fechaEmision = new Date().toLocaleDateString('es-AR');
     const horaEmision = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-    
-    let contenidoCSV = "\uFEFF";
-    contenidoCSV += `INFORME GENERAL DE ALUMNOS\n`;
-    contenidoCSV += `Fecha de emision:,${fechaEmision}\n`;
-    contenidoCSV += `Hora de emision:,${horaEmision}\n`;
-    
-    // Dejamos constancia de cómo se ordenó el archivo
     const tipoOrden = document.getElementById("select-orden-informe").options[document.getElementById("select-orden-informe").selectedIndex].text;
-    contenidoCSV += `Ordenado por:,${tipoOrden}\n\n`;
 
-    // AGREGAMOS LA COLUMNA DE FECHA DE INGRESO AL EXCEL
-    contenidoCSV += "Nombre,Apellido,DNI,Fecha de Ingreso,Actividad,Edad,Condicion,Objetivo,Vencimiento,Dia de Pago,Cuota Mensual\n";
+    let matrizExcel = [];
+
+    matrizExcel.push(["INFORME GENERAL DE ALUMNOS"]);
+    matrizExcel.push(["Fecha de emisión:", fechaEmision]);
+    matrizExcel.push(["Hora de emisión:", horaEmision]);
+    matrizExcel.push(["Ordenado por:", tipoOrden]);
+    matrizExcel.push([]); 
+
+    matrizExcel.push(["Nombre", "Apellido", "DNI", "Fecha de Ingreso", "Modalidad", "Actividad", "Edad", "Condición", "Objetivo", "Vencimiento", "Día de Pago", "Cuota Mensual"]);
 
     let totalDinero = 0;
     let conteoActividades = {};
 
-    // El array 'alumnosParaInformeActual' ya está ordenado mágicamente según lo que elegiste
     alumnosParaInformeActual.forEach(a => {
-        let nombre = `"${a.nombre || ""}"`;
-        let apellido = `"${a.apellido || ""}"`;
-        let dni = a.dni || "-";
-        let actividad = `"${a.actividad || ""}"`;
-        let edad = a.edad || "-";
-        let condicion = `"${a.condicion_medica || ""}"`;
-        let objetivo = `"${a.objetivo || ""}"`;
-        
-        // Calculamos la fecha de Ingreso para imprimirla
         let fechaIngreso = "-";
         const fechaBase = a.creado_en || a.created_at; 
         if (fechaBase && fechaBase !== "null") {
-            try {
-                const soloFecha = fechaBase.split('T')[0]; 
-                fechaIngreso = soloFecha.split('-').reverse().join('/'); 
-            } catch(e) {}
+            try { fechaIngreso = fechaBase.split('T')[0].split('-').reverse().join('/'); } catch(e) {}
         }
 
-        let vencimiento = "-";
-        if (a.vencimiento_cuota) {
-            vencimiento = a.vencimiento_cuota.split('-').reverse().join('/');
-        }
-        
-        let diaDePago = "-";
-        if (a.fecha_ultimo_pago) {
-            diaDePago = a.fecha_ultimo_pago.split('-').reverse().join('/');
-        }
-        
+        let vencimiento = a.vencimiento_cuota ? a.vencimiento_cuota.split('-').reverse().join('/') : "-";
+        let diaDePago = a.fecha_ultimo_pago ? a.fecha_ultimo_pago.split('-').reverse().join('/') : "-";
         let cuota = a.cuota || 0;
         
         totalDinero += cuota;
         const act = a.actividad || "Sin Categoría";
         conteoActividades[act] = (conteoActividades[act] || 0) + 1;
 
-        contenidoCSV += `${nombre},${apellido},${dni},${fechaIngreso},${actividad},${edad},${condicion},${objetivo},${vencimiento},${diaDePago},${cuota}\n`;
+        matrizExcel.push([
+            a.nombre || "",
+            a.apellido || "",
+            a.dni || "-",
+            fechaIngreso,
+            a.tipo_rutina || "Con rutina", 
+            act,
+            a.edad || "-",
+            a.condicion_medica || "-",
+            a.objetivo || "-",
+            vencimiento,
+            diaDePago,
+            cuota
+        ]);
     });
 
+    // 3. CÁLCULOS Y RESUMEN FINAL (ALINEADOS A LA DERECHA Y SEPARADOS)
     const porcentajeGimnasio = totalDinero * 0.30;
     const porcentajeProfesor = totalDinero * 0.70;
 
-    contenidoCSV += `\n\n,,,RESUMEN DEL INFORME\n`; 
-    contenidoCSV += `,,,Total Alumnos Registrados:,${alumnosParaInformeActual.length}\n`;
-    contenidoCSV += `,,,Total Recaudado:,$${totalDinero.toLocaleString('es-AR')}\n`;
-    contenidoCSV += `,,,Descuento Gimnasio (30%):,-$${porcentajeGimnasio.toLocaleString('es-AR')}\n`;
-    contenidoCSV += `,,,Neto para Profesor (70%):,$${porcentajeProfesor.toLocaleString('es-AR')}\n\n`;
-    
-    contenidoCSV += `,,,ALUMNOS POR CATEGORIA\n`;
-    for (const [cat, cantidad] of Object.entries(conteoActividades)) {
-        contenidoCSV += `,,,${cat}:,${cantidad}\n`;
+    matrizExcel.push([]); // Renglón vacío para dar aire
+    matrizExcel.push([]); 
+
+    // Convertimos la lista de categorías en un formato amigable
+    const categoriasArr = Object.entries(conteoActividades);
+
+    // Fila de Títulos (Columna B para la Plata, Columna F para las Categorías)
+    matrizExcel.push(["", "RESUMEN GENERAL", "", "", "", "ALUMNOS POR CATEGORÍA", "", ""]);
+
+    // Fila 1
+    let cat1 = categoriasArr[0] || ["", ""];
+    matrizExcel.push(["", "Total Alumnos:", "", alumnosParaInformeActual.length, "", cat1[0] ? cat1[0]+":" : "", "", cat1[1]]);
+
+    // Fila 2 (Le agregamos el formato de plata directamente al Excel)
+    let cat2 = categoriasArr[1] || ["", ""];
+    matrizExcel.push(["", "Total Recaudado:", "", totalDinero ? `$${totalDinero.toLocaleString('es-AR')}` : "$0", "", cat2[0] ? cat2[0]+":" : "", "", cat2[1]]);
+
+    // Fila 3
+    let cat3 = categoriasArr[2] || ["", ""];
+    matrizExcel.push(["", "Gimnasio (30%):", "", porcentajeGimnasio ? `-$${porcentajeGimnasio.toLocaleString('es-AR')}` : "$0", "", cat3[0] ? cat3[0]+":" : "", "", cat3[1]]);
+
+    // Fila 4
+    let cat4 = categoriasArr[3] || ["", ""];
+    matrizExcel.push(["", "Tu parte (70%):", "", porcentajeProfesor ? `$${porcentajeProfesor.toLocaleString('es-AR')}` : "$0", "", cat4[0] ? cat4[0]+":" : "", "", cat4[1]]);
+
+    // Fila 5 en adelante (por si el profe tiene 5, 6 o más actividades distintas que no entraron arriba)
+    for (let i = 4; i < categoriasArr.length; i++) {
+        matrizExcel.push(["", "", "", "", "", categoriasArr[i][0] + ":", "", categoriasArr[i][1]]);
     }
 
-    const blob = new Blob([contenidoCSV], { type: 'text/csv;charset=utf-8;' });
-    const urlVirtual = URL.createObjectURL(blob);
-    const linkDescarga = document.createElement("a");
+    const libroExcel = XLSX.utils.book_new();
+    const hojaExcel = XLSX.utils.aoa_to_sheet(matrizExcel);
     
-    const fechaArchivo = fechaEmision.replace(/\//g, '-'); 
-    linkDescarga.setAttribute("href", urlVirtual);
-    linkDescarga.setAttribute("download", `Informe_Alumnos_${fechaArchivo}.csv`);
-    
-    document.body.appendChild(linkDescarga);
-    linkDescarga.click();
-    document.body.removeChild(linkDescarga);
+    hojaExcel['!cols'] = [
+        {wch: 15}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 12}, 
+        {wch: 15}, {wch: 8}, {wch: 22}, {wch: 22}, {wch: 12}, 
+        {wch: 12}, {wch: 14}
+    ];
 
-    guardarEnHistorial(fechaArchivo, contenidoCSV);
-    mostrarAlerta("¡Descarga Exitosa!", "El informe se guardó en tu dispositivo en formato CSV (Abre con Excel).");
+    XLSX.utils.book_append_sheet(libroExcel, hojaExcel, "Planilla Alumnos");
+
+    const fechaArchivo = fechaEmision.replace(/\//g, '-');
+    XLSX.writeFile(libroExcel, `Informe_Alumnos_${fechaArchivo}.xlsx`);
+
+    guardarEnHistorial(fechaArchivo, JSON.stringify(matrizExcel));
+    mostrarAlerta("¡Descarga Exitosa!", "El informe se descargó correctamente con el nuevo diseño.");
 }
 
 function guardarEnHistorial(fechaString, contenidoDelExcel) {
@@ -2948,43 +3228,72 @@ function guardarEnHistorial(fechaString, contenidoDelExcel) {
     localStorage.setItem(llaveMemoria, JSON.stringify(historial));
 }
 
-// ---> LA NUEVA FUNCIÓN MAGICA
+// ---> FUNCION MÁGICA DE RE-DESCARGA CON DOBLE COMPATIBILIDAD
 function volverADescargarExcel(index) {
     const llaveMemoria = 'historial_informes_' + profeActivoId;
     let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
-    
     const registro = historial[index];
     
-    // Si justo presiona uno muy viejo que se guardó antes de implementar este nuevo código:
     if (!registro || !registro.datos) {
-        mostrarAlerta("Error", "Este informe es muy antiguo y no tiene los datos guardados. Por favor, genera uno nuevo desde la pestaña 'Planilla Actual'.");
+        mostrarAlerta("Error", "Este informe es antiguo y no tiene datos guardados.");
         return;
     }
 
-    // Le pasamos el texto viejo y generamos la misma descarga
-    const blob = new Blob([registro.datos], { type: 'text/csv;charset=utf-8;' });
-    const urlVirtual = URL.createObjectURL(blob);
-    const linkDescarga = document.createElement("a");
-    
-    // Le agregamos la palabra "Copia_" para que no se confunda
-    linkDescarga.setAttribute("href", urlVirtual);
-    linkDescarga.setAttribute("download", `Copia_Informe_${registro.fecha}.csv`);
-    
-    document.body.appendChild(linkDescarga);
-    linkDescarga.click();
-    document.body.removeChild(linkDescarga);
-    
-    mostrarAlerta("¡Re-descarga Exitosa!", "El informe guardado en el historial se bajó nuevamente a tu dispositivo.");
+    try {
+        // Intentamos leerlo como Matriz de Excel nuevo (.xlsx)
+        const matrizRecuperada = JSON.parse(registro.datos);
+        
+        const libroExcel = XLSX.utils.book_new();
+        const hojaExcel = XLSX.utils.aoa_to_sheet(matrizRecuperada);
+        
+        hojaExcel['!cols'] = [
+            {wch: 15}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, 
+            {wch: 8}, {wch: 22}, {wch: 22}, {wch: 12}, {wch: 12}, {wch: 14}
+        ];
+
+        XLSX.utils.book_append_sheet(libroExcel, hojaExcel, "Copia Planilla");
+        XLSX.writeFile(libroExcel, `Copia_Informe_${registro.fecha}.xlsx`);
+        mostrarAlerta("¡Re-descarga Exitosa!", "El informe guardado se descargó en formato Excel (.xlsx).");
+
+    } catch (error) {
+        // Si tira error el JSON.parse, significa que es un historial viejo formato CSV (texto crudo). 
+        // Lo descargamos a la antigua:
+        const blob = new Blob([registro.datos], { type: 'text/csv;charset=utf-8;' });
+        const urlVirtual = URL.createObjectURL(blob);
+        const linkDescarga = document.createElement("a");
+        
+        linkDescarga.setAttribute("href", urlVirtual);
+        linkDescarga.setAttribute("download", `Copia_Informe_${registro.fecha}.csv`);
+        document.body.appendChild(linkDescarga);
+        linkDescarga.click();
+        document.body.removeChild(linkDescarga);
+        
+        mostrarAlerta("¡Re-descarga Exitosa!", "Se descargó una versión antigua del informe (CSV).");
+    }
 }
 
+// ==========================================
+// DETECTOR AUTOMÁTICO DE CONEXIÓN A INTERNET
+// ==========================================
 
+// 1. Cuando el celular pierde la conexión (Wi-Fi o Datos)
+window.addEventListener('offline', () => {
+    document.getElementById('modal-offline').style.display = 'flex';
+    
+    // Si el celular soporta vibración, tira tres latidos de alerta
+    if (navigator.vibrate) {
+        navigator.vibrate([50, 50, 50]); 
+    }
+});
 
-
-
-
-
-
-
+// 2. Cuando el celular recupera la conexión
+window.addEventListener('online', () => {
+    // Cerramos el cartel rojo automáticamente
+    document.getElementById('modal-offline').style.display = 'none';
+    
+    // Y le avisamos con tu alerta inteligente (la del pulgar verde) que todo volvió a la normalidad
+    mostrarAlerta("¡Conexión Exitosa!", "Ya tenés internet de nuevo. Volviste a estar conectado a la base de datos.");
+});
 
 
 

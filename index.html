@@ -14,10 +14,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="18.3">
+    <meta name="apple-mobile-web-app-title" content="ClubHouse">
     <link rel="apple-touch-icon" href="./imagenes/icono-192.png">
     <link rel="icon" href="./imagenes/icono-192.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- NUEVO MOTOR PARA CREAR EXCEL REAL (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -218,6 +220,10 @@
                 <button class="chip" onclick="filtrarPorChip(this, 'Crossfit')">Crossfit</button>
                 <button class="chip" onclick="filtrarPorChip(this, 'Al día')">Cuota al día</button>
                 <button class="chip" onclick="filtrarPorChip(this, 'Vencida')">Vencida</button>
+                
+                <!-- NUEVOS FILTROS DE MODALIDAD -->
+                <button class="chip" onclick="filtrarPorChip(this, 'Con rutina')">Con rutina</button>
+                <button class="chip" onclick="filtrarPorChip(this, 'Libre')">Libre</button>
             </div>
 
             
@@ -482,6 +488,14 @@
                     <label class="label-modal">DNI:</label>
                     <input type="number" id="input-alumno-dni" class="input-modal" placeholder="Ej: 35123456">
                 </div>
+                <!-- NUEVO CAMPO: MODALIDAD -->
+                <div class="campo-detalle">
+                    <label class="label-modal">Modalidad:</label>
+                    <select id="select-alumno-tipo" class="input-modal">
+                        <option value="Con rutina">Con rutina asignada</option>
+                        <option value="Libre">Alumno Libre (Sin rutina)</option>
+                    </select>
+                </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Actividad principal:</label>
                     <select id="select-alumno-actividad" class="input-modal">
@@ -532,6 +546,14 @@
                 <div class="campo-detalle">
                     <label class="label-modal">DNI:</label>
                     <input type="number" id="input-edit-alumno-dni" class="input-modal">
+                </div>
+                <!-- NUEVO CAMPO: MODALIDAD -->
+                <div class="campo-detalle">
+                    <label class="label-modal">Modalidad:</label>
+                    <select id="select-edit-alumno-tipo" class="input-modal">
+                        <option value="Con rutina">Con rutina asignada</option>
+                        <option value="Libre">Alumno Libre (Sin rutina)</option>
+                    </select>
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Actividad principal:</label>
@@ -666,9 +688,10 @@
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Ejercicio:</label>
-                    <select id="select-ej-nombre" class="input-modal">
-                        <option value="">Primero elegí una zona...</option>
-                    </select>
+                    <!-- NUEVO: Ahora es un input de texto, pero está conectado a una lista -->
+                    <input type="text" id="input-ej-nombre" class="input-modal" placeholder="Elegí de la lista o escribí uno nuevo..." list="opciones-ejercicios">
+                    <!-- ACÁ SE INYECTAN LAS OPCIONES INVISIBLES -->
+                    <datalist id="opciones-ejercicios"></datalist>
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Series y Repeticiones:</label>
@@ -708,7 +731,10 @@
             <div class="modal-contenido">
                 <h3>Añadir al Pack</h3>
                 <div class="campo-detalle"><select id="select-pack-ej-zona" class="input-modal" onchange="actualizarListaEjerciciosPack()"><option value="">Zona muscular...</option><option value="Pecho">Pecho</option><option value="Espalda">Espalda</option><option value="Hombros">Hombros</option><option value="Piernas">Piernas</option><option value="Glúteos">Glúteos</option><option value="Brazos">Brazos</option><option value="Core">Core / Abdominales</option></select></div>
-                <div class="campo-detalle"><select id="select-pack-ej-nombre" class="input-modal"><option value="">Elegí zona primero...</option></select></div>
+                <div class="campo-detalle">
+                    <input type="text" id="input-pack-ej-nombre" class="input-modal" placeholder="Elegí o escribí un ejercicio..." list="opciones-pack-ejercicios">
+                    <datalist id="opciones-pack-ejercicios"></datalist>
+                </div>
                 <div class="campo-detalle"><input type="text" id="input-pack-ej-series" class="input-modal" placeholder="Series y Reps"></div>
                 <div class="campo-detalle"><input type="text" id="input-pack-ej-descanso" class="input-modal" placeholder="Descanso"></div>
                 <div class="modal-botones">
@@ -735,7 +761,7 @@
                 <p id="texto-confirmacion" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.4;"></p>
                 <div class="modal-botones" style="justify-content: center; width: 100%;">
                     <button class="btn-cancelar" onclick="cerrarModalConfirmacion()" style="flex: 1;">Cancelar</button>
-                    <button id="btn-confirmar-accion" class="btn-guardar" style="flex: 1; background-color: #d32f2f;">Eliminar</button>
+                    <button id="btn-confirmar-accion" class="btn-guardar btn-rojo" style="flex: 1;">Eliminar</button>
                 </div>
             </div>
         </div>
@@ -757,13 +783,10 @@
 
         <div id="modal-alerta" class="modal-overlay" style="display: none; z-index: 9999;">
             <div class="modal-contenido" style="text-align: center; max-width: 300px;">
-                <div style="display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2.5" width="44" height="44">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                        <line x1="12" y1="9" x2="12" y2="13"></line>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
+                <!-- NUEVO: Contenedor vacío donde se inyecta el ícono dinámico -->
+                <div id="contenedor-icono-alerta" style="display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
                 </div>
+                
                 <h3 id="titulo-alerta" style="margin-bottom: 8px; color: #ffffff; font-size: 1.4rem;"></h3>
                 <p id="texto-alerta" style="font-size: 1rem; color: #e4e4e4; margin-bottom: 20px; line-height: 1.5;"></p>
                 <button class="btn-guardar" onclick="cerrarModalAlerta()" style="width: 100%; font-size: 1.05rem; padding: 12px;">Entendido</button>
@@ -958,7 +981,7 @@
 
                             <button class="btn-guardar" onclick="descargarExcelProfe()" style="width: 100%; margin-top: 15px; margin-bottom: 20px; display: flex; justify-content: center; gap: 8px; flex-shrink: 0;">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                Descargar como Excel (CSV)
+                                Descargar como Excel 
                             </button>
                         </div>
 
@@ -974,6 +997,28 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- MODAL SIN CONEXIÓN A INTERNET -->
+        <div id="modal-offline" class="modal-overlay" style="display: none; z-index: 9999;">
+            <div class="modal-contenido" style="text-align: center; max-width: 300px;">
+                <div style="display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
+                    <!-- Ícono de Wi-Fi cortado con la animación latiendo que ya tenías -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" class="anim-sin-conexion">
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                    </svg>
+                </div>
+                <h3 style="margin-bottom: 8px; color: #ffffff; font-size: 1.4rem;">Sin Internet</h3>
+                <p style="font-size: 0.95rem; color: #e4e4e4; margin-bottom: 20px; line-height: 1.5;">Parece que te quedaste sin señal. No podrás guardar o modificar datos hasta que vuelva la conexión.</p>
+                <!-- Botón rojo en lugar de naranja para indicar precaución -->
+                <button class="btn-guardar btn-rojo" onclick="document.getElementById('modal-offline').style.display='none'" style="width: 100%; font-size: 1.05rem; padding: 12px;">Entendido</button>
             </div>
         </div>
 

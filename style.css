@@ -10,6 +10,25 @@
    7. PANTALLA 4: DASHBOARD (Lista de Alumnos)
    8. PANTALLA 5: DETALLE DEL ALUMNO Y RUTINAS
 ========================================================================== */
+/* =========================================
+   PARCHE DEFINITIVO: EVITAR FONDO BLANCO AL PEGAR / AUTOCOMPLETAR
+   ========================================= */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+    /* 1. Inyecta un fondo oscuro sólido a la fuerza que tapa el blanco */
+    -webkit-box-shadow: 0 0 0px 1000px #2c2c2c inset !important; 
+    
+    /* 2. Obliga a que la letra siga siendo blanca */
+    -webkit-text-fill-color: #ffffff !important; 
+    
+    /* 3. Mantenemos la transición por las dudas */
+    transition: background-color 5000s ease-in-out 0s;
+}
 
 /* =========================================
    1. RESETEO Y BASE GLOBAL
@@ -1406,17 +1425,31 @@ button:active, .card-alumno:active, .card-ejercicio:active,
    BOTONES DE ASISTENCIA RÁPIDA (CHECK-IN)
    ========================================= */
 
-/* Botón en la tarjeta del alumno */
-.btn-checkin-rapido {
+/* Botón de Asistencia Pendiente (Gris con borde azul punteado) */
+.btn-asistencia-pendiente {
+    background-color: #f5f5f5; 
+    color: #666; 
+    border: 1px dashed #3498db;
+    border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    width: 100%; transition: all 0.2s ease; margin-top: 5px;
+}
+.btn-asistencia-pendiente:active { transform: scale(0.92) !important; background-color: #e0e0e0; }
+
+/* Botón de Asistencia Presente (Azul sólido con el tilde) */
+.btn-asistencia-presente {
     background-color: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb;
     border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     width: 100%; transition: all 0.2s ease; margin-top: 5px;
 }
-.btn-checkin-rapido:active { transform: scale(0.92) !important; background-color: #bbdefb; }
+.btn-asistencia-presente:active { transform: scale(0.92) !important; background-color: #bbdefb; }
 
-/* Modo oscuro para el botón de la tarjeta */
-.pantalla-dashboard-moderna.modo-oscuro .btn-checkin-rapido {
+/* Adaptación inteligente para el Modo Oscuro */
+.pantalla-dashboard-moderna.modo-oscuro .btn-asistencia-pendiente {
+    background-color: #1a1a1a; color: #888; border-color: #3498db;
+}
+.pantalla-dashboard-moderna.modo-oscuro .btn-asistencia-presente {
     background-color: rgba(25, 118, 210, 0.15); color: #64b5f6; border-color: rgba(25, 118, 210, 0.3);
 }
 
@@ -1438,11 +1471,11 @@ button:active, .card-alumno:active, .card-ejercicio:active,
    SISTEMA DE INFORMES Y TABLAS EXCEL (MINIMALISTA)
    ========================================= */
 
-/* El botón cuadrado del encabezado (Limpio y sutil) */
+/* El botón cuadrado del encabezado (Color Naranja/Amarillo) */
 .btn-informe-cuadrado {
-    background: transparent;
-    border: 1px solid #555;
-    color: #ccc;
+    background: rgba(243, 156, 18, 0.15);
+    border: 1px solid #f39c12;
+    color: #f39c12;
     border-radius: 12px;
     width: 60px;
     height: 60px;
@@ -1452,12 +1485,27 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     align-items: center;
     gap: 4px;
     cursor: pointer;
-    box-shadow: none;
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.1);
     transition: all 0.2s ease;
 }
-.btn-informe-cuadrado:active { background: #333; transform: scale(0.95); }
-.btn-informe-cuadrado svg { width: 22px; height: 22px; stroke: #ccc; }
-.btn-informe-cuadrado span { font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.btn-informe-cuadrado:active { 
+    background: rgba(243, 156, 18, 0.3); 
+    transform: scale(0.95); 
+}
+.btn-informe-cuadrado svg { 
+    width: 22px; 
+    height: 22px; 
+    stroke: #f39c12; 
+}
+.btn-informe-cuadrado span { 
+    font-size: 0.65rem; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+}
+.pantalla-dashboard-moderna.modo-oscuro .btn-informe-cuadrado { 
+    background: rgba(243, 156, 18, 0.08); 
+}
 
 /* La ventana más alta y con fondo oscuro sólido (sin blur pesado) */
 .modal-informe-grande {
@@ -1569,3 +1617,86 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     margin-top: 10px;
 }
 .btn-re-descarga:active { background: #333; transform: scale(0.98); }
+
+
+/* =========================================
+   ETIQUETA DE ALUMNO LIBRE
+   ========================================= */
+.badge-libre {
+    background: #e3f2fd;
+    color: #5a6d7e;
+    border: 1px solid #9eb4c7;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    margin-left: 8px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+/* Adaptación para que brille en el Modo Oscuro */
+.pantalla-dashboard-moderna.modo-oscuro .badge-libre {
+    background: rgba(25, 118, 210, 0.15);
+    color: #64b5f6;
+    border-color: rgba(25, 118, 210, 0.3);
+}
+
+
+/* =========================================
+   ANIMACIONES DE ICONOS DE ALERTA
+   ========================================= */
+
+/* 1. Pulgar para arriba (Aparece rotando desde abajo como si hiciera el gesto) */
+.anim-exito {
+    animation: pulgarArriba 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transform-origin: bottom left;
+}
+@keyframes pulgarArriba {
+    0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    60% { transform: scale(1.15) rotate(10deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* 2. Triángulo de advertencia (Latido intermitente) */
+.anim-alerta {
+    animation: latidoAlerta 1s infinite alternate ease-in-out;
+}
+@keyframes latidoAlerta {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); stroke: #e67e22; } /* Se agranda un poquito y oscurece el naranja */
+}
+
+/* 3. Animación de "Sin Señal" (Parpadeo y pérdida de fuerza) */
+.anim-sin-conexion {
+    animation: perderSenal 1.2s infinite alternate ease-in-out;
+}
+@keyframes perderSenal {
+    0% { 
+        transform: scale(1); 
+        opacity: 1; 
+        filter: drop-shadow(0 0 12px rgba(231, 76, 60, 0.8)); 
+    }
+    100% { 
+        transform: scale(0.85); 
+        opacity: 0.3; 
+        filter: drop-shadow(0 0 0 rgba(231, 76, 60, 0)); 
+    }
+}
+
+/* =========================================
+   BOTONES ROJOS (Reemplaza el brillo amarillo por rojo)
+   ========================================= */
+.btn-guardar.btn-rojo {
+    background-color: #e74c3c !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.35), 0 0 12px rgba(231, 76, 60, 0.2) !important;
+}
+.btn-guardar.btn-rojo:active {
+    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.5), 0 0 8px rgba(231, 76, 60, 0.3) !important;
+    background-color: #c0392b !important;
+}
+
