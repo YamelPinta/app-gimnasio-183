@@ -1995,10 +1995,14 @@ button:active, .card-alumno:active, .card-ejercicio:active,
         margin-left: 0; 
     }
     
-    /* El botón recupera su forma sin ser microscópico */
-    .btn-pago-status { 
+    /* Los botones de pago y de asistencia ahora son gemelos exactos */
+    .btn-pago-status,
+    .btn-asistencia-presente,
+    .btn-asistencia-pendiente { 
         font-size: 0.65rem; 
         padding: 5px 6px; 
+        width: 100%; /* Asegura que ambos ocupen el mismo ancho exacto de la columna */
+        box-sizing: border-box;
     }
 
     /* Ajustes extra del buscador y menú */
