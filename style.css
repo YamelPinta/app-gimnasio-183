@@ -229,11 +229,11 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     background-image: url('imagenes/FONDONEGRO.jpg'); 
     background-size: cover; background-position: center; background-color: #111; 
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-    padding-top: 10vh; z-index: 2500;
+    padding-top: 8vh; z-index: 2500;
 }
 .pantalla-inicio.modo-claro { background-image: url('imagenes/FONDOBLANCO.jpg'); }
 
-.logo-container-inicio { margin-bottom: 8vh; text-align: center; }
+.logo-container-inicio { margin-bottom: 15vh; text-align: center; }
 /* Alternar logos en Pantalla de Inicio */
 .pantalla-inicio .logo-modo-oscuro-inicio { display: inline-block; }
 .pantalla-inicio .logo-modo-claro-inicio { display: none; }
@@ -241,7 +241,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 .pantalla-inicio.modo-claro .logo-modo-oscuro-inicio { display: none; }
 .pantalla-inicio.modo-claro .logo-modo-claro-inicio { display: inline-block; }
 
-.img-logo-inicio { width: 250px; filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8)); }
+.img-logo-inicio { width: 230px; filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8)); }
 
 .contenedor-botones-rol {
     display: flex; flex-direction: column; gap: 35px; margin-top: 6vh;
@@ -317,7 +317,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
     background-image: url('imagenes/FONDONEGRO.jpg'); background-size: cover; background-position: center; background-color: #111; 
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start !important; 
-    padding-top: 12vh !important; z-index: 2000;
+    padding-top: 8vh !important; z-index: 2000;
 }
 
 .login-header-visual { text-align: center; margin-bottom: 4vh; z-index: 2; padding: 0 20px; }
@@ -330,7 +330,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 .login-visual.modo-claro .logo-modo-claro-login { display: inline-block; }
 
 .logo-visual {
-    width: 200px; margin-top: 0; margin-bottom: 15vh; 
+    width: 230px; margin-top: 0; margin-bottom: 15vh; 
     filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8));
 }
 
@@ -1764,563 +1764,312 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 
 
 
-/* ==========================================
-   DISEÑO RESPONSIVE Y FLUIDO (ESCRITORIO Y MÓVIL)
-   ========================================== */
+/* ==========================================================================
+   DISEÑO RESPONSIVE Y FLUIDO (Limpio y unificado)
+   ========================================================================== */
 
-
-
-/* 2. Contenedor de la aplicación (Se expande hasta un límite muy amplio en PC) */
+/* 1. PC y Tablets Grandes (Vuelve a ser amplio y cómodo) */
 .contenedor-app {
     width: 100%;
     max-width: 1200px;
     min-height: 100vh;
-    background-color: transparent !important; /* <--- ACÁ ESTABA EL VILLANO. Al ser transparente, deja ver el fondo */
+    background-color: transparent;
     position: relative;
     margin: 0 auto;
-    padding-bottom: 80px; 
-    /* Eliminamos la sombra porque al ser transparente hacía un efecto raro */
+    
+    /* MAGIA ELÁSTICA: 30px arriba, elástico a los lados, 80px abajo */
+    padding: 30px clamp(8px, 5vw, 10px) 80px clamp(8px, 5vw, 10px); 
 }
 
-/* 3. LA MAGIA DE LA PC: Convertir listas en columnas automáticas */
-/* Le sacamos a los profesores de esta lista para que no se rompan */
 .lista-alumnos-moderna,
 #lista-packs,
 #lista-historial-admin,
 #lista-historial-informes {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 15px;
     align-items: start;
 }
 
-/* REGLA BLINDADA SOLO PARA PROFESORES (SIEMPRE 2 POR FILA) */
-.grilla-perfiles-moderna {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 20px;
-    align-items: start;
-    /* Opcional: Le ponemos un tope para que en monitores gigantes no se deformen tanto, manteniéndose centrados */
-    max-width: 600px; 
-    margin: 0 auto;
-}
-
-/* Panel de Administrador: Convertimos las barras de profes en cajas ordenadas */
 #contenedor-admin-columnas {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)) !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 15px;
     align-items: start;
-    overflow: visible !important;
+    overflow: visible;
 }
 
-/* 4. Modales perfectos: Nunca gigantes en PC, ni cortados en Celular */
 .modal-contenido {
-    width: 92% !important;
-    max-width: 480px !important; /* Tope de ancho para que no se vea grosero en PC */
-    max-height: 85vh !important; /* Nunca pasa del alto de la pantalla (ideal para celus chicos) */
-    overflow-y: auto !important; /* Agrega scroll si la pantalla es bajita */
+    width: 92%;
+    max-width: 480px; 
+    max-height: 85vh; 
+    overflow-y: auto; 
     margin: auto;
-    padding: 22px !important;
+    padding: 22px;
 }
 
-/* Ajustamos las letras y cajas de texto de los modales para que sean más estéticas */
-.input-modal {
-    font-size: 0.9rem !important;
-    padding: 10px 14px !important;
-}
-.label-modal {
-    font-size: 0.8rem !important;
-    margin-bottom: 4px !important;
-}
-
-/* 5. Menú inferior ajustado a la app */
 .bottom-nav {
-    max-width: 1200px; /* Sigue el mismo ancho de la app en PC */
+    max-width: 1200px; 
     left: 50%;
     transform: translateX(-50%);
 }
 
-/* 6. Botones flotantes (+) anclados para que no se vayan a la otra punta de la casa en PC */
 .contenedor-fab {
     position: fixed;
     bottom: 90px;
     right: auto;
     left: 50%;
-    transform: translateX(calc(min(50vw, 600px) - 75px)); /* Se pega al borde derecho del contenedor central */
+    transform: translateX(calc(min(50vw, 600px) - 75px)); 
     display: flex;
     flex-direction: column;
     gap: 15px;
     z-index: 999;
 }
 
-/* ==========================================
-   REGLAS ESPECÍFICAS SOLO PARA CELULARES
-   ========================================== */
+/* 2. TARJETAS DE PROFESORES (Grandes y proporcionales) */
+.grilla-perfiles-moderna {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    align-items: start;
+    max-width: 750px; 
+    margin: 0 auto;
+}
+
+.tarjeta-perfil-moderna .avatar-profe {
+    width: 130px;  
+    height: 130px; 
+    border-width: 4px;
+}
+
+.tarjeta-perfil-moderna p {
+    font-size: 1.1rem;
+}
+
+/* Tarjeta especial "Agregar Profesor" */
+.tarjeta-perfil-moderna[onclick*="abrirModalAgregarProfe"],
+.tarjeta-perfil-moderna.agregar-profe {
+    display: flex; flex-direction: row; align-items: center; justify-content: flex-start;
+    gap: 16px; padding: 15px 20px; text-align: left;
+    aspect-ratio: auto; min-height: 85px; box-sizing: border-box;
+}
+
+.tarjeta-perfil-moderna[onclick*="abrirModalAgregarProfe"] > div:first-child {
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 0;
+}
+
+.tarjeta-perfil-moderna[onclick*="abrirModalAgregarProfe"] p {
+    text-align: left; font-size: 0.85rem; line-height: 1.2; margin: 0; flex-grow: 1;
+}
+
+/* ==========================================================================
+   3. CELULARES ESTÁNDAR (Hasta 768px)
+   ========================================================================== */
 @media (max-width: 768px) {
-    /* En celulares, la app vuelve a comportarse como nativa (ocupa 100%) */
-    .contenedor-app {
-        box-shadow: none;
-    }
-    
-    /* El botón flotante (+) vuelve a anclarse exactamente a la derecha de la pantalla */
-    .contenedor-fab {
-        left: auto;
-        right: 20px;
-        transform: none;
+    html, body { overflow-x: hidden; width: 100%; }
+
+    /* 1. Limpiamos el contenedor base para que deje de interferir con las pantallas */
+    .contenedor-app { 
+        padding-left: 0; 
+        padding-right: 0; 
+        width: 100%; 
+        box-shadow: none; 
     }
 
-    /* Reducimos un poquito el relleno en las ventanitas para que entre todo cómodo sin hacer scroll */
-    .modal-contenido {
-        padding: 16px !important;
+    /* LA CLAVE ELÁSTICA: Las pantallas y la grilla achican sus bordes solas */
+    .pantalla-dashboard-moderna, 
+    .pantalla-fondo-claro {
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: clamp(8px, 5vw, 20px);
+        padding-right: clamp(8px, 5vw, 20px);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .grilla-perfiles-moderna {
+        padding-left: clamp(8px, 5vw, 20px);
+        padding-right: clamp(8px, 5vw, 20px);
+    }
+
+    /* Resto de ajustes móviles normales */
+    .contenedor-fab { left: auto; right: 20px; transform: none; }
+    .titulo-dashboard h2 { font-size: 1.4rem; }
+
+    .lista-alumnos-moderna, #lista-packs, #lista-historial-admin, #lista-historial-informes, #contenedor-admin-columnas {
+        grid-template-columns: 1fr;
     }
     
-    /* Los títulos grandes se achican apenitas para no empujar el contenido hacia abajo */
-    .titulo-dashboard h2 {
-        font-size: 1.4rem;
-    }
+    #contenedor-admin-columnas { padding: 0 0 15px 0; }
+    .contenedor-tabla-excel { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     
-    /* El buscador se adapta mejor en celus muy finitos */
-    #buscador-alumnos {
-        font-size: 0.9rem;
+    .pantalla-inicio, .login-visual, .pantalla-perfiles, 
+    .pantalla-dashboard-moderna::before, .pantalla-fondo-claro.modo-oscuro::before {
+        width: 100vw; height: 100vh; top: 0; left: 0;
     }
 }
 
 
-/* ==========================================
-   CORRECCIÓN DEFINITIVA DE FONDOS (MONITOR Y CELULAR)
-   ========================================== */
+/* 4. CELULARES FINITOS (Ajuste suave sin aplastar) */
+@media (max-width: 400px) {
+    /* Alumnos */
+    .card-alumno { padding: 14px 12px; gap: 10px; }
+    .avatar-actividad { width: 48px; height: 48px; margin-right: 10px; }
+    .info-central h3 { font-size: 1rem; }
+    .info-detalle { font-size: 0.75rem; }
+    .estado-derecha { min-width: 85px; padding-left: 10px; }
+    .badge-estado { font-size: 0.7rem; padding: 4px 8px; }
+    .btn-pago-status { font-size: 0.7rem; padding: 5px 8px; }
 
-/* 1. Liberamos los fondos para que cubran todo el monitor sin cortarse */
-.pantalla-inicio,
-.login-visual,
-.pantalla-perfiles,
-.pantalla-dashboard-moderna::before,
-.pantalla-fondo-claro.modo-oscuro::before {
-    width: 100vw !important; 
-    height: 100vh !important; /* Aseguramos que cubra de arriba a abajo */
-    max-width: none !important; 
-    top: 0 !important; /* Lo anclamos bien al techo */
-    left: 0 !important;
-    transform: none !important;
-    background-size: cover !important; 
-    background-position: center center !important; 
-    background-attachment: fixed !important; 
-}
-
-/* 2. Las tarjetas de rol (Alumno/Profe) se arreglan para no estirarse como chicle */
-.fondo-tarjeta-rol {
-    background-size: cover !important;
-    background-position: right center !important; 
-}
-
-
-/* ==========================================
-   CORRECCIÓN: ALINEACIÓN VERTICAL ESTRICTA EN LOGIN (PC)
-   ========================================== */
-
-.login-header-visual {
-    display: flex !important;
-    flex-direction: column !important; /* Obliga a que los elementos se apilen de arriba a abajo */
-    align-items: center !important; /* Los centra perfectamente en el medio */
-    gap: 20px !important; /* Separación prolija entre el logo y el cartel */
-    width: 100% !important;
-}
-
-.logo-visual {
-    margin-bottom: 0 !important; /* Le quitamos el margen gigante que empujaba la caja de contraseña */
-}
-
-.contenedor-texto-visual {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-}
-
-
-
-/* ==========================================
-   PARCHE: ADAPTACIÓN A PANTALLAS PETISAS Y MUY CHICAS
-   ========================================== */
-
-/* 1. RADARES PARA PANTALLAS FINITAS (Celulares delgados) */
-@media (max-width: 400px) { /* Subimos el radar a 400px para proteger más modelos de celulares */
+    /* PROFESORES: Tamaño cómodo, no microscópico */
+    .tarjeta-perfil-moderna { padding: 12px; }
+    .tarjeta-perfil-moderna .avatar-profe { width: 105px; height: 105px; } 
+    .tarjeta-perfil-moderna p { font-size: 0.95rem; }
     
-    /* Títulos y Logos */
-    .titulo-dashboard h2 { font-size: 1.4rem !important; }
-    .logo-dash { width: 100px !important; }
-    
-    /* -------------------------------------------
-       MAGIA ANTI-ROTURA: TARJETAS DE ALUMNOS
-       ------------------------------------------- */
+    /* Ejercicios */
+    .card-ejercicio { padding: 12px; gap: 10px; }
+    .info-ejercicio h4 { font-size: 0.85rem; }
+    .detalle-ejercicio { font-size: 0.75rem; }
+    .acciones-ejercicio svg { width: 36px; height: 36px; padding: 8px; }
+
+    /* Buscador adaptado */
+    .contenedor-buscador { padding: 8px 10px; }
+    .contenedor-buscador input { font-size: 0.85rem; margin: 0 6px; }
+}
+
+/* 5. TARJETA DE LOGIN ELÁSTICA */
+.tarjeta-login-visual {
+    width: 85%; max-width: 315px; min-width: 260px; box-sizing: border-box; margin: 0 auto;
+}
+
+
+/* ==========================================================================
+   7. PANTALLAS ULTRA FINITAS (Menos de 360px - Compresión Extrema)
+   ========================================================================== */
+@media (max-width: 360px) {
+    .logo-dash { width: 90px; }
+    .iconos-derecha-header { gap: 10px; }
+    .icono-header { width: 20px; }
+    .titulo-dashboard h2 { font-size: 1.3rem; }
+    .btn-informe-cuadrado { width: 45px; height: 45px; }
+    .btn-informe-cuadrado svg { width: 18px; height: 18px; }
+    .btn-informe-cuadrado span { font-size: 0.55rem; }
+
+    /* 1. Mantenemos todo en una fila pero lo comprimimos al máximo */
     .card-alumno { 
-        padding: 12px 10px !important; /* Menos relleno para ganar espacio vital */
-        gap: 5px !important;
-        max-width: 100% !important; /* Blindaje absoluto contra desbordes en la pantalla */
+        padding: 10px 8px; 
+        gap: 5px; 
+        flex-wrap: nowrap; /* Prohibimos que caiga a la línea de abajo todavía */
     }
     
     .avatar-actividad { 
-        width: 45px !important; 
-        height: 45px !important; 
-        margin-right: 8px !important; 
+        width: 38px; 
+        height: 38px; 
+        margin-right: 5px; 
     }
     
-    /* Centro de la tarjeta */
-    .info-central { 
-        padding-right: 8px !important; 
-        min-width: 0 !important; /* TRUCO EXPERTO: Permite que el texto súper largo se achique con "..." en lugar de hacer explotar la tarjeta */
-    }
-    .info-central h3 { font-size: 0.95rem !important; }
-    .info-detalle { font-size: 0.7rem !important; }
+    .info-central h3 { font-size: 0.85rem; margin-bottom: 2px; }
+    .info-detalle { font-size: 0.65rem; }
     
-    /* Columna derecha (Estado / Pago) */
+    /* 2. Columna derecha ultra delgada y con botones súper chiquitos */
     .estado-derecha { 
-        width: auto !important; /* Liberamos a la caja de la cárcel de los 110px */
-        min-width: 80px !important; /* Le damos un tamaño más humilde */
-        padding-left: 8px !important; 
+        width: auto;
+        min-width: 65px; 
+        padding-left: 5px; 
+        border-left: 1px solid #f39c12; /* Mantiene la raya vertical */
+        border-top: none;
+        flex-direction: column; /* Apilados verticalmente */
+        align-items: flex-end;
     }
-    .badge-estado { font-size: 0.65rem !important; padding: 4px 6px !important; }
-    .btn-pago-status { font-size: 0.65rem !important; padding: 5px 4px !important; }
-    /* ------------------------------------------- */
 
-    /* Grilla de Perfiles Profesores (Evita que las 2 columnas colapsen) */
-    .tarjeta-perfil-moderna { padding: 10px 5px !important; }
-    .tarjeta-perfil-moderna .avatar-profe { width: 75px !important; height: 75px !important; border-width: 2px !important; }
-    .tarjeta-perfil-moderna p { font-size: 0.75rem !important; }
+    /* Devolvemos un tamaño legible (0.65rem) porque ahora hay espacio de sobra */
+    .badge-estado { 
+        font-size: 0.65rem; 
+        padding: 4px 6px; 
+        margin-bottom: 4px; 
+    }
     
-    /* Tarjetas de Ejercicios y Rutinas */
-    .card-ejercicio { padding: 10px 8px !important; gap: 8px !important; }
-    .info-ejercicio h4 { font-size: 0.75rem !important; }
-    .detalle-ejercicio { font-size: 0.65rem !important; }
-    .acciones-ejercicio svg { width: 32px !important; height: 32px !important; padding: 6px !important; }
+    .contenedor-accion-pago { 
+        margin-top: 4px; 
+        width: 100%; 
+        margin-left: 0; 
+    }
+    
+    /* El botón recupera su forma sin ser microscópico */
+    .btn-pago-status { 
+        font-size: 0.65rem; 
+        padding: 5px 6px; 
+    }
 
-    /* Botones flotantes (+) y Atrás */
-    .btn-fab-amarillo, .btn-flotante-atras { width: 42px !important; height: 42px !important; }
-    .btn-fab-amarillo svg, .btn-flotante-atras svg { width: 20px !important; height: 20px !important; }
-    
-    /* Chips (Filtros superiores) */
-    .chip { font-size: 0.75rem !important; padding: 5px 12px !important; }
-}
-/* 2. RADARES PARA PANTALLAS BAJITAS / PETISAS (Laptops chicas o celus apaisados) */
-@media (max-height: 700px) {
-    /* Compactar Pantalla de Inicio (Para que no haya que scrollear para elegir rol) */
-    .pantalla-inicio { padding-top: 4vh !important; }
-    .logo-container-inicio { margin-bottom: 4vh !important; }
-    .img-logo-inicio { width: 180px !important; }
-    .contenedor-botones-rol { gap: 15px !important; margin-top: 2vh !important; }
-    .tarjeta-rol { height: 100px !important; border-radius: 15px !important; }
-    .tarjeta-profe { height: 85px !important; }
-    .icono-rol { width: 40px !important; }
-    .textos-rol h2 { font-size: 1.5rem !important; }
-    .textos-rol p { font-size: 0.85rem !important; }
-
-    /* Compactar Pantalla de Login */
-    .login-visual { padding-top: 6vh !important; }
-    .logo-visual { width: 140px !important; margin-bottom: 5vh !important; }
-    .tarjeta-login-visual { padding: 25px 20px !important; gap: 15px !important; }
-
-    /* Compactar Selección de Perfiles */
-    .logo-container-small { margin-top: 4vh !important; margin-bottom: 2vh !important; }
-    .textos-perfiles-caja { margin-bottom: 2vh !important; padding: 5px !important; }
-    .textos-perfiles-caja h2 { font-size: 1.4rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
-    .tarjeta-perfil-moderna { padding: 10px !important; }
-    .tarjeta-perfil-moderna .avatar-profe { width: 85px !important; height: 85px !important; margin-bottom: 8px !important; }
-    
-    /* Achicar las Ventanas Emergentes (Modales) y sus campos */
-    .modal-contenido { padding: 15px 18px !important; gap: 10px !important; }
-    .modal-contenido h3 { font-size: 1.15rem !important; }
-    .input-modal { padding: 8px 12px !important; font-size: 0.85rem !important; }
-    .campo-detalle { margin-bottom: 0 !important; }
-    
-    /* Subir un poco los botones flotantes y achicar el menú inferior */
-    .contenedor-fab { bottom: 75px !important; gap: 10px !important; }
-    .bottom-nav { padding: 8px 0 10px 0 !important; }
-    .nav-item svg { width: 20px !important; margin-bottom: 2px !important; }
+    /* Ajustes extra del buscador y menú */
+    .contenedor-buscador { padding: 6px 10px; }
+    .btn-tachito-modo { width: 34px; height: 34px; min-width: 34px; }
+    .chip { font-size: 0.75rem; padding: 5px 12px; }
+    .nav-item span { font-size: 0.65rem; }
+    .nav-item svg { width: 20px; }
 }
 
-
-
-/* ==========================================
-   PARCHE: RESPONSIVE PARA INFORMES Y PANEL ADMIN
-   ========================================== */
-
-/* 1. Ajustes base para PC y pantallas grandes */
-.modal-informe-grande {
-    width: 95% !important;
-    max-width: 800px !important; /* Le damos más aire en la PC para que la tabla no se asfixie */
-}
-
-/* 2. ADAPTACIÓN PARA CELULARES ESTÁNDAR (Hasta 768px) */
-@media (max-width: 768px) {
-    /* El panel de admin (los profes) pasa a una sola columna perfecta */
-    #contenedor-admin-columnas {
-        grid-template-columns: 1fr !important;
-        padding: 0 15px 15px 15px !important;
-    }
-
-    /* La caja del gran total se achica un poco para no exagerar */
-    #monto-gran-total {
-        font-size: 1.8rem !important;
-    }
-
-    /* El modal de informe ocupa casi toda la pantalla en móvil */
-    .modal-informe-grande {
-        width: 98% !important;
-        height: 90vh !important;
-        padding: 15px !important;
-    }
-
-    /* LA MAGIA DE LA TABLA: Permite deslizar horizontalmente con el dedo SOLO la tabla, protegiendo el resto de la ventana */
-    .contenedor-tabla-excel {
-        width: 100%;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch; /* Hace que el deslizamiento en iPhone y Android sea súper suave */
+/* ==========================================================================
+   8. PANTALLAS MICRO (Menos de 330px - Caída a la segunda fila)
+   ========================================================================== */
+@media (max-width: 330px) {
+    /* 3. Ahora sí, cuando el espacio físico se agota por completo, las cosas bajan */
+    .card-alumno { 
+        flex-wrap: wrap; /* Habilita la caída a la línea de abajo */
     }
     
-    /* Achicamos la separación de las pestañas ("Planilla Actual" / "Historial") */
-    .tabs-informe {
-        gap: 5px !important;
-        margin: 0 !important;
+    .estado-derecha { 
+        width: 100%; /* Ocupa todo el ancho abajo */
+        flex-direction: row; /* Pone el estado y el botón uno al lado del otro */
+        justify-content: space-between; /* Espaciados a los bordes */
+        align-items: center;
+        border-left: none; /* Quitamos la raya vertical */
+        border-top: 1px solid rgba(243, 156, 18, 0.4); /* Línea horizontal sutil */
+        padding-left: 0; 
+        padding-top: 8px;
+        margin-top: 4px;
     }
-    .tab-btn {
-        font-size: 0.75rem !important;
-        padding-bottom: 8px !important;
+
+    .badge-estado { 
+        margin-bottom: 0; /* Ya no empuja al de abajo porque están lado a lado */
+    }
+    
+    .contenedor-accion-pago {
+        margin-top: 0;
+        width: auto; 
+        flex-grow: 1;
+        margin-left: 10px; /* Aire entre el cartelito y el botón */
     }
 }
+/* ==========================================================================
+   PARCHE DE ELASTICIDAD: BUSCADOR Y TARJETAS DE ALUMNOS
+   ========================================================================== */
 
-/* 3. ADAPTACIÓN EXTREMA PARA CELULARES PETISOS O FINITOS (Hasta 380px) */
-@media (max-width: 380px) {
-    /* Los KPIs (Total alumnos, recaudación, etc.) se apilan de a 1 en vez de a 2 para no aplastar el texto */
-    .resumen-kpis-grid {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
-    }
-    
-    .kpi-item strong {
-        font-size: 1.1rem !important;
-    }
-    
-    /* El selector de "Ordenar por" se pone arriba y la cajita abajo para que entre bien */
-    #contenedor-filtros-informe {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 8px;
-    }
-    
-    #select-orden-informe {
-        width: 100% !important;
-    }
-}
-
-/* ==========================================
-   PARCHE: COMPRESIÓN EXTREMA PARA CELULARES ULTRA FINITOS
-   ========================================== */
-
-/* 1. ROMPEMOS EL CANDADO DE LOS 320PX EN MÓVILES */
-@media (max-width: 768px) {
-    /* Le sacamos el chaleco de fuerza a las listas para que puedan encogerse hasta el infinito */
-    .lista-alumnos-moderna,
-    #lista-packs,
-    #lista-historial-admin,
-    #lista-historial-informes {
-        grid-template-columns: 1fr !important; /* Obliga a usar solo 1 columna que sea 100% elástica */
-    }
-}
-
-/* 2. RADAR DE COMPRESIÓN EXTREMA (Celulares de menos de 350px de ancho) */
-@media (max-width: 350px) {
-    /* Achicamos la tarjeta entera al máximo posible */
-    .card-alumno {
-        padding: 10px 8px !important; /* Relleno mínimo para no asfixiar el contenido */
-        gap: 4px !important;
-    }
-    
-    /* El círculo de la foto se vuelve mini */
-    .avatar-actividad {
-        width: 38px !important;
-        height: 38px !important;
-        margin-right: 5px !important;
-    }
-    
-    /* Reducimos la tipografía para que sigan entrando nombres largos */
-    .info-central h3 {
-        font-size: 0.85rem !important;
-    }
-    .info-detalle {
-        font-size: 0.65rem !important;
-    }
-    
-    /* La columna derecha (Pagado / Vencida) se vuelve súper delgada */
-    .estado-derecha {
-        min-width: 65px !important; /* Lo comprimimos al máximo nivel legible */
-        padding-left: 5px !important;
-    }
-    
-    .badge-estado {
-        font-size: 0.55rem !important;
-        padding: 3px 5px !important;
-    }
-    
-    .btn-pago-status {
-        font-size: 0.55rem !important;
-        padding: 4px 2px !important;
-    }
-    
-    /* Achicamos la letra de las pestañas inferiores para que no se amontonen */
-    .nav-item span {
-        font-size: 0.65rem !important;
-    }
-    .nav-item svg {
-        width: 18px !important;
-    }
-}
-
-
-/* ==========================================
-   PARCHE: BLINDAJE ANTI-DESBORDE (CORREGIDO)
-   ========================================== */
-
-/* 1. Prohibimos el scroll horizontal "fantasma" sin romper los sliders */
-html, body {
-    overflow-x: hidden !important;
-    width: 100% !important;
-}
-
-@media (max-width: 768px) {
-    /* 2. Le sacamos los márgenes fijos al contenedor padre para que no sume ancho */
-    .contenedor-app {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        overflow-x: hidden !important;
-        width: 100% !important;
-    }
-    
-    /* 3. Anulamos los márgenes negativos (los culpables de empujar la pantalla a la derecha) */
-    .pantalla-dashboard-moderna,
-    .pantalla-fondo-claro,
-    .pantalla-admin {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* 4. Blindamos SOLO las tarjetas clave para que no desborden, en vez de blindar "todo" */
-    .card-alumno, .tarjeta-login-visual, .tarjeta-info-alumno, .modal-contenido {
-        max-width: 100vw !important;
-    }
-
-    /* 5. Le devolvemos explícitamente la libertad al slider para que pueda medir el doble (200%) */
-    .track-slider {
-        max-width: none !important;
-        width: 200% !important;
-    }
-}
-
-
-/* ==========================================
-   PARCHE: RESPONSIVE PARA BUSCADOR Y TACHITO
-   ========================================== */
-
-/* 1. Permitimos que la barra de búsqueda y su input se reduzcan sin límite */
+/* 1. Magia para que el buscador pueda encogerse todo lo necesario */
 .contenedor-buscador {
-    min-width: 0 !important; /* Rompe el límite que congelaba al buscador */
-    flex-grow: 1 !important;
-    overflow: hidden !important;
+    min-width: 0 !important;
+    flex-grow: 1;
 }
 
+/* El input adentro también debe tener permiso para aplastarse */
 .contenedor-buscador input {
-    min-width: 0 !important; /* Permite que el texto o placeholder se achiquen dinámicamente */
-    width: 100% !important;
+    min-width: 0 !important;
+    width: 100%;
 }
 
-/* 2. Aseguramos que los íconos y el tachito no se deformen en pantallas chicas */
-@media (max-width: 400px) {
-    .contenedor-buscador {
-        padding: 8px 10px !important; /* Reducimos un poquito el margen interno */
-    }
-    
-    .contenedor-buscador input {
-        font-size: 0.85rem !important; /* Letra un poco más compacta */
-        margin: 0 6px !important;
-    }
-    
-    .icono-buscar, .icono-filtros {
-        width: 18px !important;
-        height: 18px !important;
-        flex-shrink: 0 !important;
-    }
-    
-    .btn-tachito-modo {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        flex-shrink: 0 !important; /* Evita que el tachito se aplaste */
-    }
-    
-    .btn-tachito-modo svg {
-        width: 16px !important;
-        height: 16px !important;
-    }
-}
-
-
-/* ==========================================
-   CORRECCIÓN DEFINITIVA: ESPACIADO "AGREGAR PROFESOR"
-   ========================================== */
-
-.tarjeta-perfil-moderna[onclick*="abrirModalAgregarProfe"],
-.tarjeta-perfil-moderna.agregar-profe {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 16px !important; /* Separación perfecta entre el ícono y el texto */
-    padding: 15px 20px !important; /* ¡AQUÍ ESTABA EL DETALLE! El padding lateral aleja los elementos del borde de la tarjeta */
-    text-align: left !important;
-    aspect-ratio: auto !important; 
-    min-height: 85px !important;
-    box-sizing: border-box !important;
-}
-
-/* El contenedor del ícono mantiene su lugar fijo sin pegarse al borde */
-.tarjeta-perfil-moderna[onclick*="abrirModalAgregarProfe"] > div:first-child,
-.tarjeta-perfil-moderna.agregar-profe > div:first-child {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+/* 2. Protegemos el tachito para que no se aplaste, obligando al buscador a ceder el espacio */
+.btn-tachito-modo {
     flex-shrink: 0 !important;
-    margin: 0 !important;
 }
 
-/* El texto se acomoda a la derecha del ícono ocupando su espacio con prolijidad */
-.tarjeta-perfil-moderna[onclick*="abrirModalAgregarProfe"] p,
-.tarjeta-perfil-moderna.agregar-profe p {
-    text-align: left !important;
-    font-size: 0.85rem !important;
-    line-height: 1.2 !important;
-    margin: 0 !important;
-    flex-grow: 1 !important;
+/* 3. Permiso de compresión para las tarjetas de los alumnos */
+.card-alumno {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
-
-/* ==========================================
-   PARCHE: CONTENEDOR DE LOGIN FIJO (SIN ESTIRARSE)
-   ========================================== */
-
-.tarjeta-login-visual {
-    width: 315px !important;      /* Ancho fijo exacto, sin porcentajes que se estiren */
-    max-width: 315px !important;  /* Impide que crezca más de la cuenta */
-    min-width: 315px !important;  /* Impide que se achique en pantallas angostas */
-    flex-shrink: 0 !important;    /* Evita que el navegador la deforme a la fuerza */
-}
-/* ==========================================
-   PARCHE: LOGIN ELÁSTICO Y ADAPTABLE
-   ========================================== */
-
-.tarjeta-login-visual {
-    width: 85% !important;        /* Se adapta con flexibilidad al ancho de la pantalla */
-    max-width: 315px !important;  /* Pone un tope: en PC nunca pasará de 315px */
-    min-width: 260px !important;  /* Pone un límite inferior para que en pantallas súper finitas no colapse */
-    box-sizing: border-box !important;
+/* EL SECRETO: Permite que el nombre del alumno se corte con "..." en vez de empujar la pantalla */
+.info-central {
+    min-width: 0 !important;
 }
