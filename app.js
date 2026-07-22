@@ -365,6 +365,7 @@ function entrarPerfil(id, nombre, apellido) {
     document.getElementById("pantalla-dashboard").style.display = "block";
     
     cargarAlumnos(); 
+    cargarChips();
     actualizarNavActivo('alumnos');
 }
 // ==========================================
@@ -1227,18 +1228,25 @@ function filtrarAlumnos() {
 
 // --- 8. FILTROS POR CHIPS (BOTONES MÚLTIPLES E INTELIGENTES) ---
 function filtrarPorChip(botonClickeado, textoFiltro) {
-    const todosLosChips = Array.from(document.querySelectorAll(".chip"));
-    const chipTodos = todosLosChips[0]; // El primero siempre es "Todos"
+    const todosLosChips = Array.from(document.querySelectorAll("#contenedor-chips-dinamicos .chip"));
+    
+    // CORRECCIÓN MAGISTRAL: Separamos el lápiz del botón "Todos"
+    const chipLapiz = todosLosChips[0]; // El índice 0 ahora es siempre el Lápiz
+    const chipTodos = todosLosChips[1]; // El índice 1 es siempre "Todos"
 
     // 1. Lógica de prendido y apagado visual
     if (textoFiltro === 'Todos') {
-        todosLosChips.forEach(chip => chip.classList.remove("activo"));
+        todosLosChips.forEach(chip => {
+            // Le sacamos el estado "activo" a todos menos al lápiz (que nunca debe tenerlo)
+            if (chip !== chipLapiz) chip.classList.remove("activo");
+        });
         chipTodos.classList.add("activo");
     } else {
         chipTodos.classList.remove("activo");
         botonClickeado.classList.toggle("activo");
 
-        const hayAlgunoPrendido = todosLosChips.some(c => c.classList.contains("activo"));
+        // Si desmarcó todo, volvemos a prender "Todos" automáticamente
+        const hayAlgunoPrendido = todosLosChips.some(c => c !== chipLapiz && c.classList.contains("activo"));
         if (!hayAlgunoPrendido) {
             chipTodos.classList.add("activo");
         }
@@ -1247,13 +1255,13 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
     // 2. Limpiamos la barra de búsqueda escrita por las dudas
     document.getElementById("buscador-alumnos").value = "";
 
-    // 3. Recolectamos qué cosas están prendidas separándolas en 3 Grupos Lógicos
+    // 3. Recolectamos qué cosas están prendidas (Ignorando el lápiz y el botón Todos)
     let actividadesPrendidas = [];
     let estadosPrendidos = [];
-    let modalidadesPrendidas = []; // <-- NUEVO GRUPO
+    let modalidadesPrendidas = []; 
 
     todosLosChips.forEach(chip => {
-        if (chip.classList.contains("activo") && chip !== chipTodos) {
+        if (chip !== chipLapiz && chip !== chipTodos && chip.classList.contains("activo")) {
             const textoBoton = chip.innerText.trim();
             
             if (textoBoton === 'Cuota al día') {
@@ -1263,7 +1271,7 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
             } else if (textoBoton === 'Con rutina') {
                 modalidadesPrendidas.push('con rutina');
             } else if (textoBoton === 'Libre') {
-                modalidadesPrendidas.push('alumno libre'); // Busca el texto exacto que armamos en la etiqueta de la tarjeta
+                modalidadesPrendidas.push('alumno libre'); 
             } else {
                 actividadesPrendidas.push(textoBoton.toLowerCase());
             }
@@ -1281,16 +1289,10 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
 
         const contenidoTarjeta = tarjeta.innerText.toLowerCase();
 
-        // REGLA 1: ¿Cumple con la actividad? 
         const pasaActividad = actividadesPrendidas.length === 0 || actividadesPrendidas.some(act => contenidoTarjeta.includes(act));
-
-        // REGLA 2: ¿Cumple con el estado del pago?
         const pasaEstado = estadosPrendidos.length === 0 || estadosPrendidos.some(est => contenidoTarjeta.includes(est));
-
-        // REGLA 3: ¿Cumple con la modalidad? (Nueva regla)
         const pasaModalidad = modalidadesPrendidas.length === 0 || modalidadesPrendidas.some(mod => contenidoTarjeta.includes(mod));
 
-        // RESULTADO: Si pasa el embudo de las 3 Reglas al mismo tiempo, lo mostramos.
         if (pasaActividad && pasaEstado && pasaModalidad) {
             tarjeta.style.display = "flex";
         } else {
@@ -1298,7 +1300,6 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
         }
     });
 }
-
 // --- 9. REGISTRO Y CANCELACIÓN DE PAGOS EN TARJETAS ---
 async function modificarCicloPago(alumnoId, fechaVencimientoActual, yaEstabaPagado) {
     let baseFecha = fechaVencimientoActual && fechaVencimientoActual !== "null" ? new Date(fechaVencimientoActual + 'T00:00:00') : new Date();
@@ -1365,7 +1366,6 @@ function abrirModalEjercicio() {
     });
 
     document.getElementById("input-ej-nombre").value = "";
-    document.getElementById("opciones-ejercicios").innerHTML = ""; 
     document.getElementById("input-ej-series").value = "";
     document.getElementById("input-ej-fuerza").value = "";
     document.getElementById("input-ej-descanso").value = "";
@@ -1411,14 +1411,12 @@ function abrirModalEditar(id, zona, nombre, series, fuerza, descanso) {
     });
 
     document.getElementById("select-ej-zona").value = zona;
-    actualizarListaEjercicios();
     
     document.getElementById("input-ej-nombre").value = nombre;
     document.getElementById("input-ej-series").value = series;
     document.getElementById("input-ej-fuerza").value = fuerza !== 'undefined' && fuerza !== 'null' ? fuerza : "";
     document.getElementById("input-ej-descanso").value = descanso;
 }
-
 // --- EDICIÓN DE PROFESOR ---
 
 let fotoEditProfeElegida = ""; 
@@ -2368,7 +2366,7 @@ async function guardarEjercicioEnBD() {
     // Ahora capturamos el texto del INPUT en vez del select
     const nombre = document.getElementById("input-ej-nombre").value.trim(); 
     
-    if (!zona || !nombre) { mostrarAlerta("Faltan datos","Ponele zona y nombre."); return; }
+    if (!nombre) { mostrarAlerta("Faltan datos"," Por favor, ponele un nombre al ejercicio."); return; }
 
     let dias = ["D1", "D2", "D3", "D4", "D5"];
     if (alumnoDataActual && alumnoDataActual.nombres_dias) { dias = alumnoDataActual.nombres_dias; }
@@ -2378,7 +2376,7 @@ async function guardarEjercicioEnBD() {
         if (ejercicioEditandoId) {
             await clienteSupabase.from('rutinas_planificadas').update({ 
                 ejercicio_nombre: nombre, series_reps: document.getElementById("input-ej-series").value, 
-                descanso: document.getElementById("input-ej-descanso").value, zona_muscular: zona,
+                descanso: document.getElementById("input-ej-descanso").value, zona_muscular: zona || null,
                 fuerza: fuerza ? parseFloat(fuerza) : null,
             }).eq('id', ejercicioEditandoId);
         } else {
@@ -2387,7 +2385,7 @@ async function guardarEjercicioEnBD() {
                 dia_semana: diaSeleccionado, 
                 semana: semanaActiva,
                 categoria: categoriaSeleccionada, 
-                zona_muscular: zona,
+                zona_muscular: zona || null,
                 ejercicio_nombre: nombre, 
                 series_reps: document.getElementById("input-ej-series").value,
                 fuerza: fuerza ? parseFloat(fuerza) : null,
@@ -2499,7 +2497,6 @@ function abrirModalEjercicioPack() {
     const selectZonaPack = document.getElementById("select-pack-ej-zona");
     selectZonaPack.innerHTML = '<option value="">Seleccioná una zona / tipo...</option>';
 
-    // Como en los Packs no estamos adentro de una barra, le mostramos TODAS las zonas de la BD mezcladas
     let todasLasZonas = [];
     Object.keys(catalogoGlobal).forEach(granCategoria => {
         Object.keys(catalogoGlobal[granCategoria]).forEach(zona => {
@@ -2512,27 +2509,20 @@ function abrirModalEjercicioPack() {
     });
 
     document.getElementById("input-pack-ej-nombre").value = "";
-    document.getElementById("opciones-pack-ejercicios").innerHTML = "";
     document.getElementById("input-pack-ej-series").value = "";
     document.getElementById("input-pack-ej-descanso").value = "";
 }
-
 // ==========================================
 // NUEVO SISTEMA DE LISTA DE EJERCICIOS EMERGENTE
 // ==========================================
 let inputDestinoEjercicio = ""; // Memoria para saber qué cajita rellenar
 
-// 1. Abre la lista para una rutina normal
+// 1. Lista emergente para la rutina normal (muestra todos si no hay zona elegida)
 function abrirModalListaEjercicios(idInputDestino, idSelectZona) {
     const zona = document.getElementById(idSelectZona).value;
-    if (!zona) {
-        mostrarAlerta("Atención", "Primero elegí una Zona Muscular / Tipo en la cajita de arriba.");
-        return;
-    }
-
-    inputDestinoEjercicio = idInputDestino; // Guardamos si es el input normal o el del pack
+    inputDestinoEjercicio = idInputDestino; 
     const contenedor = document.getElementById("contenedor-botones-ejercicios");
-    contenedor.innerHTML = ""; // Limpiamos la lista anterior
+    contenedor.innerHTML = ""; 
 
     let catActual = "ENTRENAMIENTO"; 
     if (categoriaSeleccionada) {
@@ -2540,12 +2530,26 @@ function abrirModalListaEjercicios(idInputDestino, idSelectZona) {
         if (cat === "MOVILIDAD" || cat === "ENTRADA EN CALOR") catActual = cat;
     }
 
-    const ejercicios = catalogoGlobal[catActual][zona] || [];
-    
-    if (ejercicios.length === 0) {
-         contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>No hay ejercicios precargados en esta zona.</p>";
+    let ejerciciosAMostrar = [];
+
+    if (zona) {
+        // Si eligió una zona específica, mostramos solo esos
+        ejerciciosAMostrar = catalogoGlobal[catActual][zona] || [];
     } else {
-        ejercicios.forEach(ej => {
+        // Si NO eligió zona, juntamos TODOS los ejercicios de todas las zonas de esta categoría
+        Object.keys(catalogoGlobal[catActual]).forEach(z => {
+            const listaZona = catalogoGlobal[catActual][z] || [];
+            listaZona.forEach(ej => {
+                if (!ejerciciosAMostrar.includes(ej)) ejerciciosAMostrar.push(ej);
+            });
+        });
+        ejerciciosAMostrar.sort(); // Los ordenamos alfabéticamente
+    }
+    
+    if (ejerciciosAMostrar.length === 0) {
+         contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>No hay ejercicios precargados.</p>";
+    } else {
+        ejerciciosAMostrar.forEach(ej => {
             const btn = document.createElement("button");
             btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; border-radius: 10px; font-size: 1.05rem; background: #2c3e50; color: #fff; border: 1px solid #34495e; cursor: pointer; transition: 0.2s;";
             btn.innerText = ej;
@@ -2556,25 +2560,25 @@ function abrirModalListaEjercicios(idInputDestino, idSelectZona) {
     document.getElementById("modal-lista-ejercicios").style.display = "flex";
 }
 
-// 2. Abre la lista para los packs predefinidos (mezcla todas las zonas)
+// 2. Lista emergente para los packs predefinidos (muestra todos si no hay zona elegida)
 function abrirModalListaEjerciciosPack(idInputDestino, idSelectZona) {
     const zona = document.getElementById(idSelectZona).value;
-    if (!zona) {
-        mostrarAlerta("Atención", "Primero elegí una Zona Muscular / Tipo en la cajita de arriba.");
-        return;
-    }
-
     inputDestinoEjercicio = idInputDestino;
     const contenedor = document.getElementById("contenedor-botones-ejercicios");
     contenedor.innerHTML = "";
 
     let ejerciciosDelPack = [];
+    
     Object.keys(catalogoGlobal).forEach(granCategoria => {
-        if (catalogoGlobal[granCategoria][zona]) {
-            catalogoGlobal[granCategoria][zona].forEach(ej => {
-                if (!ejerciciosDelPack.includes(ej)) ejerciciosDelPack.push(ej);
-            });
-        }
+        const zonasAConsiderar = zona ? [zona] : Object.keys(catalogoGlobal[granCategoria]);
+        
+        zonasAConsiderar.forEach(z => {
+            if (catalogoGlobal[granCategoria][z]) {
+                catalogoGlobal[granCategoria][z].forEach(ej => {
+                    if (!ejerciciosDelPack.includes(ej)) ejerciciosDelPack.push(ej);
+                });
+            }
+        });
     });
 
     ejerciciosDelPack.sort();
@@ -3561,8 +3565,129 @@ window.addEventListener('online', () => {
     mostrarAlerta("¡Conexión Exitosa!", "Ya tenés internet de nuevo. Volviste a estar conectado a la base de datos.");
 });
 
+// ==========================================
+// SISTEMA DE CHIPS (FILTROS) EDITABLES
+// ==========================================
+let chipsActuales = [];
 
+function cargarChips() {
+    // Busca si este profesor ya había guardado filtros personalizados
+    const guardados = localStorage.getItem('chips_profe_' + profeActivoId);
+    
+    if (guardados) {
+        chipsActuales = JSON.parse(guardados);
+    } else {
+        // Si es la primera vez, le cargamos estos por defecto
+        chipsActuales = [
+            "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación", 
+            "Hyrox", "Crossfit", "Cuota al día", "Vencida", "Con rutina", "Libre"
+        ];
+    }
+    dibujarChipsPrincipales();
+}
 
+function dibujarChipsPrincipales() {
+    const contenedor = document.getElementById("contenedor-chips-dinamicos");
+    if (!contenedor) return;
+    
+    // 1. EL LÁPIZ NARANJA (Siempre primero, nunca se borra)
+    let html = `
+        <button class="chip" style="padding: 0 12px; border-color: #f39c12; color: #f39c12; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="abrirModalEditarChips()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        </button>
+    `;
+    
+    // 2. BOTÓN "TODOS"
+    html += `<button class="chip activo" onclick="filtrarPorChip(this, 'Todos')">Todos</button>`;
+    
+    // 3. LOS CHIPS PERSONALIZADOS
+    chipsActuales.forEach(chip => {
+        html += `<button class="chip" onclick="filtrarPorChip(this, '${chip}')">${chip}</button>`;
+    });
+    
+    contenedor.innerHTML = html;
+}
 
+function guardarEdicionChips() {
+    // 1. Capturamos los inputs en el orden exacto en el que aparecen visualmente en la pantalla (respetando el arrastre)
+    const inputs = document.querySelectorAll(".input-chip-edit");
+    let nuevosChips = [];
+    
+    inputs.forEach(input => {
+        const val = input.value.trim();
+        if (val) nuevosChips.push(val); 
+    });
+    
+    // 2. Actualizamos la memoria global del profesor
+    chipsActuales = nuevosChips;
+    
+    // 3. LA CLAVE: Guardamos permanentemente en el almacenamiento local del navegador (localStorage)
+    localStorage.setItem('chips_profe_' + profeActivoId, JSON.stringify(chipsActuales));
+    
+    // 4. Cerramos el modal de edición
+    document.getElementById("modal-editar-chips").style.display = "none";
+    
+    // 5. Redibuja los chips principales en la pantalla principal al instante
+    dibujarChipsPrincipales();
+    
+    // 6. Reseteamos el filtro a "Todos" para actualizar la lista de alumnos sin errores
+    const chipTodos = document.querySelector("#contenedor-chips-dinamicos .chip:nth-child(2)");
+    if (chipTodos) {
+        filtrarPorChip(chipTodos, 'Todos');
+    } else {
+        if (typeof cargarAlumnos === "function") cargarAlumnos();
+    }
+}
+let sortableChips = null; 
 
+function abrirModalEditarChips() {
+    document.getElementById("modal-editar-chips").style.display = "flex";
+    const contenedor = document.getElementById("lista-chips-editables");
+    contenedor.innerHTML = ""; 
+    
+    chipsActuales.forEach((chip) => {
+        agregarChipFila(chip);
+    });
+
+    // ---> MAGIA: Motor de arrastre configurado para toda la tarjeta <---
+    if (!sortableChips) {
+        sortableChips = new Sortable(contenedor, {
+            animation: 200, 
+            // Eliminamos el "handle" para que toda la tarjeta se pueda agarrar
+            filter: "input, button", // Protegemos el input y el tachito de basura
+            preventOnFilter: false, // Permite que el click en el input funcione para escribir
+            ghostClass: "tarjeta-indicador-caida", 
+            delay: 150, 
+            delayOnTouchOnly: true
+        });
+    }
+}
+
+function agregarChipFila(valor = "") {
+    const contenedor = document.getElementById("lista-chips-editables");
+    
+    const div = document.createElement("div");
+    // Le agregamos cursor: grab a toda la tarjeta
+    div.style.display = "flex";
+    div.style.gap = "12px";
+    div.style.alignItems = "center";
+    div.style.background = "#141414"; 
+    div.style.border = "1px solid #262626";
+    div.style.padding = "8px 12px";
+    div.style.borderRadius = "8px";
+    div.style.marginBottom = "6px";
+    div.style.cursor = "grab"; // Le avisa a la compu que toda la caja se puede agarrar
+    
+    div.innerHTML = `
+        <svg viewBox="0 0 24 24" width="20" style="color: #666; flex-shrink: 0;"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+        <input type="text" class="input-modal input-chip-edit" value="${valor}" placeholder="Ej: Pilates..." style="margin: 0; flex-grow: 1; border: none; background: transparent; padding: 0; cursor: text;">
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #e74c3c; cursor: pointer; padding: 5px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+    `;
+    
+    contenedor.appendChild(div);
+    
+    setTimeout(() => { contenedor.scrollTop = contenedor.scrollHeight; }, 10);
+}
 

@@ -209,21 +209,8 @@
 
             </div>
 
-            <div class="contenedor-chips">
-                <button class="chip activo" onclick="filtrarPorChip(this, 'Todos')">Todos</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Musculación')">Musculación</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Tela')">Tela</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Funcional')">Funcional</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Calistenia')">Calistenia</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Readaptación')">Readaptación</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Hyrox')">Hyrox</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Crossfit')">Crossfit</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Al día')">Cuota al día</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Vencida')">Vencida</button>
-                
-                <!-- NUEVOS FILTROS DE MODALIDAD -->
-                <button class="chip" onclick="filtrarPorChip(this, 'Con rutina')">Con rutina</button>
-                <button class="chip" onclick="filtrarPorChip(this, 'Libre')">Libre</button>
+            <div class="contenedor-chips" id="contenedor-chips-dinamicos">
+                <!-- Los botones se dibujan automáticamente desde JavaScript -->
             </div>
 
             
@@ -741,7 +728,7 @@
                 <div style="text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 10px;">O crear un ejercicio manual:</div>
                 <div class="campo-detalle">
                     <label class="label-modal">Zona muscular:</label>
-                    <select id="select-ej-zona" class="input-modal" onchange="actualizarListaEjercicios()">
+                    <select id="select-ej-zona" class="input-modal">
                         <option value="">Seleccioná una zona...</option>
                         <option value="Pecho">Pecho</option>
                         <option value="Espalda">Espalda</option>
@@ -799,7 +786,7 @@
         <div id="modal-ejercicio-pack" class="modal-overlay" style="display: none;">
             <div class="modal-contenido">
                 <h3>Añadir al Pack</h3>
-                <div class="campo-detalle"><select id="select-pack-ej-zona" class="input-modal" onchange="actualizarListaEjerciciosPack()"><option value="">Zona muscular...</option><option value="Pecho">Pecho</option><option value="Espalda">Espalda</option><option value="Hombros">Hombros</option><option value="Piernas">Piernas</option><option value="Glúteos">Glúteos</option><option value="Brazos">Brazos</option><option value="Core">Core / Abdominales</option></select></div>
+                <div class="campo-detalle"><select id="select-pack-ej-zona" class="input-modal"><option value="">Zona muscular...</option><option value="Pecho">Pecho</option><option value="Espalda">Espalda</option><option value="Hombros">Hombros</option><option value="Piernas">Piernas</option><option value="Glúteos">Glúteos</option><option value="Brazos">Brazos</option><option value="Core">Core / Abdominales</option></select></div>
                 <div class="campo-detalle">
                     <label class="label-modal">Ejercicio:</label>
                     <div style="display: flex; gap: 8px;">
@@ -1107,6 +1094,28 @@
                 </div>
                 
                 <button class="btn-guardar btn-rojo" onclick="document.getElementById('modal-lista-ejercicios').style.display='none'" style="margin-top: 15px; width: 100%;">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- MODAL EDITAR CHIPS DE FILTRO -->
+        <div id="modal-editar-chips" class="modal-overlay" style="display: none; z-index: 5000;">
+            <div class="modal-contenido" style="max-height: 80vh; display: flex; flex-direction: column;">
+                <h3 style="margin-bottom: 10px;">Editar Filtros</h3>
+                <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Creá, editá o borrá las etiquetas de búsqueda rápida.</p>
+                
+                <!-- Contenedor donde JS inyectará los inputs uno debajo del otro -->
+                <div id="lista-chips-editables" style="overflow-y: auto; flex-grow: 1; padding-right: 5px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; max-height: 300px;">
+                </div>
+
+                <button class="btn-guardar" onclick="agregarChipFila()" style="background: #ff9900; width: 100%; margin-bottom: 20px; font-size: 0.95rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" style="vertical-align: text-bottom; margin-right: 5px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Añadir nuevo filtro
+                </button>
+                
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="document.getElementById('modal-editar-chips').style.display='none'">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarEdicionChips()">Guardar</button>
+                </div>
             </div>
         </div>
 
