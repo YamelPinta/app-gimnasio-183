@@ -139,6 +139,9 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 
 .modal-contenido h3 { 
     margin: 0; color: white; font-size: 1.3rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    white-space: normal; 
+    overflow-wrap: anywhere; 
+    word-break: break-word;
 }
 
 .modal-botones { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
@@ -612,11 +615,19 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 }
 .info-central h3 { 
     font-size: 1.1rem; color: #2c2c2c; margin-bottom: 4px; 
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Pone "..." si el nombre es muy largo */
+    white-space: normal; /* Le da permiso para saltar de renglón */
+    overflow-wrap: anywhere; /* Corta palabras gigantes que no tengan espacios */
+    word-break: break-word; 
+    line-height: 1.2; 
 }
 .info-detalle { 
-    display: flex; align-items: center; font-size: 0.8rem; color: #777; margin-bottom: 2px; 
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+    display: flex; 
+    align-items: flex-start; /* Hace que el ícono se quede arriba si el texto baja */
+    font-size: 0.8rem; color: #777; margin-bottom: 2px; 
+    white-space: normal; 
+    overflow-wrap: anywhere; 
+    word-break: break-word; 
+    line-height: 1.3;
 }
 .punto-naranja { 
     width: 8px; height: 8px; background: #f39c12; border-radius: 50%; margin-right: 6px; flex-shrink: 0;
@@ -692,7 +703,17 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 }
 .avatar-gris { width: 60px; height: 60px; background-color: #c2c2c2; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
 .avatar-gris svg { width: 30px; height: 30px; }
-.datos-info-alumno h2 { font-size: 1.5rem; color: #2c2c2c; margin-bottom: 5px; font-weight: 648; }
+.datos-info-alumno { 
+    flex-grow: 1; 
+    min-width: 0; 
+}
+.datos-info-alumno h2 { 
+    font-size: 1.5rem; color: #2c2c2c; margin-bottom: 5px; font-weight: 648; 
+    white-space: normal; /* Permite saltar de renglón */
+    overflow-wrap: anywhere; /* Corta palabras gigantes si no entran */
+    word-break: break-word; 
+    line-height: 1.2; 
+}
 .datos-info-alumno p { font-size: 0.75rem; color: #333; margin-bottom: 2px; }
 
 .btn-editar-alumno-card {
@@ -2331,4 +2352,59 @@ body.tema-oscuro .btn-re-descarga:hover { background: #222; }
     background: rgba(255,255,255,0.6);
     border-color: #ccc;
     color: #333;
+}
+
+
+
+/* =========================================
+   SUB-BLOQUES (ACORDEONES DE RUTINA)
+   ========================================= */
+.tarjeta-subbloque {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+body.tema-oscuro .tarjeta-subbloque {
+    background: #1a1a1a;
+    border-color: #333;
+}
+.header-subbloque {
+    padding: 14px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: rgba(243, 156, 18, 0.1);
+    border-bottom: 1px solid transparent;
+    transition: background 0.2s;
+}
+body.tema-oscuro .header-subbloque {
+    background: rgba(243, 156, 18, 0.05);
+}
+.header-subbloque:active { background: rgba(243, 156, 18, 0.2); }
+.header-subbloque h4 {
+    margin: 0;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.15rem;
+    color: #f39c12;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.badge-subbloque {
+    background: #f39c12;
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+.cuerpo-subbloque {
+    flex-direction: column;
+    padding: 12px 10px;
+}
+.subbloque-contenedor {
+    display: flex; flex-direction: column; gap: 10px; min-height: 20px;
 }

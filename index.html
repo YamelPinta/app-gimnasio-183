@@ -747,6 +747,17 @@
                         <option value="Core">Core / Abdominales</option>
                     </select>
                 </div>
+                <!-- NUEVO CAMPO: SUB-BLOQUE -->
+                <div class="campo-detalle">
+                    <label class="label-modal">Sub-bloque (Opcional):</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="input-ej-subbloque" class="input-modal" placeholder="Ej: Circuito 1, AMRAP..." style="flex: 1; margin: 0;">
+                        <button type="button" class="btn-guardar" onclick="abrirListaSubbloques()" style="padding: 0 15px; margin: 0; background: #ff9900; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            Los que ya tenés
+                        </button>
+                    </div>
+                </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Ejercicio:</label>
                     <div style="display: flex; gap: 8px;">
@@ -803,6 +814,19 @@
                 <div class="modal-botones">
                     <button class="btn-cancelar" onclick="cerrarModalCrearPack()">Cancelar</button>
                     <button class="btn-guardar" onclick="guardarPackNuevo()">Crear</button>
+                </div>
+            </div>
+        </div>
+        <!-- MODAL EDITAR NOMBRE DEL PACK -->
+        <div id="modal-editar-pack" class="modal-overlay" style="display: none; z-index: 4000;">
+            <div class="modal-contenido">
+                <h3>Renombrar Rutina</h3>
+                <div class="campo-detalle">
+                    <input type="text" id="input-edit-pack-nombre" class="input-modal" placeholder="Ej: Día de Pierna">
+                </div>
+                <div class="modal-botones">
+                    <button class="btn-cancelar" onclick="cerrarModalEditarPack()">Cancelar</button>
+                    <button class="btn-guardar" onclick="guardarEdicionPack()">Guardar</button>
                 </div>
             </div>
         </div>

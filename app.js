@@ -731,7 +731,12 @@ function volverAlDashboard() {
 
 async function cargarAlumnos() {
     const contenedor = document.getElementById("lista-alumnos");
-    contenedor.innerHTML = "<p>Cargando alumnos...</p>";
+    
+    // CORRECCIÓN 1: Solo mostramos "Cargando" si la lista está completamente vacía (la primera vez).
+    // Si ya hay alumnos, no borramos la pantalla para evitar que el celular pegue un salto.
+    if (contenedor.innerHTML.trim() === "") {
+        contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Cargando alumnos...</p>";
+    }
 
     try {
         const { data: alumnos, error } = await clienteSupabase
@@ -742,212 +747,201 @@ async function cargarAlumnos() {
             .order('apellido', { ascending: true }); // Orden alfabético perfecto
 
         if (error) throw error;
-        contenedor.innerHTML = "";
 
         document.getElementById("contador-alumnos").innerText = `${alumnos.length} alumnos asignados`;
 
+        let htmlFinal = ""; // Memoria temporal para armar las tarjetas súper rápido
+
         if (alumnos.length === 0) {
-            contenedor.innerHTML = `<p style="color: #a0a0a0; text-align: center; margin-top: 20px;">Aún no tenés alumnos asignados.</p>`;
-            return;
-        } 
+            htmlFinal = `<p style="color: #a0a0a0; text-align: center; margin-top: 20px;">Aún no tenés alumnos asignados.</p>`;
+        } else {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0); 
 
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0); 
+            let nuevasNotif = 0;
+            let listaNotificaciones = [];
+            let leidasGuardadas = JSON.parse(localStorage.getItem('notifLeidas_' + profeActivoId)) || [];
 
-        // ----- SISTEMA DE NOTIFICACIONES -----
-        let nuevasNotif = 0;
-        let listaNotificaciones = [];
-        let leidasGuardadas = JSON.parse(localStorage.getItem('notifLeidas_' + profeActivoId)) || [];
-        // -------------------------------------
+            const mapaActividades = {
+                "Musculación": "imagenes/MUSCULACION.jpg",
+                "Tela": "imagenes/TELA.jpg",
+                "Funcional": "imagenes/REHABILITACION.jpg",
+                "Calistenia": "imagenes/CALISTENIA.jpg",
+                "Readaptación": "imagenes/READAPTACION.jpg",
+                "Hyrox": "imagenes/HYROX.jpg",
+                "Crossfit": "imagenes/CROSSFIT.jpg",
+            };
 
-        const mapaActividades = {
-            "Musculación": "imagenes/MUSCULACION.jpg",
-            "Tela": "imagenes/TELA.jpg",
-            "Funcional": "imagenes/REHABILITACION.jpg",
-            "Calistenia": "imagenes/CALISTENIA.jpg",
-            "Readaptación": "imagenes/READAPTACION.jpg",
-            "Hyrox": "imagenes/HYROX.jpg",
-            "Crossfit": "imagenes/CROSSFIT.jpg",
-        };
+            alumnos.forEach((alumno) => {
+                let claseBadge = "badge-vencida"; 
+                let textoBadge = "Vencida";
+                let estaAlDia = false;
 
-        alumnos.forEach((alumno) => {
-            let claseBadge = "badge-vencida"; 
-            let textoBadge = "Vencida";
-            let textoRutina = "Rutina vencida";
-            let estaAlDia = false;
+                if (alumno.vencimiento_cuota) {
+                    const fechaVencimiento = new Date(alumno.vencimiento_cuota + 'T00:00:00'); 
+                    const diferenciaTiempo = fechaVencimiento - hoy;
+                    const diferenciaDias = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
 
-            if (alumno.vencimiento_cuota) {
-                const fechaVencimiento = new Date(alumno.vencimiento_cuota + 'T00:00:00'); 
-                const diferenciaTiempo = fechaVencimiento - hoy;
-                const diferenciaDias = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
+                    if (diferenciaDias < 0) {
+                        claseBadge = "badge-vencida"; textoBadge = "Vencida";
+                    } else if (diferenciaDias <= 5) {
+                        claseBadge = "badge-vencepronto"; textoBadge = "Vence pronto";
+                    } else {
+                        claseBadge = "badge-aldia"; textoBadge = "Al día"; estaAlDia = true;
+                    }
 
-                if (diferenciaDias < 0) {
-                    claseBadge = "badge-vencida";
-                    textoBadge = "Vencida";
-                    textoRutina = "Rutina vencida";
-                } else if (diferenciaDias <= 5) {
-                    claseBadge = "badge-vencepronto";
-                    textoBadge = "Vence pronto";
-                    textoRutina = "Rutina activa";
+                    if (diferenciaDias <= 5) {
+                        let tipoNotif = diferenciaDias < 0 ? 'vencida' : 'pronto';
+                        let idNotif = `${alumno.id}_${alumno.vencimiento_cuota}_${tipoNotif}`; 
+                        let esNueva = !leidasGuardadas.includes(idNotif);
+                        let fechaFormateada = alumno.vencimiento_cuota.split('-').reverse().join('/');
+
+                        listaNotificaciones.push({
+                            idNotif: idNotif, alumnoNombre: `${alumno.nombre} ${alumno.apellido}`,
+                            tipo: tipoNotif, dias: Math.abs(diferenciaDias),
+                            esNueva: esNueva, fechaFormateada: fechaFormateada
+                        });
+
+                        if (esNueva) nuevasNotif++;
+                    }
+                }
+
+                const actividadReal = alumno.actividad || "Musculación";
+                const imagenAsignada = mapaActividades[actividadReal] || "imagenes/MUSCULACION.jpg";
+                const textoBotonPago = estaAlDia ? "Pagado" : "Marcar Pago";
+                const claseBotonPago = estaAlDia ? "btn-pago-realizado" : "btn-pago-pendiente";
+                const cuotaTexto = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "-";
+
+                let htmlBotonBorrar = "";
+                if (modoBorradoActivo) {
+                    htmlBotonBorrar = `<button class="btn-accion-admin peligro" onclick="event.stopPropagation(); borrarAlumno('${alumno.id}')" style="margin-bottom: 5px;">Borrar</button>`;
+                }
+
+                let textoUltimaSesion = "Sin asistencias";
+                let colorUltimaSesion = "#777";
+                let iconoUltimaSesion = `<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>`; 
+
+                const tmpHoy = new Date();
+                const fechaHoyStr = `${tmpHoy.getFullYear()}-${String(tmpHoy.getMonth() + 1).padStart(2, '0')}-${String(tmpHoy.getDate()).padStart(2, '0')}`;
+                const estaPresenteHoy = (alumno.ultima_sesion === fechaHoyStr); 
+
+                if (alumno.ultima_sesion) {
+                    const fechaUltima = new Date(alumno.ultima_sesion + 'T00:00:00');
+                    const difTiempoSesion = hoy - fechaUltima;
+                    const difDiasSesion = Math.floor(difTiempoSesion / (1000 * 60 * 60 * 24));
+
+                    if (difDiasSesion === 0) {
+                        textoUltimaSesion = "Entrenó hoy"; colorUltimaSesion = "#2ecc71"; 
+                    } else if (difDiasSesion === 1) {
+                        textoUltimaSesion = "Entrenó ayer"; colorUltimaSesion = "#2ecc71"; 
+                    } else if (difDiasSesion <= 7) {
+                        textoUltimaSesion = `Última vez: hace ${difDiasSesion} días`; colorUltimaSesion = "#f39c12"; 
+                    } else {
+                        textoUltimaSesion = `Ausente hace ${difDiasSesion} días`; colorUltimaSesion = "#e74c3c"; 
+                        iconoUltimaSesion = `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>`; 
+                    }
+                }
+
+                let htmlBotonAsistencia = "";
+                if (estaPresenteHoy) {
+                    htmlBotonAsistencia = `<button class="btn-asistencia-presente" onclick="event.stopPropagation(); deshacerAsistencia('${alumno.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Presente</button>`;
                 } else {
-                    claseBadge = "badge-aldia";
-                    textoBadge = "Al día";
-                    textoRutina = "Rutina activa";
-                    estaAlDia = true;
+                    htmlBotonAsistencia = `<button class="btn-asistencia-pendiente" onclick="event.stopPropagation(); abrirModalCheckin('${alumno.id}')">Asistencia</button>`;
                 }
 
-                // Generar alerta en segundo plano si está por vencer o venció
-                if (diferenciaDias <= 5) {
-                    let tipoNotif = diferenciaDias < 0 ? 'vencida' : 'pronto';
-                    // Creamos un código único para esta alerta (Ej: Juan_2026-08-10_vencida)
-                    let idNotif = `${alumno.id}_${alumno.vencimiento_cuota}_${tipoNotif}`; 
-                    let esNueva = !leidasGuardadas.includes(idNotif); // ¿Ya la vio el profe?
+                const modalidad = alumno.tipo_rutina || "Con rutina";
+                let etiquetaModalidad = modalidad === "Libre" 
+                    ? `<span class="badge-libre" style="margin-left: 0; font-family: inherit; font-size: 0.7rem;">ALUMNO LIBRE</span>` 
+                    : `<span style="font-family: inherit; font-size: 0.75rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">CON RUTINA</span>`;
 
-                    let fechaFormateada = alumno.vencimiento_cuota.split('-').reverse().join('/');
-
-                    listaNotificaciones.push({
-                        idNotif: idNotif,
-                        alumnoNombre: `${alumno.nombre} ${alumno.apellido}`,
-                        tipo: tipoNotif,
-                        dias: Math.abs(diferenciaDias),
-                        esNueva: esNueva,
-                        fechaFormateada: fechaFormateada
-                    });
-
-                    if (esNueva) nuevasNotif++;
-                }
-            }
-
-            const actividadReal = alumno.actividad || "Musculación";
-            const objetivoReal = alumno.objetivo || "Sin definir";
-            const imagenAsignada = mapaActividades[actividadReal] || "imagenes/MUSCULACION.jpg";
-            const textoBotonPago = estaAlDia ? "Pagado" : "Marcar Pago";
-            const claseBotonPago = estaAlDia ? "btn-pago-realizado" : "btn-pago-pendiente";
-
-            // ---> CORRECCIÓN: Preparamos el texto de la cuota SIN el $ duplicado y con puntos
-            const cuotaTexto = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "-";
-
-            // Lógica del botón borrar (solo aparece si el modo está activo)
-            let htmlBotonBorrar = "";
-            if (modoBorradoActivo) {
-                htmlBotonBorrar = `
-                    <button class="btn-accion-admin peligro" onclick="event.stopPropagation(); borrarAlumno('${alumno.id}')" style="margin-bottom: 5px;">
-                        Borrar
-                    </button>
-                `;
-            }
-
-            // LÓGICA DE ÚLTIMA SESIÓN (ASISTENCIA)
-            let textoUltimaSesion = "Sin asistencias";
-            let colorUltimaSesion = "#777"; // Gris
-            let iconoUltimaSesion = `<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>`; // Reloj
-
-            // CORRECCIÓN HORARIA: Forzamos la hora local exacta de tu dispositivo
-            const tmpHoy = new Date();
-            const fechaHoyStr = `${tmpHoy.getFullYear()}-${String(tmpHoy.getMonth() + 1).padStart(2, '0')}-${String(tmpHoy.getDate()).padStart(2, '0')}`;
-            const estaPresenteHoy = (alumno.ultima_sesion === fechaHoyStr); // Revisa si ya vino hoy
-
-            if (alumno.ultima_sesion) {
-                const fechaUltima = new Date(alumno.ultima_sesion + 'T00:00:00');
-                const difTiempoSesion = hoy - fechaUltima;
-                const difDiasSesion = Math.floor(difTiempoSesion / (1000 * 60 * 60 * 24));
-
-                if (difDiasSesion === 0) {
-                    textoUltimaSesion = "Entrenó hoy";
-                    colorUltimaSesion = "#2ecc71"; // Verde
-                } else if (difDiasSesion === 1) {
-                    textoUltimaSesion = "Entrenó ayer";
-                    colorUltimaSesion = "#2ecc71"; // Verde
-                } else if (difDiasSesion <= 7) {
-                    textoUltimaSesion = `Última vez: hace ${difDiasSesion} días`;
-                    colorUltimaSesion = "#f39c12"; // Naranja
-                } else {
-                    textoUltimaSesion = `Ausente hace ${difDiasSesion} días`;
-                    colorUltimaSesion = "#e74c3c"; // Rojo alerta
-                    iconoUltimaSesion = `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>`; // Alerta triangular
-                }
-            }
-
-            // CREAMOS EL BOTÓN INTELIGENTE (Presente vs Asistencia)
-            let htmlBotonAsistencia = "";
-            if (estaPresenteHoy) {
-                htmlBotonAsistencia = `
-                    <button class="btn-asistencia-presente" onclick="event.stopPropagation(); deshacerAsistencia('${alumno.id}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        Presente
-                    </button>
-                `;
-            } else {
-                htmlBotonAsistencia = `
-                    <button class="btn-asistencia-pendiente" onclick="event.stopPropagation(); abrirModalCheckin('${alumno.id}')">
-                        Asistencia
-                    </button>
-                `;
-            }
-
-            // LÓGICA DE ETIQUETA DE MODALIDAD CON LA TIPOGRAFÍA DEL NOMBRE (Poppins)
-            const modalidad = alumno.tipo_rutina || "Con rutina";
-            let etiquetaModalidad = modalidad === "Libre" 
-                ? `<span class="badge-libre" style="margin-left: 0; font-family: inherit; font-size: 0.7rem;">ALUMNO LIBRE</span>` 
-                : `<span style="font-family: inherit; font-size: 0.75rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">CON RUTINA</span>`;
-
-            // Construcción final de la tarjeta
-            contenedor.innerHTML += `
-                <div class="card-alumno" onclick="abrirGrillaAlumno('${alumno.id}')">
-                    <img src="${imagenAsignada}" class="avatar-actividad" alt="Actividad">
-                    
-                    <div class="info-central">
-                        <h3>${alumno.nombre} ${alumno.apellido}</h3>
-                        
-                        <div class="info-detalle" style="margin-bottom: 6px;">
-                            ${etiquetaModalidad}
+                htmlFinal += `
+                    <div class="card-alumno" onclick="abrirGrillaAlumno('${alumno.id}')">
+                        <img src="${imagenAsignada}" class="avatar-actividad" alt="Actividad">
+                        <div class="info-central">
+                            <h3>${alumno.nombre} ${alumno.apellido}</h3>
+                            <div class="info-detalle" style="margin-bottom: 6px;">${etiquetaModalidad}</div>
+                            <div class="info-detalle"><svg viewBox="0 0 24 24" fill="#f39c12" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;"><circle cx="12" cy="12" r="7.5"></circle></svg>${actividadReal}</div>
+                            <div class="info-detalle" style="margin-top: 2px;"><svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg><span style="color: #f39c12; font-weight: 600;">${cuotaTexto}</span></div>
+                            <div class="info-detalle" style="margin-top: 2px;"><svg viewBox="0 0 24 24" fill="none" stroke="${colorUltimaSesion}" stroke-width="2" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;">${iconoUltimaSesion}</svg><span style="color: ${colorUltimaSesion}; font-weight: 500;">${textoUltimaSesion}</span></div>
                         </div>
-                        
-                        <!-- CORRECCIÓN: El punto naranja ahora es más grande (r="7.5" en vez de 5) -->
-                        <div class="info-detalle">
-                            <svg viewBox="0 0 24 24" fill="#f39c12" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;"><circle cx="12" cy="12" r="7.5"></circle></svg>
-                            ${actividadReal}
-                        </div>
-                        
-                        <div class="info-detalle" style="margin-top: 2px;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                            <span style="color: #f39c12; font-weight: 600;">${cuotaTexto}</span>
-                        </div>
-
-                        <div class="info-detalle" style="margin-top: 2px;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="${colorUltimaSesion}" stroke-width="2" width="14" height="14" style="margin-right: 6px; flex-shrink: 0;">
-                                ${iconoUltimaSesion}
-                            </svg>
-                            <span style="color: ${colorUltimaSesion}; font-weight: 500;">${textoUltimaSesion}</span>
+                        <div class="estado-derecha">
+                            <span class="badge-estado ${claseBadge}">${textoBadge}</span>
+                            ${htmlBotonBorrar}
+                            <div class="contenedor-accion-pago">
+                                <button class="btn-pago-status ${claseBotonPago}" onclick="event.stopPropagation(); modificarCicloPago('${alumno.id}', '${alumno.vencimiento_cuota}', ${estaAlDia})">${textoBotonPago}</button>
+                                ${htmlBotonAsistencia}
+                            </div>
                         </div>
                     </div>
+                `;
+            });
 
-                    <div class="estado-derecha">
-                        <span class="badge-estado ${claseBadge}">${textoBadge}</span>
-                        ${htmlBotonBorrar}
-                        <div class="contenedor-accion-pago">
-                            <button class="btn-pago-status ${claseBotonPago}" 
-                                onclick="event.stopPropagation(); modificarCicloPago('${alumno.id}', '${alumno.vencimiento_cuota}', ${estaAlDia})">
-                                ${textoBotonPago}
-                            </button>
-                            ${htmlBotonAsistencia}
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        // ACTUALIZAR PUNTITO DE LA CAMPANITA
-        window.notificacionesGlobales = listaNotificaciones; // Las guardamos en memoria
-        const badge = document.getElementById("badge-notificaciones");
-        if (badge) {
-            badge.style.display = nuevasNotif > 0 ? "block" : "none";
+            window.notificacionesGlobales = listaNotificaciones; 
+            const badge = document.getElementById("badge-notificaciones");
+            if (badge) {
+                badge.style.display = nuevasNotif > 0 ? "block" : "none";
+            }
         }
+
+        // PISAMOS todo el HTML de golpe (Cero parpadeo, muchísimo más rápido)
+        contenedor.innerHTML = htmlFinal;
+
+        // CORRECCIÓN 2: Re-aplicamos los filtros para que los alumnos no "salten" si tenías alguno seleccionado
+        reaplicarFiltrosSilenciosamente();
 
     } catch (error) {
         console.error("Error al cargar alumnos:", error.message);
         contenedor.innerHTML = "<p>Error al cargar alumnos.</p>";
     }
+}
+
+// CORRECCIÓN 3: El cerebro que recuerda qué botones o busquedas tenías activas
+function reaplicarFiltrosSilenciosamente() {
+    const inputBuscador = document.getElementById("buscador-alumnos");
+    const textoBusqueda = inputBuscador ? inputBuscador.value.toLowerCase() : "";
+
+    let actividadesPrendidas = [];
+    let estadosPrendidos = [];
+    let modalidadesPrendidas = [];
+    let chipTodosActivo = false;
+
+    const todosLosChips = document.querySelectorAll("#contenedor-chips-dinamicos .chip");
+    todosLosChips.forEach((chip, index) => {
+        if (index === 0) return; // Saltamos el lápiz
+        if (index === 1 && chip.classList.contains("activo")) chipTodosActivo = true;
+
+        if (chip.classList.contains("activo") && index > 1) {
+            const txt = chip.innerText.trim();
+            if (txt === 'Cuota al día') estadosPrendidos.push('al día');
+            else if (txt === 'Vencida') estadosPrendidos.push('vencida');
+            else if (txt === 'Con rutina') modalidadesPrendidas.push('con rutina');
+            else if (txt === 'Libre') modalidadesPrendidas.push('alumno libre'); 
+            else actividadesPrendidas.push(txt.toLowerCase());
+        }
+    });
+
+    const tarjetas = document.querySelectorAll("#lista-alumnos .card-alumno");
+    
+    tarjetas.forEach(tarjeta => {
+        const contenido = tarjeta.innerText.toLowerCase();
+        const nombre = tarjeta.querySelector("h3").innerText.toLowerCase();
+        
+        const pasaBuscador = nombre.includes(textoBusqueda);
+        
+        let pasaChips = chipTodosActivo;
+        if (!chipTodosActivo) {
+            const pasaAct = actividadesPrendidas.length === 0 || actividadesPrendidas.some(act => contenido.includes(act));
+            const pasaEst = estadosPrendidos.length === 0 || estadosPrendidos.some(est => contenido.includes(est));
+            const pasaMod = modalidadesPrendidas.length === 0 || modalidadesPrendidas.some(mod => contenido.includes(mod));
+            pasaChips = pasaAct && pasaEst && pasaMod;
+        }
+
+        if (pasaBuscador && pasaChips) {
+            tarjeta.style.display = "flex";
+        } else {
+            tarjeta.style.display = "none";
+        }
+    });
 }
 
 // --- LÓGICA PARA CREAR ALUMNO CON VENTANA EMERGENTE ---
@@ -1353,6 +1347,7 @@ function abrirModalEjercicio() {
 
     document.getElementById("input-ej-nombre").value = "";
     document.getElementById("input-ej-descanso").value = "";
+    document.getElementById("input-ej-subbloque").value = ""; // Blanqueamos el sub-bloque
     
     const contenedorSeries = document.getElementById('contenedor-filas-series');
     if (contenedorSeries) {
@@ -1392,7 +1387,7 @@ function borrarEjercicio(id) {
     );
 }
 
-function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso) {
+function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, subBloque) {
     ejercicioEditandoId = id; 
     document.getElementById("modal-ejercicio").style.display = "flex";
     let catActual = "ENTRENAMIENTO"; 
@@ -1409,6 +1404,7 @@ function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso) {
     document.getElementById("select-ej-zona").value = zona || "";
     document.getElementById("input-ej-nombre").value = nombre || "";
     document.getElementById("input-ej-descanso").value = descanso !== 'undefined' && descanso !== 'null' ? descanso : "";
+    document.getElementById("input-ej-subbloque").value = subBloque || "";
 
     const contenedorSeries = document.getElementById('contenedor-filas-series');
     if (contenedorSeries) {
@@ -1463,7 +1459,7 @@ async function abrirModalEditarPorId(idEjercicio) {
         if (!ej) return;
 
         // Llamamos a nuestra función de edición pasando los datos de forma segura
-        abrirModalEditar(ej.id, ej.zona_muscular, ej.ejercicio_nombre, ej.series_reps, ej.fuerza, ej.descanso);
+        abrirModalEditar(ej.id, ej.zona_muscular, ej.ejercicio_nombre, ej.series_reps, ej.fuerza, ej.descanso, ej.sub_bloque);
 
     } catch (e) {
         console.error("Error al abrir para editar:", e);
@@ -1644,33 +1640,34 @@ function cerrarModalEditarAlumno() {
 
 
 // --- GUARDAR EL ORDEN AL ARRASTRAR ---
-async function guardarOrdenEjercicios() {
-    // Agarramos todas las tarjetas en el nuevo orden visual
-    const tarjetas = document.querySelectorAll("#lista-ejercicios-detalle .card-ejercicio");
-    const promesasDeGuardado = [];
+async function guardarOrdenYSubbloque() {
+    const contenedores = document.querySelectorAll('.subbloque-contenedor');
+    const promesas = [];
+    let indexGlobal = 0;
 
-    // Recorremos una por una
-    tarjetas.forEach((tarjeta, index) => {
-        const idEjercicio = tarjeta.getAttribute("data-id");
-        
-        // Armamos el aviso para Supabase: "A este ID le toca esta posición (index)"
-        const peticion = clienteSupabase
-            .from('rutinas_planificadas')
-            .update({ orden: index })
-            .eq('id', idEjercicio);
-            
-        promesasDeGuardado.push(peticion);
+    contenedores.forEach(contenedor => {
+        let nombreSub = contenedor.getAttribute('data-sub');
+        if (nombreSub === "Sin agrupar") nombreSub = null;
+
+        const tarjetas = contenedor.querySelectorAll('.card-ejercicio');
+        tarjetas.forEach(tarjeta => {
+            const idEj = tarjeta.getAttribute('data-id');
+            promesas.push(
+                clienteSupabase.from('rutinas_planificadas')
+                    .update({ orden: indexGlobal, sub_bloque: nombreSub })
+                    .eq('id', idEj)
+            );
+            indexGlobal++;
+        });
     });
 
     try {
-        // Disparamos todos los avisos al mismo tiempo para que sea instantáneo
-        await Promise.all(promesasDeGuardado);
-        console.log("Nuevo orden guardado en la nube");
+        await Promise.all(promesas);
+        console.log("Orden y sub-bloques guardados en la nube");
     } catch (error) {
         console.error("Error al guardar el nuevo orden:", error.message);
     }
 }
-
 
 
 // ==========================================
@@ -2160,7 +2157,6 @@ function abrirModalEditarDias() {
     document.getElementById("modal-editar-dias").style.display = "flex";
 }
 
-// Guarda los nombres nuevos
 async function guardarEdicionDias() {
     const nuevosDias = [
         document.getElementById("input-dia-1").value.trim() || "D1",
@@ -2170,23 +2166,56 @@ async function guardarEdicionDias() {
         document.getElementById("input-dia-5").value.trim() || "D5"
     ];
 
-    // Lo actualizamos en la memoria visual instantáneamente
+    // 1. Rescatamos los nombres VIEJOS antes de pisarlos
+    let viejosDias = ["D1", "D2", "D3", "D4", "D5"];
+    if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length === 5) {
+        viejosDias = alumnoDataActual.nombres_dias;
+    }
+
+    // 2. Lo actualizamos en la memoria visual instantáneamente
     if (!alumnoDataActual) alumnoDataActual = {};
     alumnoDataActual.nombres_dias = nuevosDias;
-    
+
     generarChipsRutina(); // Redibuja los botones al instante
     document.getElementById("modal-editar-dias").style.display = "none";
 
-    // Lo mandamos a Supabase para que quede guardado para siempre
     try {
+        // 3. Guardamos los nombres nuevos en la tabla del alumno en Supabase
         const { error } = await clienteSupabase
             .from('alumnos')
             .update({ nombres_dias: nuevosDias })
             .eq('id', alumnoSeleccionadoId);
         
         if (error) throw error;
+
+        // 4. LA MAGIA: Mudamos todos los ejercicios de los días viejos a los días nuevos
+        const promesasMudanza = [];
+        for (let i = 0; i < 5; i++) {
+            if (viejosDias[i] !== nuevosDias[i]) {
+                // Si el nombre cambió, le avisamos a Supabase que mude las rutinas
+                promesasMudanza.push(
+                    clienteSupabase.from('rutinas_planificadas')
+                        .update({ dia_semana: nuevosDias[i] })
+                        .eq('alumno_id', alumnoSeleccionadoId)
+                        .eq('dia_semana', viejosDias[i])
+                );
+            }
+        }
+
+        // 5. Si hubo cambios de nombre, disparamos las mudanzas todas juntas
+        if (promesasMudanza.length > 0) {
+            await Promise.all(promesasMudanza);
+            
+            // Actualizamos la vista de abajo para que los ejercicios reaparezcan al instante
+            if (vistaSliderActual === 'ejercicios') {
+                cargarEjerciciosCategoriaBD();
+            } else if (vistaSliderActual === 'categorias') {
+                dibujarCategoriasAlumno();
+            }
+        }
+
     } catch (e) {
-        mostrarAlerta("Error", "Error al guardar en Supabase.");
+        mostrarAlerta("Error", "Error al guardar los nuevos nombres de días en Supabase.");
     }
 }
 
@@ -2385,22 +2414,17 @@ function obtenerAnimacionHTML(nombreEj) {
 // ==========================================
 async function cargarEjerciciosCategoriaBD() {
     const contenedorEjercicios = document.getElementById("lista-ejercicios-detalle");
-    contenedorEjercicios.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top: 20px;'>Cargando rutina...</p>";
+    contenedorEjercicios.innerHTML = "<p style='text-align:center; color:#888; margin-top: 20px;'>Cargando rutina...</p>";
 
     let dias = ["D1", "D2", "D3", "D4", "D5"];
     if (alumnoDataActual && alumnoDataActual.nombres_dias) { dias = alumnoDataActual.nombres_dias; }
     const diaSeleccionado = dias[diaActivo - 1]; 
 
     try {
-        // Consulta base: el alumno y el día
         let query = clienteSupabase.from('rutinas_planificadas').select('*')
-            .eq('alumno_id', alumnoSeleccionadoId)
-            .eq('dia_semana', diaSeleccionado) 
-            .eq('semana', semanaActiva)
-            .order('orden', { ascending: true, nullsFirst: false }) 
-            .order('id', { ascending: true }); 
+            .eq('alumno_id', alumnoSeleccionadoId).eq('dia_semana', diaSeleccionado).eq('semana', semanaActiva)
+            .order('orden', { ascending: true, nullsFirst: false }).order('id', { ascending: true }); 
 
-        // MAGIA DE RESCATE: Si estamos en "Entrenamiento", traemos los ejercicios nuevos Y los viejos de Ana Banana (que no tienen categoría)
         if (categoriaSeleccionada.toUpperCase() === 'ENTRENAMIENTO') {
             query = query.or(`categoria.eq.${categoriaSeleccionada},categoria.is.null`);
         } else {
@@ -2414,58 +2438,83 @@ async function cargarEjerciciosCategoriaBD() {
 
         if (ejercicios.length === 0) {
             let htmlBotonCopiar = "";
-            // Si está en la semana 2, 3 o 4, le ofrecemos clonar toda la semana 1
             if (semanaActiva !== 1) {
-                htmlBotonCopiar = `
-                    <button class="btn-guardar" onclick="clonarSemanaCompleta(1, ${semanaActiva})" style="width: 100%; margin-top: 15px; background-color: #3498db; color: white;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" style="vertical-align: middle; margin-right: 5px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copiar toda la rutina de la Semana 1 acá
-                    </button>
-                `;
+                htmlBotonCopiar = `<button class="btn-guardar" onclick="clonarSemanaCompleta(1, ${semanaActiva})" style="width: 100%; margin-top: 15px; background-color: #3498db; color: white;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" style="vertical-align: middle; margin-right: 5px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar toda la rutina de la Semana 1 acá</button>`;
             }
-
-            contenedorEjercicios.innerHTML = `
-                <p style="text-align:center; color:#888; font-size: 0.9rem; margin-top: 30px;">No hay ejercicios en esta semana.</p>
-                ${htmlBotonCopiar}
-            `;
+            contenedorEjercicios.innerHTML = `<p style="text-align:center; color:#888; font-size: 0.9rem; margin-top: 30px;">No hay ejercicios en esta semana.</p>${htmlBotonCopiar}`;
             return;
         }
-        
+
+        // 1. AGRUPAMOS POR SUB-BLOQUE
+        const grupos = {};
         ejercicios.forEach(ej => {
-            let htmlImagen = obtenerAnimacionHTML(ej.ejercicio_nombre);
-            contenedorEjercicios.innerHTML += `
-                <div class="card-ejercicio" data-id="${ej.id}">
-                    <svg class="icono-arrastre" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
-                    ${htmlImagen}
-                    <div class="info-ejercicio" style="min-width: 0;">
-                        <h4 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${ej.ejercicio_nombre}</h4>
-                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-                            
-                            <!-- Fila 1: Lista de Series (Permite saltos de línea prolijos) -->
-                            <div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.3; font-size: 0.75rem;">
-                                <div class="punto-ama" style="margin-top: 5px; flex-shrink: 0;"></div>
-                                <span style="word-break: break-word;">${formatearResumenSeries(ej.series_reps)}</span>
-                            </div>
-                            
-                            <!-- Fila 2: Descanso abajo -->
-                            <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; opacity: 0.7; margin-left: 12px;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                <span>Descanso: ${ej.descanso || "-"}</span>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="acciones-ejercicio">
-                        <svg onclick="abrirModalEditarPorId('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>                        
-                        <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </div>
-                </div>`;
+            const nombreGrupo = ej.sub_bloque || "Sin agrupar";
+            if (!grupos[nombreGrupo]) grupos[nombreGrupo] = [];
+            grupos[nombreGrupo].push(ej);
         });
 
-        new Sortable(contenedorEjercicios, {
-            animation: 200, delay: 200, delayOnTouchOnly: true, filter: ".acciones-ejercicio svg", preventOnFilter: false,
-            chosenClass: "tarjeta-arrastrando", ghostClass: "tarjeta-indicador-caida",
-            onEnd: function () { guardarOrdenEjercicios(); }
+        let htmlFinal = "";
+
+        // Función armadora de tarjetas
+        const generarTarjeta = (ej) => `
+            <div class="card-ejercicio" data-id="${ej.id}">
+                <svg class="icono-arrastre" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+                ${obtenerAnimacionHTML(ej.ejercicio_nombre)}
+                <div class="info-ejercicio" style="min-width: 0;">
+                    <h4 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${ej.ejercicio_nombre}</h4>
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+                        <div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.3; font-size: 0.75rem;">
+                            <div class="punto-ama" style="margin-top: 5px; flex-shrink: 0;"></div>
+                            <span style="word-break: break-word;">${formatearResumenSeries(ej.series_reps)}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; opacity: 0.7; margin-left: 12px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            <span>Descanso: ${ej.descanso || "-"}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="acciones-ejercicio">
+                    <svg onclick="abrirModalEditarPorId('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>                        
+                    <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </div>
+            </div>`;
+
+        // 2. RENDERIZAMOS PRIMERO LOS "SIN AGRUPAR" (Para que queden sueltos como siempre)
+        if (grupos["Sin agrupar"]) {
+            htmlFinal += `<div class="subbloque-contenedor" data-sub="Sin agrupar">`;
+            grupos["Sin agrupar"].forEach(ej => htmlFinal += generarTarjeta(ej));
+            htmlFinal += `</div>`;
+            delete grupos["Sin agrupar"]; 
+        }
+
+        // 3. RENDERIZAMOS LOS BLOQUES
+        for (const [nombreSub, ejsDelSub] of Object.entries(grupos)) {
+            const idAcordeon = 'acordeon-' + nombreSub.replace(/[^a-zA-Z0-9]/g, '-');
+            htmlFinal += `
+                <div class="tarjeta-subbloque">
+                    <div class="header-subbloque" onclick="toggleSubbloque('${idAcordeon}', this)">
+                        <div style="display:flex; align-items:center; gap:8px; min-width: 0; flex: 1; margin-right: 10px;">
+                            <svg class="flecha-subbloque" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" style="transform: rotate(180deg); transition: 0.3s; flex-shrink: 0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            <h4 style="margin: 0; white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.2;">${nombreSub}</h4>
+                        </div>
+                        <span class="badge-subbloque" style="flex-shrink: 0;">${ejsDelSub.length} ej</span>
+                    </div>
+                    <div id="${idAcordeon}" class="cuerpo-subbloque subbloque-contenedor" data-sub="${nombreSub}" style="display: flex;">
+            `;
+            ejsDelSub.forEach(ej => htmlFinal += generarTarjeta(ej));
+            htmlFinal += `</div></div>`;
+        }
+
+        contenedorEjercicios.innerHTML = htmlFinal;
+
+        // 4. ACTIVAMOS EL MOTOR DE ARRASTRE MULTI-GRUPO
+        document.querySelectorAll('.subbloque-contenedor').forEach(cont => {
+            new Sortable(cont, {
+                group: 'rutina-compartida', // ¡Permite arrastrar un ej adentro de otro bloque!
+                animation: 200, delay: 200, delayOnTouchOnly: true, filter: ".acciones-ejercicio svg", preventOnFilter: false,
+                chosenClass: "tarjeta-arrastrando", ghostClass: "tarjeta-indicador-caida",
+                onEnd: function () { guardarOrdenYSubbloque(); } // Función nueva inteligente
+            });
         });
     } catch (e) { console.error(e); }
 }
@@ -2473,6 +2522,7 @@ async function cargarEjerciciosCategoriaBD() {
 async function guardarEjercicioEnBD() {
     const zona = document.getElementById("select-ej-zona").value; 
     const nombre = document.getElementById("input-ej-nombre").value.trim(); 
+    const subBloque = document.getElementById("input-ej-subbloque").value.trim();
     if (!nombre) { mostrarAlerta("Faltan datos", "Por favor, ponele un nombre al ejercicio."); return; }
 
     let arraySeries = [];
@@ -2493,13 +2543,13 @@ async function guardarEjercicioEnBD() {
     try {
         if (ejercicioEditandoId) {
             await clienteSupabase.from('rutinas_planificadas').update({ 
-                ejercicio_nombre: nombre, series_reps: seriesRepsTexto, descanso: descansoTexto, zona_muscular: zona || null
+                ejercicio_nombre: nombre, series_reps: seriesRepsTexto, descanso: descansoTexto, zona_muscular: zona || null, sub_bloque: subBloque || null
             }).eq('id', ejercicioEditandoId);
         } else {
             await clienteSupabase.from('rutinas_planificadas').insert([{
                 alumno_id: alumnoSeleccionadoId, dia_semana: diaSeleccionado, semana: semanaActiva,
                 categoria: categoriaSeleccionada, zona_muscular: zona || null, ejercicio_nombre: nombre, 
-                series_reps: seriesRepsTexto, fuerza: null, descanso: descansoTexto, orden: 999
+                series_reps: seriesRepsTexto, fuerza: null, descanso: descansoTexto, orden: 999, sub_bloque: subBloque || null
             }]);
         }
         ejercicioEditandoId = null; cerrarModalEjercicio(); cargarEjerciciosCategoriaBD();
@@ -2606,13 +2656,63 @@ async function cargarPacks() {
             contenedor.innerHTML += `
                 <div class="card-alumno" onclick="abrirDetallePack('${pack.id}', '${pack.nombre}')" style="cursor:pointer;">
                     ${obtenerAnimacionHTML((ejCount > 0) ? pack.ejercicios[0].nombre : null)}
-                    <div class="info-central" style="margin-left: 15px;"><h3>${pack.nombre}</h3><div class="info-detalle">${ejCount} ejercicios configurados</div></div>
-                    <div class="acciones-ejercicio" style="margin-left: auto; padding-left: 10px;">
-                        <svg onclick="event.stopPropagation(); borrarPack('${pack.id}')" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <div class="info-central" style="margin-left: 15px; min-width: 0;">
+                        <h3 style="font-size: 1.1rem; white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.2; margin-bottom: 2px;">${pack.nombre}</h3>
+                        <div class="info-detalle">${ejCount} ejercicios configurados</div>
+                    </div>
+                    <div class="acciones-ejercicio" style="margin-left: auto; padding-left: 10px; display: flex; gap: 4px;">
+                        <svg onclick="event.stopPropagation(); abrirModalEditarPack('${pack.id}', '${pack.nombre}')" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="22"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        <svg onclick="event.stopPropagation(); borrarPack('${pack.id}')" viewBox="0 0 24 24" fill="none" stroke="#d32f2f" stroke-width="2" width="22"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </div>
                 </div>`;
         });
     } catch (e) { contenedor.innerHTML = "<p>Error al cargar packs.</p>"; }
+}
+
+// Memoria para saber qué pack estamos renombrando
+let packAEditarId = null;
+
+function abrirModalEditarPack(id, nombreActual) {
+    packAEditarId = id;
+    document.getElementById("input-edit-pack-nombre").value = nombreActual;
+    document.getElementById("modal-editar-pack").style.display = "flex";
+}
+
+function cerrarModalEditarPack() {
+    document.getElementById("modal-editar-pack").style.display = "none";
+    packAEditarId = null;
+}
+
+async function guardarEdicionPack() {
+    const nuevoNombre = document.getElementById("input-edit-pack-nombre").value.trim();
+    
+    if(!nuevoNombre) {
+        mostrarAlerta("Faltan datos", "El nombre de la rutina no puede estar vacío.");
+        return;
+    }
+
+    try {
+        // Le avisamos a Supabase que le cambie el nombre a este ID específico
+        const { error } = await clienteSupabase
+            .from('packs_rutinas')
+            .update({ nombre: nuevoNombre })
+            .eq('id', packAEditarId);
+            
+        if (error) throw error;
+        
+        cerrarModalEditarPack();
+        cargarPacks(); // Recargamos la lista para ver el nombre nuevo
+        
+        // Si justo tenés abierto el detalle de ESE pack, también le actualizamos el título gigante arriba
+        if (packActivoId === packAEditarId) {
+            const tituloDetalle = document.getElementById("detalle-nombre-pack");
+            if(tituloDetalle) tituloDetalle.innerText = nuevoNombre;
+        }
+        
+    } catch (e) {
+        mostrarAlerta("Error", "No se pudo actualizar el nombre.");
+        console.error(e);
+    }
 }
 
 function borrarPack(idPack) {
@@ -3108,6 +3208,7 @@ window.addEventListener('popstate', function (event) {
             { id: "modal-profe", cerrar: cerrarModalProfe },
             { id: "modal-checkin", cerrar: cerrarModalCheckin },
             { id: "modal-terminos", cerrar: cerrarModalTerminos },
+            { id: "modal-editar-pack", cerrar: cerrarModalEditarPack },
             { id: "modal-informe-profe", cerrar: cerrarModalInformeProfe }
         ];
 
@@ -3838,21 +3939,124 @@ window.addEventListener('online', () => {
 // SISTEMA DE CHIPS (FILTROS) EDITABLES
 // ==========================================
 let chipsActuales = [];
+let sortableChips = null; 
 
-function cargarChips() {
-    // Busca si este profesor ya había guardado filtros personalizados
-    const guardados = localStorage.getItem('chips_profe_' + profeActivoId);
-    
-    if (guardados) {
-        chipsActuales = JSON.parse(guardados);
-    } else {
-        // Si es la primera vez, le cargamos estos por defecto
+// 1. CARGAR CHIPS DESDE LA NUBE
+async function cargarChips() {
+    const contenedor = document.getElementById("contenedor-chips-dinamicos");
+    if (contenedor) contenedor.innerHTML = "<p style='color:#888; font-size:0.8rem; margin-left:15px;'>Cargando filtros...</p>";
+
+    try {
+        // Le preguntamos a Supabase cuáles son los chips de este profesor
+        const { data: profe, error } = await clienteSupabase
+            .from('profesores')
+            .select('chips_filtros')
+            .eq('id', profeActivoId)
+            .single();
+
+        if (error) throw error;
+
+        // Si el profe ya había guardado chips en la nube, los usamos
+        if (profe && profe.chips_filtros && profe.chips_filtros.length > 0) {
+            chipsActuales = profe.chips_filtros;
+        } else {
+            // Si es un profe nuevo y la columna está vacía, le damos estos por defecto
+            chipsActuales = [
+                "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación", 
+                "Hyrox", "Crossfit", "Cuota al día", "Vencida", "Con rutina", "Libre"
+            ];
+        }
+        dibujarChipsPrincipales();
+
+    } catch (e) {
+        console.error("Error al cargar chips de la nube:", e);
+        // Si falla el internet, cargamos los de defecto para que no se rompa la app
         chipsActuales = [
             "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación", 
             "Hyrox", "Crossfit", "Cuota al día", "Vencida", "Con rutina", "Libre"
         ];
+        dibujarChipsPrincipales();
     }
+}
+
+// 2. VENTANA DE EDICIÓN CON EL MOTOR DE ARRASTRE CORREGIDO
+function abrirModalEditarChips() {
+    document.getElementById("modal-editar-chips").style.display = "flex";
+    const contenedor = document.getElementById("lista-chips-editables");
+    contenedor.innerHTML = ""; 
+    
+    chipsActuales.forEach((chip) => {
+        agregarChipFila(chip);
+    });
+
+    if (sortableChips) {
+        sortableChips.destroy();
+    }
+    
+    sortableChips = new Sortable(contenedor, {
+        handle: '.handle-arrastre', // <--- Solo arrastra tocando el ícono, libera el teclado
+        animation: 200, 
+        ghostClass: "tarjeta-indicador-caida", 
+    });
+}
+
+// 3. FILA DEL CHIP CON EL ÍCONO "AGARRABLE"
+function agregarChipFila(valor = "") {
+    const contenedor = document.getElementById("lista-chips-editables");
+    
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.gap = "12px";
+    div.style.alignItems = "center";
+    div.style.background = "#141414"; 
+    div.style.border = "1px solid #262626";
+    div.style.padding = "8px 12px";
+    div.style.borderRadius = "8px";
+    div.style.marginBottom = "6px";
+    
+    div.innerHTML = `
+        <svg class="handle-arrastre" viewBox="0 0 24 24" width="20" style="color: #666; flex-shrink: 0; cursor: grab;"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+        <input type="text" class="input-modal input-chip-edit" value="${valor}" oninput="this.setAttribute('value', this.value)" placeholder="Ej: Pilates..." style="margin: 0; flex-grow: 1; border: none; background: transparent; padding: 0; cursor: text; outline: none;">
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #e74c3c; cursor: pointer; padding: 5px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+    `;
+    
+    contenedor.appendChild(div);
+    setTimeout(() => { contenedor.scrollTop = contenedor.scrollHeight; }, 10);
+}
+
+// 4. GUARDAR CHIPS (EN PANTALLA Y EN SUPABASE)
+async function guardarEdicionChips() {
+    const inputs = document.querySelectorAll(".input-chip-edit");
+    let nuevosChips = [];
+    
+    inputs.forEach(input => {
+        const val = input.value.trim();
+        if (val) nuevosChips.push(val); 
+    });
+    
+    chipsActuales = nuevosChips;
+    
+    // Cerramos y dibujamos rápido para no hacer esperar al profe
+    document.getElementById("modal-editar-chips").style.display = "none";
     dibujarChipsPrincipales();
+    
+    const chipTodos = document.querySelector("#contenedor-chips-dinamicos .chip:nth-child(2)");
+    if (chipTodos) {
+        filtrarPorChip(chipTodos, 'Todos');
+    } else {
+        if (typeof cargarAlumnos === "function") cargarAlumnos();
+    }
+
+    // MANDAMOS LOS DATOS A SUPABASE DE FONDO (Silent Save)
+    try {
+        await clienteSupabase.from('profesores')
+            .update({ chips_filtros: chipsActuales })
+            .eq('id', profeActivoId);
+    } catch (e) {
+        console.error("Error guardando los filtros en la nube:", e);
+    }
 }
 
 function dibujarChipsPrincipales() {
@@ -3877,88 +4081,6 @@ function dibujarChipsPrincipales() {
     contenedor.innerHTML = html;
 }
 
-function guardarEdicionChips() {
-    // 1. Capturamos los inputs en el orden exacto en el que aparecen visualmente en la pantalla (respetando el arrastre)
-    const inputs = document.querySelectorAll(".input-chip-edit");
-    let nuevosChips = [];
-    
-    inputs.forEach(input => {
-        const val = input.value.trim();
-        if (val) nuevosChips.push(val); 
-    });
-    
-    // 2. Actualizamos la memoria global del profesor
-    chipsActuales = nuevosChips;
-    
-    // 3. LA CLAVE: Guardamos permanentemente en el almacenamiento local del navegador (localStorage)
-    localStorage.setItem('chips_profe_' + profeActivoId, JSON.stringify(chipsActuales));
-    
-    // 4. Cerramos el modal de edición
-    document.getElementById("modal-editar-chips").style.display = "none";
-    
-    // 5. Redibuja los chips principales en la pantalla principal al instante
-    dibujarChipsPrincipales();
-    
-    // 6. Reseteamos el filtro a "Todos" para actualizar la lista de alumnos sin errores
-    const chipTodos = document.querySelector("#contenedor-chips-dinamicos .chip:nth-child(2)");
-    if (chipTodos) {
-        filtrarPorChip(chipTodos, 'Todos');
-    } else {
-        if (typeof cargarAlumnos === "function") cargarAlumnos();
-    }
-}
-let sortableChips = null; 
-
-function abrirModalEditarChips() {
-    document.getElementById("modal-editar-chips").style.display = "flex";
-    const contenedor = document.getElementById("lista-chips-editables");
-    contenedor.innerHTML = ""; 
-    
-    chipsActuales.forEach((chip) => {
-        agregarChipFila(chip);
-    });
-
-    // ---> MAGIA: Motor de arrastre configurado para toda la tarjeta <---
-    if (!sortableChips) {
-        sortableChips = new Sortable(contenedor, {
-            animation: 200, 
-            // Eliminamos el "handle" para que toda la tarjeta se pueda agarrar
-            filter: "input, button", // Protegemos el input y el tachito de basura
-            preventOnFilter: false, // Permite que el click en el input funcione para escribir
-            ghostClass: "tarjeta-indicador-caida", 
-            delay: 150, 
-            delayOnTouchOnly: true
-        });
-    }
-}
-
-function agregarChipFila(valor = "") {
-    const contenedor = document.getElementById("lista-chips-editables");
-    
-    const div = document.createElement("div");
-    // Le agregamos cursor: grab a toda la tarjeta
-    div.style.display = "flex";
-    div.style.gap = "12px";
-    div.style.alignItems = "center";
-    div.style.background = "#141414"; 
-    div.style.border = "1px solid #262626";
-    div.style.padding = "8px 12px";
-    div.style.borderRadius = "8px";
-    div.style.marginBottom = "6px";
-    div.style.cursor = "grab"; // Le avisa a la compu que toda la caja se puede agarrar
-    
-    div.innerHTML = `
-        <svg viewBox="0 0 24 24" width="20" style="color: #666; flex-shrink: 0;"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
-        <input type="text" class="input-modal input-chip-edit" value="${valor}" placeholder="Ej: Pilates..." style="margin: 0; flex-grow: 1; border: none; background: transparent; padding: 0; cursor: text;">
-        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #e74c3c; cursor: pointer; padding: 5px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        </button>
-    `;
-    
-    contenedor.appendChild(div);
-    
-    setTimeout(() => { contenedor.scrollTop = contenedor.scrollHeight; }, 10);
-}
 
 // --- FUNCIONES PARA SERIES DINÁMICAS ---
 
@@ -4010,4 +4132,50 @@ function abrirModalTerminos() {
 
 function cerrarModalTerminos() {
     document.getElementById("modal-terminos").style.display = "none";
+}
+
+// Animación para abrir/cerrar un bloque
+function toggleSubbloque(idCuerpo, elementoHeader) {
+    const cuerpo = document.getElementById(idCuerpo);
+    const flecha = elementoHeader.querySelector('.flecha-subbloque');
+    
+    if (cuerpo.style.display === "none") {
+        cuerpo.style.display = "flex";
+        flecha.style.transform = "rotate(180deg)";
+    } else {
+        cuerpo.style.display = "none";
+        flecha.style.transform = "rotate(0deg)";
+    }
+}
+
+// Ventana emergente "Los que ya tenés"
+async function abrirListaSubbloques() {
+    inputDestinoEjercicio = 'input-ej-subbloque';
+    const contenedor = document.getElementById("contenedor-botones-ejercicios");
+    contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Buscando tus bloques...</p>";
+    document.getElementById("modal-lista-ejercicios").style.display = "flex";
+
+    try {
+        const { data, error } = await clienteSupabase.from('rutinas_planificadas')
+            .select('sub_bloque').eq('alumno_id', alumnoSeleccionadoId).not('sub_bloque', 'is', null);
+
+        if (error) throw error;
+        const unicos = [...new Set(data.map(item => item.sub_bloque))]; // Filtramos los repetidos
+
+        contenedor.innerHTML = "";
+        if (unicos.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Aún no creaste sub-bloques.</p>";
+        } else {
+            unicos.forEach(sb => {
+                const btn = document.createElement("button");
+                btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; border-radius: 10px; font-size: 1.05rem; background: #2c3e50; color: #fff; border: 1px solid #34495e; cursor: pointer; transition: 0.2s; word-break: break-word; line-height: 1.2;";
+                btn.innerText = sb;
+                // Reutilizamos tu función perfecta que inyecta el texto
+                btn.onclick = () => seleccionarEjercicioDesdeLista(sb); 
+                contenedor.appendChild(btn);
+            });
+        }
+    } catch (e) {
+        contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al buscar.</p>";
+    }
 }
