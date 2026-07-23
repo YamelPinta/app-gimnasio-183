@@ -107,6 +107,11 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     </span>
                 </div>
+                <!-- NUEVO: Checkbox de Términos y Condiciones -->
+                <div class="contenedor-tyc">
+                    <input type="checkbox" id="checkbox-tyc">
+                    <label for="checkbox-tyc">Acepto los <span class="link-tyc" onclick="abrirModalTerminos()">Términos y Condiciones</span></label>
+                </div>
                 <button class="btn-iniciar-visual" onclick="iniciarSesion()">Iniciar sesión</button>
             </div>
         </div>
@@ -398,11 +403,11 @@
                 <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="logo-top logo-modo-oscuro-top">
             </div>
             
-            <div class="tarjeta-info-alumno" style="background-image: none; background-color: #2c2c2c; color: white;">
-                <div class="avatar-gris" style="background-color: rgba(255,255,255,0.1);"><svg viewBox="0 0 24 24" fill="white" width="28"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
+            <div class="tarjeta-info-alumno" style="background: linear-gradient(135deg, #f39c12, #e67e22) !important; color: #ffffff !important; border: none !important; box-shadow: 0 6px 15px rgba(243, 156, 18, 0.3) !important;">
+                <div class="avatar-gris" style="background-color: rgba(95, 95, 95, 0.25) !important;"><svg viewBox="0 0 24 24" fill="white" width="28"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
                 <div class="datos-info-alumno">
-                    <h2 id="detalle-nombre-pack" style="color: white; font-weight: 600;"></h2>
-                    <p style="color: rgba(255,255,255,0.7);">Ejercicios predefinidos</p>
+                    <h2 id="detalle-nombre-pack" style="color: #1b1a1ad2 !important; font-weight: 700; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"></h2>
+                    <p style="color: rgba(24, 22, 22, 0.603) !important; font-weight: 500;">Ejercicios predefinidos</p>
                 </div>
             </div>
 
@@ -445,7 +450,7 @@
             </nav>
         </div>
 
-        <div id="pantalla-admin" class="pantalla-dashboard-moderna" style="display: none; flex-direction: column; height: 100vh; overflow: hidden; padding-bottom: 0;">
+        <div id="pantalla-admin" class="pantalla-dashboard-moderna" style="display: none; flex-direction: column;">
             <div class="header-dashboard">
                 <img src="imagenes/logo.png" alt="Logo" class="logo-dash logo-modo-claro-dash">
                 <img src="imagenes/LOGOACENTO.png" alt="Logo" class="logo-dash logo-modo-oscuro-dash">
@@ -473,12 +478,12 @@
             </div>
 
             <!-- Viewport Slider para Admin -->
-            <div class="viewport-slider" style="flex-grow: 1; margin-top: 10px; height: 0; min-height: 0;">
-                <div id="track-admin" class="track-slider" style="height: 100%;">
+            <div class="viewport-slider" style="margin-top: 10px;">
+                <div id="track-admin" class="track-slider">
                     
                     <!-- VISTA 1: PLANILLA (COLUMNAS DE PROFESORES) -->
-                    <div class="vista-slider" style="display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; padding-bottom: 80px;">
-                        
+                    <div class="vista-slider" style="display: flex; flex-direction: column; overflow-x: hidden; padding-bottom: 10px;">
+
                         <!-- GRAN TOTAL -->
                         <div style="margin: 0 20px 15px 20px; text-align: center; background: #2c3e50; padding: 15px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                             <h3 style="margin:0; font-size: 0.9rem; color: #bdc3c7; text-transform: uppercase;">Recaudación Total (30% Gym)</h3>
@@ -499,7 +504,7 @@
                     </div>
 
                     <!-- VISTA 2: HISTORIAL -->
-                    <div class="vista-slider" style="display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 20px 80px 20px;">
+                    <div class="vista-slider" style="display: flex; flex-direction: column; overflow-x: hidden; padding: 0 20px 10px 20px;">
                         <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px; text-align: center; flex-shrink: 0;">Registro de planillas globales descargadas.</p>
                         <div id="lista-historial-admin" style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; padding-bottom: 20px;">
                             <!-- Se llena con JS -->
@@ -752,14 +757,30 @@
                         </button>
                     </div>
                 </div>
-                <div class="campo-detalle">
-                    <label class="label-modal">Series y Repeticiones:</label>
-                    <input type="text" id="input-ej-series" class="input-modal" placeholder="Ej: 4 x 10 rep">
-                </div>
-                <!-- CAMPO DE FUERZA -->
-                <div class="campo-detalle">
-                    <label class="label-modal">Fuerza:</label>
-                    <input type="number" id="input-ej-fuerza" class="input-modal" placeholder="Ej: 40">
+                <!-- SISTEMA DE SERIES DINÁMICAS -->
+                <div class="campo-detalle" style="margin-top: 15px;">
+                    <div class="encabezado-series">
+                        <span>Serie</span>
+                        <span>% RM</span>
+                        <span>Reps</span>
+                        <span>RIR</span>
+                        <span></span>
+                    </div>
+                    
+                    <div id="contenedor-filas-series" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Fila base 1 -->
+                        <div class="fila-serie">
+                            <span class="numero-serie">1</span>
+                            <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
+                            <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
+                            <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
+                            <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn-agregar-serie" onclick="agregarFilaSerie('contenedor-filas-series')">+ Añadir Serie</button>
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Tiempo de descanso:</label>
@@ -800,7 +821,27 @@
                         </button>
                     </div>
                 </div>
-                <div class="campo-detalle"><input type="text" id="input-pack-ej-series" class="input-modal" placeholder="Series y Reps"></div>
+                <div class="campo-detalle" style="margin-top: 15px;">
+                    <div class="encabezado-series">
+                        <span>Serie</span>
+                        <span>% RM</span>
+                        <span>Reps</span>
+                        <span>RIR</span>
+                        <span></span>
+                    </div>
+                    <div id="contenedor-filas-series-pack" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="fila-serie">
+                            <span class="numero-serie">1</span>
+                            <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
+                            <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
+                            <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
+                            <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-agregar-serie" onclick="agregarFilaSerie('contenedor-filas-series-pack')">+ Añadir Serie</button>
+                </div>
                 <div class="campo-detalle"><input type="text" id="input-pack-ej-descanso" class="input-modal" placeholder="Descanso"></div>
                 <div class="modal-botones">
                     <button class="btn-cancelar" onclick="document.getElementById('modal-ejercicio-pack').style.display='none'">Cancelar</button>
@@ -1119,6 +1160,35 @@
                     <button class="btn-cancelar" onclick="document.getElementById('modal-editar-chips').style.display='none'">Cancelar</button>
                     <button class="btn-guardar" onclick="guardarEdicionChips()">Guardar</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE TÉRMINOS Y CONDICIONES -->
+        <div id="modal-terminos" class="modal-overlay" style="display: none; z-index: 99999;">
+            <div class="modal-contenido modal-terminos-texto" style="max-height: 85vh; padding: 20px;">
+                <h3 style="margin-bottom: 15px; color: #f39c12; font-size: 1.2rem; text-align: center;">Términos y Políticas</h3>
+                
+                <div class="caja-texto-legal">
+                    <strong>1. Aceptación de los Términos</strong><br>
+                    El ingreso y uso de esta plataforma administrativa ("18.3 ClubHouse") constituye la aceptación expresa de los presentes términos y condiciones. Este acceso es de uso exclusivo para el personal autorizado e instructores del gimnasio.<br><br>
+                    
+                    <strong>2. Uso de Credenciales</strong><br>
+                    La contraseña de acceso es estrictamente confidencial. Queda terminantemente prohibido compartir las credenciales de ingreso con alumnos, ex-empleados o personas ajenas a la institución. Toda acción realizada dentro de la plataforma bajo el perfil del profesor se considerará responsabilidad del mismo.<br><br>
+                    
+                    <strong>3. Privacidad y Datos Sensibles</strong><br>
+                    Al utilizar esta aplicación, el profesional tendrá acceso a datos personales de los alumnos (DNI, estado de pagos, condiciones médicas, edades). En cumplimiento con la Ley de Protección de Datos Personales (Ley 25.326 de la República Argentina), el profesional se compromete a mantener el absoluto secreto profesional respecto a esta información. Queda prohibida la extracción, divulgación, captura de pantalla o uso de los datos de los alumnos para fines ajenos a la actividad propia del gimnasio.<br><br>
+                    
+                    <strong>4. Propiedad Intelectual</strong><br>
+                    Las rutinas, los métodos de entrenamiento, las bases de datos de ejercicios (Packs) y la estructura del software son propiedad exclusiva del gimnasio. Queda prohibida su copia, reproducción, venta o uso en ámbitos comerciales externos a esta institución.<br><br>
+                    
+                    <strong>5. Responsabilidad</strong><br>
+                    El instructor es responsable de la correcta carga de datos, porcentajes de intensidad (% RM, RIR) y el registro de la asistencia. La aplicación es una herramienta de asistencia; la supervisión física y la evaluación del estado del alumno durante la ejecución de los ejercicios es responsabilidad directa del profesor a cargo de la clase.<br><br>
+
+                    <strong>6. Modificaciones de los Términos</strong><br>
+                    La administración del gimnasio se reserva el derecho de modificar estos términos en cualquier momento, así como de suspender o revocar el acceso a La Aplicación a cualquier usuario que incumpla estas normativas, sin previo aviso.
+                </div>
+                
+                <button class="btn-guardar" onclick="cerrarModalTerminos()" style="width: 100%; margin-top: 15px;">Cerrar y volver</button>
             </div>
         </div>
 
