@@ -719,9 +719,41 @@
                         </div>
                     </div>
                 </div>
+                <button type="button" class="btn-cancelar" onclick="abrirModalCambiarPassword()" style="width: 100%; margin-top: 15px; border-color: #3498db; color: #3498db;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" style="vertical-align: middle; margin-right: 5px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Cambiar mi contraseña
+                </button>
                 <div class="modal-botones">
                     <button class="btn-cancelar" onclick="cerrarModalEditarProfe()">Cancelar</button>
                     <button class="btn-guardar" onclick="guardarEdicionProfe()">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL CAMBIAR CONTRASEÑA -->
+        <div id="modal-cambiar-password" class="modal-overlay" style="display: none; z-index: 9999;">
+            <div class="modal-contenido">
+                <h3 style="margin-bottom: 15px; color: #f39c12;">Cambiar Contraseña</h3>
+            
+                <label class="label-modal">Nueva Contraseña (mín. 6 caracteres):</label>
+                <div style="position: relative; width: 100%; margin-bottom: 10px;">
+                    <input type="password" id="input-nueva-pass" class="input-modal" placeholder="Ingresá la nueva clave" style="padding-right: 40px; margin-bottom: 0; width: 100%; box-sizing: border-box;">
+                    <span onclick="alternarVisibilidadPass('input-nueva-pass')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #888; display: flex;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </span>
+                </div>
+            
+                <label class="label-modal" style="margin-top: 10px;">Repetir Contraseña:</label>
+                <div style="position: relative; width: 100%;">
+                    <input type="password" id="input-confirmar-pass" class="input-modal" placeholder="Confirmá la nueva clave" style="padding-right: 40px; margin-bottom: 0; width: 100%; box-sizing: border-box;">
+                    <span onclick="alternarVisibilidadPass('input-confirmar-pass')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #888; display: flex;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </span>
+                </div>
+            
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn-cancelar" onclick="cerrarModalCambiarPassword()" style="flex: 1;">Cancelar</button>
+                    <button type="button" id="btn-guardar-pass" class="btn-guardar" onclick="guardarNuevaPassword()" style="flex: 1;">Actualizar</button>
                 </div>
             </div>
         </div>
@@ -768,7 +800,7 @@
                         </button>
                     </div>
                 </div>
-                <!-- SISTEMA DE SERIES DINÁMICAS -->
+                <!-- SISTEMA DE SERIES DINÁMICAS INTELIGENTE -->
                 <div class="campo-detalle" style="margin-top: 15px;">
                     <div class="encabezado-series">
                         <span>Serie</span>
@@ -779,9 +811,8 @@
                     </div>
                     
                     <div id="contenedor-filas-series" style="display: flex; flex-direction: column; gap: 8px;">
-                        <!-- Fila base 1 -->
                         <div class="fila-serie">
-                            <span class="numero-serie">1</span>
+                            <input type="number" class="input-serie-numero input-modal" value="1" style="text-align: center; padding: 8px 2px;" title="Número o Cantidad">
                             <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
                             <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
                             <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
@@ -792,10 +823,19 @@
                     </div>
                     
                     <button type="button" class="btn-agregar-serie" onclick="agregarFilaSerie('contenedor-filas-series')">+ Añadir Serie</button>
+                    <button type="button" class="btn-agregar-serie" onclick="desglosarSeries('rutina')" style="margin-top: 8px; font-size: 0.8rem; background: rgba(243, 156, 18, 0.1); color: #f39c12; border-color: rgba(243, 156, 18, 0.3);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="vertical-align: middle; margin-right: 4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        Modificar individualmente cada serie
+                    </button>
                 </div>
                 <div class="campo-detalle">
                     <label class="label-modal">Tiempo de descanso:</label>
                     <input type="text" id="input-ej-descanso" class="input-modal" placeholder="Ej: 90s">
+                </div>
+
+                <div class="campo-detalle">
+                    <label class="label-modal">Notas del profe (Opcional):</label>
+                    <textarea id="input-ej-notas" class="input-modal" placeholder="Ej: Cuidado con la postura de la espalda..." rows="2" style="resize: none;"></textarea>
                 </div>
                 
                 <div class="modal-botones">
@@ -845,6 +885,7 @@
                         </button>
                     </div>
                 </div>
+                <!-- SISTEMA DE SERIES DINÁMICAS INTELIGENTE PACK -->
                 <div class="campo-detalle" style="margin-top: 15px;">
                     <div class="encabezado-series">
                         <span>Serie</span>
@@ -853,9 +894,10 @@
                         <span>RIR</span>
                         <span></span>
                     </div>
+                    
                     <div id="contenedor-filas-series-pack" style="display: flex; flex-direction: column; gap: 8px;">
                         <div class="fila-serie">
-                            <span class="numero-serie">1</span>
+                            <input type="number" class="input-serie-numero input-modal" value="1" style="text-align: center; padding: 8px 2px;" title="Número o Cantidad">
                             <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
                             <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
                             <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
@@ -864,9 +906,17 @@
                             </button>
                         </div>
                     </div>
+                    
                     <button type="button" class="btn-agregar-serie" onclick="agregarFilaSerie('contenedor-filas-series-pack')">+ Añadir Serie</button>
+                    <button type="button" class="btn-agregar-serie" onclick="desglosarSeries('pack')" style="margin-top: 8px; font-size: 0.8rem; background: rgba(243, 156, 18, 0.1); color: #f39c12; border-color: rgba(243, 156, 18, 0.3);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="vertical-align: middle; margin-right: 4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        Modificar individualmente cada serie
+                    </button>
                 </div>
                 <div class="campo-detalle"><input type="text" id="input-pack-ej-descanso" class="input-modal" placeholder="Descanso"></div>
+                <div class="campo-detalle">
+                    <textarea id="input-pack-ej-notas" class="input-modal" placeholder="Notas del profe (Opcional)..." rows="2" style="resize: none;"></textarea>
+                </div>
                 <div class="modal-botones">
                     <button class="btn-cancelar" onclick="document.getElementById('modal-ejercicio-pack').style.display='none'">Cancelar</button>
                     <button class="btn-guardar" onclick="guardarEjercicioEnPack()">Guardar</button>

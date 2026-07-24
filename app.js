@@ -103,36 +103,56 @@ function cerrarModalAlerta() {
 }
 
 // --- 2. ARRANQUE DE LA APP, MEMORIA Y NAVEGACIÓN INICIAL ---
+// Memoria dinámica para el login individual
+let emailProfePendiente = null;
+let idProfePendiente = null;
+let nombreProfePendiente = null;
+let apellidoProfePendiente = null;
+
 document.addEventListener("DOMContentLoaded", () => {
-    
-    // ---> NUEVO: Bloquear el gestor de contraseñas de Google en toda la app
-    // EXCEPTO en los inputs que tienen un "list" (para que el desplegable de ejercicios funcione en el celu)
     document.querySelectorAll('input:not([list])').forEach(input => {
         input.setAttribute('autocomplete', 'nope'); 
         input.setAttribute('data-lpignore', 'true'); 
     });
 
-    const sesionGuardada = localStorage.getItem('sesionGimnasio');
-
-    if (sesionGuardada === 'activa') {
-        // Si hay sesión, salta todo y va al dashboard de profes
-        document.getElementById("pantalla-inicio").style.display = "none";
-        document.getElementById("pantalla-login").style.display = "none";
-        document.getElementById("pantalla-perfiles").style.display = "flex";
-    } else {
-        // Si es la primera vez, arranca en la nueva Pantalla de Inicio
-        document.getElementById("pantalla-inicio").style.display = "flex";
-        document.getElementById("pantalla-login").style.display = "none";
-    }
-    
     inicializarTema();
     cargarProfesores();
+
+    // Verificamos si el profe dejó su sesión abierta en este celular
+    const sesionGuardadaId = localStorage.getItem('sesionGimnasioID');
+
+    if (sesionGuardadaId) {
+        // Auto-login directo al Dashboard
+        profeActivoId = sesionGuardadaId;
+        nombreProfePendiente = localStorage.getItem('sesionGimnasioNombre');
+        apellidoProfePendiente = localStorage.getItem('sesionGimnasioApellido');
+        
+        document.getElementById("nombre-profe-activo").innerText = "Profe " + nombreProfePendiente;
+        
+        const nombreCompleto = (nombreProfePendiente + " " + apellidoProfePendiente).toLowerCase();
+        esAdminActual = (nombreCompleto.includes('moye') || nombreCompleto.includes('german'));
+        document.querySelectorAll('.nav-admin-only').forEach(btn => btn.style.display = esAdminActual ? 'flex' : 'none');
+
+        document.getElementById("pantalla-inicio").style.display = "none";
+        document.getElementById("pantalla-login").style.display = "none";
+        document.getElementById("pantalla-perfiles").style.display = "none";
+        document.getElementById("pantalla-dashboard").style.display = "block";
+        
+        cargarAlumnos();
+        cargarChips();
+        actualizarNavActivo('alumnos');
+    } else {
+        // Primera vez en la app
+        document.getElementById("pantalla-inicio").style.display = "flex";
+        document.getElementById("pantalla-login").style.display = "none";
+        document.getElementById("pantalla-perfiles").style.display = "none";
+    }
 });
 
-// Botón "PROFESOR": Te lleva al login
+// Al tocar "Soy Profesor", salta directo a las caras
 function irPantallaLoginProfe() {
     document.getElementById("pantalla-inicio").style.display = "none";
-    document.getElementById("pantalla-login").style.display = "flex";
+    document.getElementById("pantalla-perfiles").style.display = "flex";
 }
 
 // Botón "ALUMNO": Te lleva a la futura pantalla de alumnos
@@ -155,24 +175,55 @@ function volverDesdeAlumnoAInicio() {
 
 
 // --- 3. LOGIN Y LOGOUT ---
-function iniciarSesion() {
+async function iniciarSesion() {
     const passIngresada = document.getElementById("login-password").value.trim();
-    const checkboxTyC = document.getElementById("checkbox-tyc").checked; // <-- Capturamos la casilla
+    const checkboxTyC = document.getElementById("checkbox-tyc").checked; 
 
-    // Si no aceptó los términos, lo frenamos en seco
     if (!checkboxTyC) {
-        mostrarAlerta("Atención", "Debés aceptar los Términos y Condiciones para poder ingresar.");
-        return;
+        mostrarAlerta("Atención", "Debés aceptar los Términos y Condiciones."); return;
+    }
+    if (!passIngresada) {
+        mostrarAlerta("Atención", "Ingresá tu contraseña."); return;
     }
 
-    // Contraseña única para todo el equipo
-    const passwordUnica = "gimnasio2026";
+    try {
+        // Conexión real con el escudo de seguridad de Supabase
+        const { data, error } = await clienteSupabase.auth.signInWithPassword({
+            email: emailProfePendiente,
+            password: passIngresada,
+        });
 
-    if (passIngresada === passwordUnica) {
-        localStorage.setItem('sesionGimnasio', 'activa'); 
+        if (error) {
+            document.getElementById("modal-error-login").style.display = "flex";
+            return;
+        }
+
+        // --- SI LA CONTRASEÑA ES CORRECTA ---
+        profeActivoId = idProfePendiente;
+        document.getElementById("nombre-profe-activo").innerText = "Profe " + nombreProfePendiente;
+
+        const nombreCompleto = (nombreProfePendiente + " " + apellidoProfePendiente).toLowerCase();
+        esAdminActual = (nombreCompleto.includes('moye') || nombreCompleto.includes('german') || nombreCompleto.includes('germán'));
+
+        document.querySelectorAll('.nav-admin-only').forEach(btn => {
+            btn.style.display = esAdminActual ? 'flex' : 'none';
+        });
+
+        // Guardamos su sello en este celular
+        localStorage.setItem('sesionGimnasioID', profeActivoId);
+        localStorage.setItem('sesionGimnasioNombre', nombreProfePendiente);
+        localStorage.setItem('sesionGimnasioApellido', apellidoProfePendiente);
+
         document.getElementById("pantalla-login").style.display = "none";
-        document.getElementById("pantalla-perfiles").style.display = "flex";
-    } else {
+        document.getElementById("pantalla-dashboard").style.display = "block";
+        document.getElementById("login-password").value = ""; // Vaciamos por seguridad
+
+        cargarAlumnos(); 
+        cargarChips();
+        actualizarNavActivo('alumnos');
+
+    } catch (err) {
+        console.error(err);
         document.getElementById("modal-error-login").style.display = "flex";
     }
 }
@@ -182,12 +233,19 @@ function cerrarModalErrorLogin() {
     document.getElementById("modal-error-login").style.display = "none";
 }
 
-function cerrarSesion() {
-    localStorage.removeItem('sesionGimnasio'); // Borramos el sello
-    document.getElementById("pantalla-perfiles").style.display = "none";
-    document.getElementById("pantalla-login").style.display = "flex";
-    // Solo vaciamos la cajita de la contraseña
-    document.getElementById("login-password").value = "";
+async function cerrarSesion() {
+    // Cerramos la puerta en la base de datos
+    await clienteSupabase.auth.signOut(); 
+    
+    // Borramos la memoria del celular
+    localStorage.removeItem('sesionGimnasioID');
+    localStorage.removeItem('sesionGimnasioNombre');
+    localStorage.removeItem('sesionGimnasioApellido');
+    localStorage.removeItem('sesionGimnasio'); // Por si quedó el viejo
+    
+    profeActivoId = null;
+    document.getElementById("pantalla-dashboard").style.display = "none";
+    document.getElementById("pantalla-perfiles").style.display = "flex";
 }
 
 
@@ -209,9 +267,10 @@ async function cargarProfesores() {
             // Usamos la foto que guardamos en la base de datos
             // Si no tiene foto, ponemos una por defecto
             const foto = profe.foto_url || "imagenes/perfil2.png"; 
+            const emailAuth = profe.email_auth || ""; // <-- ATRAPAMOS EL EMAIL
             
             contenedor.innerHTML += `
-                <div class="tarjeta-perfil-moderna" onclick="entrarPerfil('${profe.id}', '${profe.nombre}', '${profe.apellido}')">
+                <div class="tarjeta-perfil-moderna" onclick="entrarPerfil('${profe.id}', '${profe.nombre}', '${profe.apellido}', '${emailAuth}')">
                     <img src="${foto}" class="avatar-profe" onerror="this.src='imagenes/perfil1.png'">
                     <p>${profe.nombre} ${profe.apellido}</p>
                 </div>
@@ -340,39 +399,26 @@ async function guardarProfeEnBD() {
 }
 
 // --- 5. NAVEGACIÓN Y DASHBOARD DE ALUMNOS ---
-function entrarPerfil(id, nombre, apellido) {
-    profeActivoId = id; 
-    document.getElementById("nombre-profe-activo").innerText = "Profe " + nombre;
-    
-    // MAGIA: Unimos el nombre y apellido para buscar, pasándolo a minúsculas
-    const nombreCompleto = (nombre + " " + apellido).toLowerCase();
-    
-    // Le damos superpoderes de Admin a Moye y a German Varelli
-    esAdminActual = (
-        nombreCompleto.includes('moye') || 
-        nombreCompleto.includes('german varelli') || 
-        nombreCompleto.includes('germán varelli') // Por si acaso lo guardaron con tilde
-    );
+// Al tocar una cara, abre el modal de contraseña exclusivo para ese profe
+function entrarPerfil(id, nombre, apellido, emailAuth) {
+    idProfePendiente = id;
+    nombreProfePendiente = nombre;
+    apellidoProfePendiente = apellido;
 
-    // Mostramos u ocultamos los botones del menú inferior para admins
-    document.querySelectorAll('.nav-admin-only').forEach(btn => {
-        btn.style.display = esAdminActual ? 'flex' : 'none';
-    });
+    // MAGIA: Usamos el email que conectaste en Supabase. 
+    // Si algún día creás un profe nuevo y olvidás ponerle email en la tabla, el sistema 
+    // crea un escudo de respaldo automático usando su ID único (ej: b4a2... @gym.com)
+    emailProfePendiente = emailAuth ? emailAuth : (id + "@gym.com");
 
-    // Apagamos TODAS las pantallas
+    // Apagamos los perfiles y encendemos la pantalla de contraseña
     document.getElementById("pantalla-perfiles").style.display = "none";
-    document.getElementById("pantalla-detalle-alumno").style.display = "none";
-    document.getElementById("pantalla-rutinas").style.display = "none";
-    document.getElementById("pantalla-detalle-pack").style.display = "none";
-    document.getElementById("pantalla-admin").style.display = "none"; // Apagamos el informe por si acaso
-    
-    // Encendemos solo el Dashboard (Alumnos)
-    document.getElementById("pantalla-dashboard").style.display = "block";
-    
-    cargarAlumnos(); 
-    cargarChips();
-    actualizarNavActivo('alumnos');
+    document.getElementById("pantalla-login").style.display = "flex";
+
+    // Si tu HTML tiene un título H2 adentro del login, lo personalizamos
+    const tituloLogin = document.querySelector("#pantalla-login h2");
+    if (tituloLogin) tituloLogin.innerText = "Hola, " + nombre;
 }
+
 // ==========================================
 // FUNCIONES EXCLUSIVAS DEL PANEL DE ADMIN (ESTILO EXCEL)
 // ==========================================
@@ -639,70 +685,6 @@ function descargarExcelAdmin() {
     mostrarAlerta("¡Descarga Exitosa!", "La planilla global del gimnasio se descargó correctamente.");
 }
 
-function guardarHistorialAdmin(fechaString, contenidoDelExcel) {
-    const llaveMemoria = 'historial_admin_global';
-    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
-    
-    const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-    historial.unshift({ fecha: fechaString, hora: hora, datos: contenidoDelExcel }); 
-    
-    if (historial.length > 15) historial.pop(); 
-    localStorage.setItem(llaveMemoria, JSON.stringify(historial));
-}
-
-function dibujarHistorialAdmin() {
-    const contenedor = document.getElementById("lista-historial-admin");
-    const llaveMemoria = 'historial_admin_global';
-    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
-
-    contenedor.innerHTML = "";
-
-    if (historial.length === 0) {
-        contenedor.innerHTML = "<p style='text-align:center; color:#555; font-size: 0.9rem; margin-top:20px;'>Aún no descargaste ninguna planilla global.</p>";
-        return;
-    }
-
-    historial.forEach((registro, index) => {
-        contenedor.innerHTML += `
-            <div class="tarjeta-historial" style="display: flex; flex-direction: column; align-items: stretch;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <p>Planilla Global (Gimnasio)</p>
-                        <span>Descargado el ${registro.fecha} a las ${registro.hora}</span>
-                    </div>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                </div>
-                
-                <button class="btn-re-descarga" onclick="volverADescargarExcelAdmin(${index})">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Volver a descargar
-                </button>
-            </div>
-        `;
-    });
-}
-
-function volverADescargarExcelAdmin(index) {
-    const llaveMemoria = 'historial_admin_global';
-    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
-    const registro = historial[index];
-    
-    if (!registro || !registro.datos) return;
-
-    try {
-        const matrizRecuperada = JSON.parse(registro.datos);
-        const libroExcel = XLSX.utils.book_new();
-        const hojaExcel = XLSX.utils.aoa_to_sheet(matrizRecuperada);
-        hojaExcel['!cols'] = [{wch: 30}, {wch: 20}, {wch: 25}, {wch: 25}];
-        
-        XLSX.utils.book_append_sheet(libroExcel, hojaExcel, "Copia Global");
-        XLSX.writeFile(libroExcel, `Copia_GLOBAL_${registro.fecha}.xlsx`);
-        mostrarAlerta("¡Re-descarga Exitosa!", "El informe global se descargó nuevamente.");
-    } catch (e) {
-        console.error(e);
-        mostrarAlerta("Error", "No se pudo recuperar el archivo.");
-    }
-}
 
 function volverAPerfiles() {
     profeActivoId = null;
@@ -1189,6 +1171,15 @@ function alternarPassword() {
         inputPass.type = "password"; // Oculta la contraseña
     }
 }
+// Función universal para mostrar/ocultar cualquier contraseña en los modales
+function alternarVisibilidadPass(idInput) {
+    const input = document.getElementById(idInput);
+    if (input.type === "password") {
+        input.type = "text"; // Muestra la clave
+    } else {
+        input.type = "password"; // Oculta la clave
+    }
+}
 
 // --- 7. BUSCADOR DE ALUMNOS ---
 function filtrarAlumnos() {
@@ -1347,22 +1338,11 @@ function abrirModalEjercicio() {
 
     document.getElementById("input-ej-nombre").value = "";
     document.getElementById("input-ej-descanso").value = "";
-    document.getElementById("input-ej-subbloque").value = ""; // Blanqueamos el sub-bloque
+    document.getElementById("input-ej-subbloque").value = ""; 
+    document.getElementById("input-ej-notas").value = ""; // <-- Vaciamos las notas
     
     const contenedorSeries = document.getElementById('contenedor-filas-series');
-    if (contenedorSeries) {
-        contenedorSeries.innerHTML = `
-            <div class="fila-serie">
-                <span class="numero-serie">1</span>
-                <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
-                <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
-                <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
-                <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-            </div>
-        `;
-    }
+    inicializarModalSeries('rutina', []);
 }
 
 function cerrarModalEjercicio() {
@@ -1370,24 +1350,7 @@ function cerrarModalEjercicio() {
     document.getElementById("modal-ejercicio").style.display = "none";
 }
 
-// --- LÓGICA DE EDICIÓN Y BORRADO ---
-
-function borrarEjercicio(id) {
-    pedirConfirmacion(
-        "Borrar Ejercicio",
-        "¿Seguro que querés quitar este ejercicio de la rutina?",
-        "Borrar",
-        async () => {
-            try {
-                const { error } = await clienteSupabase.from('rutinas_planificadas').delete().eq('id', id);
-                if (error) throw error;
-                cargarEjerciciosCategoriaBD();
-            } catch (error) { mostrarAlerta("Error al borrar: " + error.message); }
-        }
-    );
-}
-
-function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, subBloque) {
+function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, subBloque, notas) {
     ejercicioEditandoId = id; 
     document.getElementById("modal-ejercicio").style.display = "flex";
     let catActual = "ENTRENAMIENTO"; 
@@ -1405,50 +1368,32 @@ function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, su
     document.getElementById("input-ej-nombre").value = nombre || "";
     document.getElementById("input-ej-descanso").value = descanso !== 'undefined' && descanso !== 'null' ? descanso : "";
     document.getElementById("input-ej-subbloque").value = subBloque || "";
+    document.getElementById("input-ej-notas").value = notas !== 'undefined' && notas !== 'null' ? (notas || "") : ""; // <-- Cargamos las notas
 
     const contenedorSeries = document.getElementById('contenedor-filas-series');
-    if (contenedorSeries) {
-        contenedorSeries.innerHTML = ""; 
-        let arraySeries = [];
-        try {
-            if (seriesRepsJson && typeof seriesRepsJson === 'string' && seriesRepsJson.startsWith('[')) {
-                arraySeries = JSON.parse(seriesRepsJson);
-            }
-        } catch (e) {}
+    let arraySeries = [];
+    try { if (seriesRepsJson && typeof seriesRepsJson === 'string') arraySeries = JSON.parse(seriesRepsJson); } catch (e) {}
+    inicializarModalSeries('rutina', arraySeries);
+}
+// --- LÓGICA DE EDICIÓN Y BORRADO ---
 
-        if (arraySeries.length > 0) {
-            arraySeries.forEach((s, index) => {
-                contenedorSeries.innerHTML += `
-                    <div class="fila-serie">
-                        <span class="numero-serie">${index + 1}</span>
-                        <input type="number" class="input-serie-fuerza input-modal" value="${s.fuerza || ''}" placeholder="% RM">
-                        <input type="number" class="input-serie-reps input-modal" value="${s.reps || ''}" placeholder="Reps">
-                        <input type="number" class="input-serie-rir input-modal" value="${s.rir || ''}" placeholder="RIR">
-                        <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
-                    </div>
-                `;
-            });
-        } else {
-            contenedorSeries.innerHTML = `
-                <div class="fila-serie">
-                    <span class="numero-serie">1</span>
-                    <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
-                    <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
-                    <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
-                    <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </div>
-            `;
+function borrarEjercicio(id) {
+    pedirConfirmacion(
+        "Borrar Ejercicio",
+        "¿Seguro que querés quitar este ejercicio de la rutina?",
+        "Borrar",
+        async () => {
+            try {
+                const { error } = await clienteSupabase.from('rutinas_planificadas').delete().eq('id', id);
+                if (error) throw error;
+                cargarEjerciciosCategoriaBD();
+            } catch (error) { mostrarAlerta("Error al borrar: " + error.message); }
         }
-    }
+    );
 }
 
 async function abrirModalEditarPorId(idEjercicio) {
     try {
-        // Buscamos el ejercicio fresco y limpio de la base de datos
         const { data: ej, error } = await clienteSupabase
             .from('rutinas_planificadas')
             .select('*')
@@ -1458,8 +1403,8 @@ async function abrirModalEditarPorId(idEjercicio) {
         if (error) throw error;
         if (!ej) return;
 
-        // Llamamos a nuestra función de edición pasando los datos de forma segura
-        abrirModalEditar(ej.id, ej.zona_muscular, ej.ejercicio_nombre, ej.series_reps, ej.fuerza, ej.descanso, ej.sub_bloque);
+        // <-- Ahora mandamos también las notas a la función
+        abrirModalEditar(ej.id, ej.zona_muscular, ej.ejercicio_nombre, ej.series_reps, ej.fuerza, ej.descanso, ej.sub_bloque, ej.notas);
 
     } catch (e) {
         console.error("Error al abrir para editar:", e);
@@ -2445,41 +2390,55 @@ async function cargarEjerciciosCategoriaBD() {
             return;
         }
 
-        // 1. AGRUPAMOS POR SUB-BLOQUE
         const grupos = {};
         ejercicios.forEach(ej => {
             const nombreGrupo = ej.sub_bloque || "Sin agrupar";
             if (!grupos[nombreGrupo]) grupos[nombreGrupo] = [];
-            grupos[nombreGrupo].push(ej);
+            grupos[grupos[nombreGrupo] ? nombreGrupo : "Sin agrupar"].push(ej);
         });
 
         let htmlFinal = "";
 
-        // Función armadora de tarjetas
+        // NUEVO DISEÑO DE TARJETA CON DESPLEGABLE DE NOTAS INCLUIDO
         const generarTarjeta = (ej) => `
-            <div class="card-ejercicio" data-id="${ej.id}">
-                <svg class="icono-arrastre" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
-                ${obtenerAnimacionHTML(ej.ejercicio_nombre)}
-                <div class="info-ejercicio" style="min-width: 0;">
-                    <h4 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${ej.ejercicio_nombre}</h4>
-                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-                        <div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.3; font-size: 0.75rem;">
-                            <div class="punto-ama" style="margin-top: 5px; flex-shrink: 0;"></div>
-                            <span style="word-break: break-word;">${formatearResumenSeries(ej.series_reps)}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; opacity: 0.7; margin-left: 12px;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            <span>Descanso: ${ej.descanso || "-"}</span>
+            <div class="card-ejercicio" data-id="${ej.id}" style="flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                    <svg class="icono-arrastre" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+                    ${obtenerAnimacionHTML(ej.ejercicio_nombre)}
+                    <div class="info-ejercicio" style="min-width: 0;">
+                        <h4 style="white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.2; margin-bottom: 4px;">${ej.ejercicio_nombre}</h4>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+                            <div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.3; font-size: 0.75rem;">
+                                <div class="punto-ama" style="margin-top: 5px; flex-shrink: 0;"></div>
+                                ${generarHtmlSeries(ej.series_reps, 'ej-' + ej.id)}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; opacity: 0.7; margin-left: 12px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span>Descanso: ${ej.descanso || "-"}</span>
+                            </div>
                         </div>
                     </div>
+                    <div class="acciones-ejercicio">
+                        <svg onclick="abrirModalEditarPorId('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>                        
+                        <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </div>
                 </div>
-                <div class="acciones-ejercicio">
-                    <svg onclick="abrirModalEditarPorId('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>                        
-                    <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                ${ej.notas ? `
+                <div style="width: 100%; border-top: 1px dashed rgba(136, 136, 136, 0.3); margin-top: 6px; padding-top: 6px;">
+                    <div onclick="toggleNotasEjercicio('notas-${ej.id}', this)" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 4px 0;">
+                        <span style="font-size: 0.75rem; color: #888; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            Notas del profe
+                        </span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="transition: 0.3s; color: #888;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div id="notas-${ej.id}" style="display: none; padding-top: 6px; font-size: 0.8rem; color: #888; line-height: 1.4; word-break: break-word;">
+                        ${ej.notas.replace(/\n/g, '<br>')}
+                    </div>
                 </div>
+                ` : ''}
             </div>`;
 
-        // 2. RENDERIZAMOS PRIMERO LOS "SIN AGRUPAR" (Para que queden sueltos como siempre)
         if (grupos["Sin agrupar"]) {
             htmlFinal += `<div class="subbloque-contenedor" data-sub="Sin agrupar">`;
             grupos["Sin agrupar"].forEach(ej => htmlFinal += generarTarjeta(ej));
@@ -2487,7 +2446,6 @@ async function cargarEjerciciosCategoriaBD() {
             delete grupos["Sin agrupar"]; 
         }
 
-        // 3. RENDERIZAMOS LOS BLOQUES
         for (const [nombreSub, ejsDelSub] of Object.entries(grupos)) {
             const idAcordeon = 'acordeon-' + nombreSub.replace(/[^a-zA-Z0-9]/g, '-');
             htmlFinal += `
@@ -2507,13 +2465,12 @@ async function cargarEjerciciosCategoriaBD() {
 
         contenedorEjercicios.innerHTML = htmlFinal;
 
-        // 4. ACTIVAMOS EL MOTOR DE ARRASTRE MULTI-GRUPO
         document.querySelectorAll('.subbloque-contenedor').forEach(cont => {
             new Sortable(cont, {
-                group: 'rutina-compartida', // ¡Permite arrastrar un ej adentro de otro bloque!
+                group: 'rutina-compartida', 
                 animation: 200, delay: 200, delayOnTouchOnly: true, filter: ".acciones-ejercicio svg", preventOnFilter: false,
                 chosenClass: "tarjeta-arrastrando", ghostClass: "tarjeta-indicador-caida",
-                onEnd: function () { guardarOrdenYSubbloque(); } // Función nueva inteligente
+                onEnd: function () { guardarOrdenYSubbloque(); } 
             });
         });
     } catch (e) { console.error(e); }
@@ -2523,17 +2480,12 @@ async function guardarEjercicioEnBD() {
     const zona = document.getElementById("select-ej-zona").value; 
     const nombre = document.getElementById("input-ej-nombre").value.trim(); 
     const subBloque = document.getElementById("input-ej-subbloque").value.trim();
+    const notasTexto = document.getElementById("input-ej-notas").value.trim(); 
+
     if (!nombre) { mostrarAlerta("Faltan datos", "Por favor, ponele un nombre al ejercicio."); return; }
 
-    let arraySeries = [];
-    document.querySelectorAll('#contenedor-filas-series .fila-serie').forEach((fila, index) => {
-        let fuerzaVal = fila.querySelector('.input-serie-fuerza').value || "0";
-        let repsVal = fila.querySelector('.input-serie-reps').value || "0";
-        let rirVal = fila.querySelector('.input-serie-rir').value || "0"; // Capturamos RIR
-        arraySeries.push({ numero: index + 1, fuerza: fuerzaVal, reps: repsVal, rir: rirVal });
-    });
-
-    const seriesRepsTexto = JSON.stringify(arraySeries);
+    // MAGIA: Extrae las series ya sea que estén en modo unificado o individual
+    const seriesRepsTexto = extraerSeriesDelModal('rutina');
     const descansoTexto = document.getElementById("input-ej-descanso").value;
 
     let dias = ["D1", "D2", "D3", "D4", "D5"];
@@ -2543,13 +2495,13 @@ async function guardarEjercicioEnBD() {
     try {
         if (ejercicioEditandoId) {
             await clienteSupabase.from('rutinas_planificadas').update({ 
-                ejercicio_nombre: nombre, series_reps: seriesRepsTexto, descanso: descansoTexto, zona_muscular: zona || null, sub_bloque: subBloque || null
+                ejercicio_nombre: nombre, series_reps: seriesRepsTexto, descanso: descansoTexto, zona_muscular: zona || null, sub_bloque: subBloque || null, notas: notasTexto || null
             }).eq('id', ejercicioEditandoId);
         } else {
             await clienteSupabase.from('rutinas_planificadas').insert([{
                 alumno_id: alumnoSeleccionadoId, dia_semana: diaSeleccionado, semana: semanaActiva,
                 categoria: categoriaSeleccionada, zona_muscular: zona || null, ejercicio_nombre: nombre, 
-                series_reps: seriesRepsTexto, fuerza: null, descanso: descansoTexto, orden: 999, sub_bloque: subBloque || null
+                series_reps: seriesRepsTexto, fuerza: null, descanso: descansoTexto, orden: 999, sub_bloque: subBloque || null, notas: notasTexto || null
             }]);
         }
         ejercicioEditandoId = null; cerrarModalEjercicio(); cargarEjerciciosCategoriaBD();
@@ -2559,28 +2511,21 @@ async function guardarEjercicioEnBD() {
 async function guardarEjercicioEnPack() {
     const zona = document.getElementById("select-pack-ej-zona").value; 
     const nombre = document.getElementById("input-pack-ej-nombre").value.trim(); 
+    const notasTexto = document.getElementById("input-pack-ej-notas") ? document.getElementById("input-pack-ej-notas").value.trim() : "";
     
     if(!nombre) {
         mostrarAlerta("Faltan datos", "Por favor ingresá el nombre del ejercicio.");
         return;
     }
 
-    let arraySeries = [];
-    document.querySelectorAll('#contenedor-filas-series-pack .fila-serie').forEach((fila, index) => {
-        let fuerzaVal = fila.querySelector('.input-serie-fuerza').value || "0";
-        let repsVal = fila.querySelector('.input-serie-reps').value || "0";
-        let rirVal = fila.querySelector('.input-serie-rir').value || "0";
-        arraySeries.push({ numero: index + 1, fuerza: fuerzaVal, reps: repsVal, rir: rirVal });
-    });
-    
-    const seriesTexto = JSON.stringify(arraySeries);
+    const seriesTexto = extraerSeriesDelModal('pack');
     const descanso = document.getElementById("input-pack-ej-descanso").value; 
 
     // Si abrimos con el lápiz, actualizamos. Si es nuevo, lo agregamos a la lista.
     if (ejercicioPackEditandoIndex !== null) {
-        packActivoEjercicios[ejercicioPackEditandoIndex] = { zona: zona, nombre: nombre, series: seriesTexto, descanso: descanso };
+        packActivoEjercicios[ejercicioPackEditandoIndex] = { zona: zona, nombre: nombre, series: seriesTexto, descanso: descanso, notas: notasTexto };
     } else {
-        packActivoEjercicios.push({ zona: zona, nombre: nombre, series: seriesTexto, descanso: descanso });
+        packActivoEjercicios.push({ zona: zona, nombre: nombre, series: seriesTexto, descanso: descanso, notas: notasTexto });
     }
 
     try { 
@@ -2591,25 +2536,6 @@ async function guardarEjercicioEnPack() {
     } catch(e) { console.error(e); }
 }
 
-function formatearResumenSeries(seriesRepsJson) {
-    if (!seriesRepsJson) return "-";
-    if (typeof seriesRepsJson === 'string' && !seriesRepsJson.trim().startsWith('[')) return seriesRepsJson;
-
-    try {
-        let arraySeries = typeof seriesRepsJson === 'string' ? JSON.parse(seriesRepsJson) : seriesRepsJson;
-        if (!Array.isArray(arraySeries) || arraySeries.length === 0) return "-";
-
-        let resumen = arraySeries.map(s => {
-            // Si el profe le puso un RIR, lo mostramos. Si lo dejó vacío, no lo mostramos.
-            let rirTexto = (s.rir && s.rir !== "0") ? ` (RIR ${s.rir})` : "";
-            return `${s.fuerza}% x ${s.reps}r${rirTexto}`;
-        }).join('  |  ');
-        return resumen;
-        
-    } catch (e) {
-        return String(seriesRepsJson);
-    }
-}
 
 // --- 11. SISTEMA DE PACKS PREDEFINIDOS (Navegación Blindada) ---
 let packActivoId = null;
@@ -2760,7 +2686,7 @@ async function cargarEjerciciosDePack() {
                         <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
                             <div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.3; font-size: 0.75rem;">
                                 <div class="punto-ama" style="margin-top: 5px; flex-shrink: 0;"></div>
-                                <span style="word-break: break-word;">${formatearResumenSeries(ej.series)}</span>
+                                <span style="word-break: break-word;">${generarHtmlSeries(ej.series, 'pack-' + index)}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; opacity: 0.7; margin-left: 12px;">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -2798,22 +2724,9 @@ function abrirModalEjercicioPack() {
 
     document.getElementById("input-pack-ej-nombre").value = "";
     document.getElementById("input-pack-ej-descanso").value = "";
+    if (document.getElementById("input-pack-ej-notas")) document.getElementById("input-pack-ej-notas").value = "";
 
-    // Vaciamos la lista y dejamos 1 sola fila por defecto
-    const contenedorSeries = document.getElementById('contenedor-filas-series-pack');
-    if (contenedorSeries) {
-        contenedorSeries.innerHTML = `
-            <div class="fila-serie">
-                <span class="numero-serie">1</span>
-                <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
-                <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
-                <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
-                <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-            </div>
-        `;
-    }
+    inicializarModalSeries('pack', []);
 }
 
 // Abre la ventana para EDITAR un ejercicio que ya existe en el pack
@@ -2840,46 +2753,11 @@ function abrirModalEditarEjercicioPack(index) {
     document.getElementById("select-pack-ej-zona").value = ej.zona || "";
     document.getElementById("input-pack-ej-nombre").value = ej.nombre || "";
     document.getElementById("input-pack-ej-descanso").value = ej.descanso || "";
+    if (document.getElementById("input-pack-ej-notas")) document.getElementById("input-pack-ej-notas").value = ej.notas || "";
 
-    // Armamos las series dinámicas leyendo lo que había guardado
-    const contenedorSeries = document.getElementById('contenedor-filas-series-pack');
-    if (contenedorSeries) {
-        contenedorSeries.innerHTML = ""; 
-        let arraySeries = [];
-        try {
-            if (ej.series && typeof ej.series === 'string' && ej.series.startsWith('[')) {
-                arraySeries = JSON.parse(ej.series);
-            }
-        } catch (e) {}
-
-        if (arraySeries.length > 0) {
-            arraySeries.forEach((s, idx) => {
-                contenedorSeries.innerHTML += `
-                    <div class="fila-serie">
-                        <span class="numero-serie">${idx + 1}</span>
-                        <input type="number" class="input-serie-fuerza input-modal" value="${s.fuerza || ''}" placeholder="% RM">
-                        <input type="number" class="input-serie-reps input-modal" value="${s.reps || ''}" placeholder="Reps">
-                        <input type="number" class="input-serie-rir input-modal" value="${s.rir || ''}" placeholder="RIR">
-                        <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
-                    </div>
-                `;
-            });
-        } else {
-            contenedorSeries.innerHTML = `
-                <div class="fila-serie">
-                    <span class="numero-serie">1</span>
-                    <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
-                    <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
-                    <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
-                    <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </div>
-            `;
-        }
-    }
+    let arraySeries = [];
+    try { if (ej.series && typeof ej.series === 'string') arraySeries = JSON.parse(ej.series); } catch (e) {}
+    inicializarModalSeries('pack', arraySeries);
 }
 
 // ==========================================
@@ -3209,6 +3087,7 @@ window.addEventListener('popstate', function (event) {
             { id: "modal-checkin", cerrar: cerrarModalCheckin },
             { id: "modal-terminos", cerrar: cerrarModalTerminos },
             { id: "modal-editar-pack", cerrar: cerrarModalEditarPack },
+            { id: "modal-cambiar-password", cerrar: cerrarModalCambiarPassword },
             { id: "modal-informe-profe", cerrar: cerrarModalInformeProfe }
         ];
 
@@ -3473,6 +3352,7 @@ async function clonarSemanaCompleta(semanaOrigen, semanaDestino) {
             series_reps: ej.series_reps,
             fuerza: ej.fuerza,
             descanso: ej.descanso,
+            notas: ej.notas,
             orden: ej.orden
         }));
 
@@ -3651,9 +3531,9 @@ async function cargarDatosParaInforme() {
 
                 tabla.innerHTML += `
                     <tr>
-                        <td style="color: #eee; font-weight: 500;">${a.nombre} ${a.apellido}</td>
+                        <td style="font-weight: 500;">${a.nombre} ${a.apellido}</td>
                         <td style="color: #3498db; font-weight: 500;">${modalidad}</td>
-                        <td style="color: #aaa;">${a.actividad || "Sin Categoría"}</td> 
+                        <td>${a.actividad || "Sin Categoría"}</td> 
                         <td>${fechaArg}</td>
                         <td>${fechaPagoArg}</td>
                         <td>${cuotaMonto}</td>
@@ -3711,38 +3591,170 @@ async function cargarDatosParaInforme() {
     }
 }
 
-function dibujarHistorialInformes() {
-    const contenedor = document.getElementById("lista-historial-informes");
-    const llaveMemoria = 'historial_informes_' + profeActivoId;
-    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
-
-    contenedor.innerHTML = "";
-
-    if (historial.length === 0) {
-        contenedor.innerHTML = "<p style='text-align:center; color:#555; font-size: 0.9rem; margin-top:20px;'>Aún no descargaste ninguna planilla.</p>";
-        return;
-    }
-
-    historial.forEach((registro, index) => {
-        // Tarjetas oscuras y botón sobrio
-        contenedor.innerHTML += `
-            <div class="tarjeta-historial" style="display: flex; flex-direction: column; align-items: stretch;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <p>Planilla de Alumnos</p>
-                        <span>Descargado el ${registro.fecha} a las ${registro.hora}</span>
-                    </div>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                </div>
-                
-                <button class="btn-re-descarga" onclick="volverADescargarExcel(${index})">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Volver a descargar
-                </button>
-            </div>
-        `;
-    });
+// ==========================================
+// 1. GUARDAR HISTORIAL GLOBAL (ADMIN) EN LA NUBE
+// ==========================================
+async function guardarHistorialAdmin(fechaString, contenidoDelExcel) {
+    try {
+        const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        
+        await clienteSupabase.from('historial_informes').insert([{
+            profesor_id: profeActivoId,
+            tipo: 'global',
+            fecha: fechaString,
+            hora: hora,
+            datos: contenidoDelExcel
+        }]);
+        
+        dibujarHistorialAdmin(); // Refresca la vista
+    } catch (e) { console.error("Error al guardar historial admin en nube:", e); }
 }
+
+async function dibujarHistorialAdmin() {
+    const contenedor = document.getElementById("lista-historial-admin");
+    contenedor.innerHTML = "<p style='text-align:center; color:#555;'>Cargando historial de la nube...</p>";
+
+    try {
+        // Traemos los últimos 15 informes ordenados por el más reciente
+        const { data: historial, error } = await clienteSupabase
+            .from('historial_informes')
+            .select('id, fecha, hora') // Traemos solo los títulos para que cargue súper rápido
+            .eq('tipo', 'global')
+            .order('id', { ascending: false })
+            .limit(15);
+
+        if (error) throw error;
+        contenedor.innerHTML = "";
+
+        if (!historial || historial.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#555; font-size: 0.9rem; margin-top:20px;'>Aún no hay planillas globales descargadas.</p>";
+            return;
+        }
+
+        historial.forEach((registro) => {
+            contenedor.innerHTML += `
+                <div class="tarjeta-historial" style="display: flex; flex-direction: column; align-items: stretch;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p>Planilla Global (Gimnasio)</p>
+                            <span>Descargado el ${registro.fecha} a las ${registro.hora}</span>
+                        </div>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    
+                    <button class="btn-re-descarga" onclick="volverADescargarExcelDeNube('${registro.id}', 'global')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Volver a descargar
+                    </button>
+                </div>
+            `;
+        });
+    } catch (e) { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar el historial.</p>"; }
+}
+
+// ==========================================
+// 2. GUARDAR HISTORIAL INDIVIDUAL EN LA NUBE
+// ==========================================
+async function guardarEnHistorial(fechaString, contenidoDelExcel) {
+    try {
+        const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        
+        await clienteSupabase.from('historial_informes').insert([{
+            profesor_id: profeActivoId,
+            tipo: 'individual',
+            fecha: fechaString,
+            hora: hora,
+            datos: contenidoDelExcel
+        }]);
+        
+        dibujarHistorialInformes();
+    } catch (e) { console.error("Error al guardar historial individual:", e); }
+}
+
+async function dibujarHistorialInformes() {
+    const contenedor = document.getElementById("lista-historial-informes");
+    contenedor.innerHTML = "<p style='text-align:center; color:#555;'>Cargando historial de la nube...</p>";
+
+    try {
+        const { data: historial, error } = await clienteSupabase
+            .from('historial_informes')
+            .select('id, fecha, hora')
+            .eq('profesor_id', profeActivoId)
+            .eq('tipo', 'individual')
+            .order('id', { ascending: false })
+            .limit(15);
+
+        if (error) throw error;
+        contenedor.innerHTML = "";
+
+        if (!historial || historial.length === 0) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#555; font-size: 0.9rem; margin-top:20px;'>Aún no hay planillas individuales descargadas.</p>";
+            return;
+        }
+
+        historial.forEach((registro) => {
+            contenedor.innerHTML += `
+                <div class="tarjeta-historial" style="display: flex; flex-direction: column; align-items: stretch;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p>Planilla de Alumnos</p>
+                            <span>Descargado el ${registro.fecha} a las ${registro.hora}</span>
+                        </div>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    
+                    <button class="btn-re-descarga" onclick="volverADescargarExcelDeNube('${registro.id}', 'individual')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Volver a descargar
+                    </button>
+                </div>
+            `;
+        });
+    } catch (e) { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar el historial.</p>"; }
+}
+
+// ==========================================
+// 3. DESCARGAR EL ARCHIVO DESDE LA NUBE
+// ==========================================
+async function volverADescargarExcelDeNube(idRegistro, tipo) {
+    try {
+        // Traemos la "data pesada" (el Excel) solo cuando el profe aprieta "Descargar"
+        const { data: registro, error } = await clienteSupabase
+            .from('historial_informes')
+            .select('fecha, datos')
+            .eq('id', idRegistro)
+            .single();
+
+        if (error || !registro || !registro.datos) {
+            mostrarAlerta("Error", "No se pudo recuperar el informe de la base de datos.");
+            return;
+        }
+
+        const matrizRecuperada = JSON.parse(registro.datos);
+        const libroExcel = XLSX.utils.book_new();
+        const hojaExcel = XLSX.utils.aoa_to_sheet(matrizRecuperada);
+        
+        if (tipo === 'global') {
+            hojaExcel['!cols'] = [{wch: 30}, {wch: 20}, {wch: 25}, {wch: 25}];
+            XLSX.utils.book_append_sheet(libroExcel, hojaExcel, "Copia Global");
+            XLSX.writeFile(libroExcel, `Copia_GLOBAL_${registro.fecha}.xlsx`);
+        } else {
+            hojaExcel['!cols'] = [
+                {wch: 15}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, 
+                {wch: 8}, {wch: 22}, {wch: 22}, {wch: 12}, {wch: 12}, {wch: 14}
+            ];
+            XLSX.utils.book_append_sheet(libroExcel, hojaExcel, "Copia Planilla");
+            XLSX.writeFile(libroExcel, `Copia_Informe_${registro.fecha}.xlsx`);
+        }
+        
+        mostrarAlerta("¡Re-descarga Exitosa!", "El informe se descargó correctamente desde la nube.");
+
+    } catch (e) {
+        console.error(e);
+        mostrarAlerta("Error", "El archivo era demasiado antiguo o está corrupto.");
+    }
+}
+
 // ==========================================
 // GENERADOR DE ARCHIVO EXCEL REAL (.xlsx) - RESUMEN LADO A LADO
 // ==========================================
@@ -3852,65 +3864,6 @@ function descargarExcelProfe() {
     mostrarAlerta("¡Descarga Exitosa!", "El informe se descargó correctamente con el nuevo diseño.");
 }
 
-function guardarEnHistorial(fechaString, contenidoDelExcel) {
-    const llaveMemoria = 'historial_informes_' + profeActivoId;
-    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
-    
-    // Guardamos la fecha, la hora y también los datos exactos del archivo
-    const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-    historial.unshift({ fecha: fechaString, hora: hora, datos: contenidoDelExcel }); 
-    
-    // BLINDAJE: Para proteger la memoria del celular, guardamos solo los últimos 15 informes.
-    if (historial.length > 15) {
-        historial.pop(); // Borra el más antiguo
-    }
-    
-    localStorage.setItem(llaveMemoria, JSON.stringify(historial));
-}
-
-// ---> FUNCION MÁGICA DE RE-DESCARGA CON DOBLE COMPATIBILIDAD
-function volverADescargarExcel(index) {
-    const llaveMemoria = 'historial_informes_' + profeActivoId;
-    let historial = JSON.parse(localStorage.getItem(llaveMemoria)) || [];
-    const registro = historial[index];
-    
-    if (!registro || !registro.datos) {
-        mostrarAlerta("Error", "Este informe es antiguo y no tiene datos guardados.");
-        return;
-    }
-
-    try {
-        // Intentamos leerlo como Matriz de Excel nuevo (.xlsx)
-        const matrizRecuperada = JSON.parse(registro.datos);
-        
-        const libroExcel = XLSX.utils.book_new();
-        const hojaExcel = XLSX.utils.aoa_to_sheet(matrizRecuperada);
-        
-        hojaExcel['!cols'] = [
-            {wch: 15}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, 
-            {wch: 8}, {wch: 22}, {wch: 22}, {wch: 12}, {wch: 12}, {wch: 14}
-        ];
-
-        XLSX.utils.book_append_sheet(libroExcel, hojaExcel, "Copia Planilla");
-        XLSX.writeFile(libroExcel, `Copia_Informe_${registro.fecha}.xlsx`);
-        mostrarAlerta("¡Re-descarga Exitosa!", "El informe guardado se descargó en formato Excel (.xlsx).");
-
-    } catch (error) {
-        // Si tira error el JSON.parse, significa que es un historial viejo formato CSV (texto crudo). 
-        // Lo descargamos a la antigua:
-        const blob = new Blob([registro.datos], { type: 'text/csv;charset=utf-8;' });
-        const urlVirtual = URL.createObjectURL(blob);
-        const linkDescarga = document.createElement("a");
-        
-        linkDescarga.setAttribute("href", urlVirtual);
-        linkDescarga.setAttribute("download", `Copia_Informe_${registro.fecha}.csv`);
-        document.body.appendChild(linkDescarga);
-        linkDescarga.click();
-        document.body.removeChild(linkDescarga);
-        
-        mostrarAlerta("¡Re-descarga Exitosa!", "Se descargó una versión antigua del informe (CSV).");
-    }
-}
 
 // ==========================================
 // DETECTOR AUTOMÁTICO DE CONEXIÓN A INTERNET
@@ -4086,10 +4039,13 @@ function dibujarChipsPrincipales() {
 
 function agregarFilaSerie(idContenedor) {
     const contenedor = document.getElementById(idContenedor);
+    // Cuenta cuántas filas hay y le suma 1 para hacer la secuencia automática inicial
+    const totalFilas = contenedor.querySelectorAll('.fila-serie').length + 1;
+    
     const nuevaFila = document.createElement('div');
     nuevaFila.className = 'fila-serie';
     nuevaFila.innerHTML = `
-        <span class="numero-serie">-</span>
+        <input type="number" class="input-serie-numero input-modal" value="${totalFilas}" style="text-align: center; padding: 8px 2px;">
         <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
         <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
         <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
@@ -4098,7 +4054,6 @@ function agregarFilaSerie(idContenedor) {
         </button>
     `;
     contenedor.appendChild(nuevaFila);
-    actualizarNumerosDeSerie(idContenedor);
 }
 
 function eliminarFilaSerie(botonEliminar) {
@@ -4109,22 +4064,11 @@ function eliminarFilaSerie(botonEliminar) {
     if (contenedor.querySelectorAll('.fila-serie').length > 1) {
         const fila = botonEliminar.closest('.fila-serie');
         fila.remove();
-        actualizarNumerosDeSerie(contenedor.id);
+        // NOTA: Ya no llamamos a reenumerar, para respetar si el profe puso un número a mano.
     } else {
         alert("El ejercicio debe tener al menos 1 serie.");
     }
 }
-
-function actualizarNumerosDeSerie(idContenedor) {
-    const contenedor = document.getElementById(idContenedor);
-    const filas = contenedor.querySelectorAll('.fila-serie');
-    
-    // Recorremos las filas de arriba a abajo y les ponemos el número correcto
-    filas.forEach((fila, index) => {
-        fila.querySelector('.numero-serie').textContent = index + 1;
-    });
-}
-
 
 function abrirModalTerminos() {
     document.getElementById("modal-terminos").style.display = "flex";
@@ -4177,5 +4121,261 @@ async function abrirListaSubbloques() {
         }
     } catch (e) {
         contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al buscar.</p>";
+    }
+}
+
+
+
+function toggleNotasEjercicio(idCuerpo, elementoHeader) {
+    const cuerpo = document.getElementById(idCuerpo);
+    const flecha = elementoHeader.querySelector('svg:last-child'); // Atrapa la flechita de la derecha
+
+    if (cuerpo.style.display === "none") {
+        cuerpo.style.display = "block";
+        flecha.style.transform = "rotate(180deg)";
+    } else {
+        cuerpo.style.display = "none";
+        flecha.style.transform = "rotate(0deg)";
+    }
+}
+
+
+
+// ==========================================
+// CEREBRO DE SERIES (LÓGICA HÍBRIDA)
+// ==========================================
+function inicializarModalSeries(tipo, arraySeries) {
+    const idContenedor = tipo === 'pack' ? 'contenedor-filas-series-pack' : 'contenedor-filas-series';
+    const contenedor = document.getElementById(idContenedor);
+    contenedor.innerHTML = "";
+    
+    // Si no hay series, arranca con una sola caja vacía
+    if (!arraySeries || arraySeries.length === 0) {
+        contenedor.innerHTML = `
+            <div class="fila-serie">
+                <input type="number" class="input-serie-numero input-modal" value="1" style="text-align: center; padding: 8px 2px;">
+                <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
+                <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
+                <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
+                <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    // Evaluamos si las series son exactamente iguales
+    let sonIguales = true;
+    const s1 = arraySeries[0];
+    for(let i=1; i<arraySeries.length; i++) {
+        if(arraySeries[i].fuerza !== s1.fuerza || arraySeries[i].reps !== s1.reps || arraySeries[i].rir !== s1.rir) {
+            sonIguales = false; break;
+        }
+    }
+
+    // Si son idénticas, las aplastamos en 1 solo renglón para no saturar al profe
+    if (sonIguales && arraySeries.length > 1) {
+        contenedor.innerHTML = `
+            <div class="fila-serie">
+                <input type="number" class="input-serie-numero input-modal" value="${arraySeries.length}" style="text-align: center; padding: 8px 2px;">
+                <input type="number" class="input-serie-fuerza input-modal" value="${s1.fuerza || ''}" placeholder="% RM">
+                <input type="number" class="input-serie-reps input-modal" value="${s1.reps || ''}" placeholder="Reps">
+                <input type="number" class="input-serie-rir input-modal" value="${s1.rir || ''}" placeholder="RIR">
+                <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
+        `;
+    } else {
+        // Si son distintas, se despliegan todas para que vea qué hizo en cada una
+        arraySeries.forEach(s => {
+            contenedor.innerHTML += `
+                <div class="fila-serie">
+                    <input type="number" class="input-serie-numero input-modal" value="${s.numero}" style="text-align: center; padding: 8px 2px;">
+                    <input type="number" class="input-serie-fuerza input-modal" value="${s.fuerza || ''}" placeholder="% RM">
+                    <input type="number" class="input-serie-reps input-modal" value="${s.reps || ''}" placeholder="Reps">
+                    <input type="number" class="input-serie-rir input-modal" value="${s.rir || ''}" placeholder="RIR">
+                    <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+            `;
+        });
+    }
+}
+
+function desglosarSeries(tipo) {
+    const idContenedor = tipo === 'pack' ? 'contenedor-filas-series-pack' : 'contenedor-filas-series';
+    const contenedor = document.getElementById(idContenedor);
+    const filas = contenedor.querySelectorAll('.fila-serie');
+    
+    // Solo podemos desglosar si hay 1 sola fila en pantalla y tiene un número multiplicador
+    if (filas.length === 1) {
+        const primerFila = filas[0];
+        const cantidad = parseInt(primerFila.querySelector('.input-serie-numero').value) || 1;
+        
+        if (cantidad > 1) {
+            const fuerza = primerFila.querySelector('.input-serie-fuerza').value;
+            const reps = primerFila.querySelector('.input-serie-reps').value;
+            const rir = primerFila.querySelector('.input-serie-rir').value;
+            
+            contenedor.innerHTML = "";
+            for(let i=1; i<=cantidad; i++) {
+                contenedor.innerHTML += `
+                    <div class="fila-serie">
+                        <input type="number" class="input-serie-numero input-modal" value="${i}" style="text-align: center; padding: 8px 2px;">
+                        <input type="number" class="input-serie-fuerza input-modal" value="${fuerza}" placeholder="% RM">
+                        <input type="number" class="input-serie-reps input-modal" value="${reps}" placeholder="Reps">
+                        <input type="number" class="input-serie-rir input-modal" value="${rir}" placeholder="RIR">
+                        <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                `;
+            }
+        } else {
+            mostrarAlerta("Atención", "Para desglosar, tenés que poner más de 1 serie en la cajita izquierda.");
+        }
+    } else {
+        mostrarAlerta("Atención", "Las series ya están desglosadas individualmente.");
+    }
+}
+
+function extraerSeriesDelModal(tipo) {
+    const idContenedor = tipo === 'pack' ? 'contenedor-filas-series-pack' : 'contenedor-filas-series';
+    const contenedor = document.getElementById(idContenedor);
+    const filas = contenedor.querySelectorAll('.fila-serie');
+    let arraySeries = [];
+    
+    if (filas.length === 1) {
+        // Si hay una sola fila, lee el número. Si dice "5", genera 5 series iguales en segundo plano
+        const fila = filas[0];
+        let cant = parseInt(fila.querySelector('.input-serie-numero').value) || 1;
+        let fuerzaVal = fila.querySelector('.input-serie-fuerza').value || "0";
+        let repsVal = fila.querySelector('.input-serie-reps').value || "0";
+        let rirVal = fila.querySelector('.input-serie-rir').value || "0"; 
+        
+        for(let i=1; i<=cant; i++) {
+            arraySeries.push({ numero: i, fuerza: fuerzaVal, reps: repsVal, rir: rirVal });
+        }
+    } else {
+        // Si hay varias filas, lee lo que el profe haya modificado individualmente
+        filas.forEach((fila, index) => {
+            let numSerie = fila.querySelector('.input-serie-numero').value || (index + 1);
+            let fuerzaVal = fila.querySelector('.input-serie-fuerza').value || "0";
+            let repsVal = fila.querySelector('.input-serie-reps').value || "0";
+            let rirVal = fila.querySelector('.input-serie-rir').value || "0"; 
+            arraySeries.push({ numero: parseInt(numSerie), fuerza: fuerzaVal, reps: repsVal, rir: rirVal });
+        });
+    }
+    return JSON.stringify(arraySeries);
+}
+
+// -----------------------------------------------------------
+// DIBUJO INTELIGENTE DE LAS SERIES EN LA TARJETA
+// -----------------------------------------------------------
+function generarHtmlSeries(seriesRepsJson, idUnico) {
+    let seriesObj = [];
+    try { if (seriesRepsJson && typeof seriesRepsJson === 'string') seriesObj = JSON.parse(seriesRepsJson); } catch(e) {}
+    
+    if (seriesObj.length === 0) return `<span style="word-break: break-word;">-</span>`;
+    
+    // Evaluamos si son idénticas para decidir qué mostrar
+    let sonIguales = true;
+    const s1 = seriesObj[0];
+    for(let i=1; i<seriesObj.length; i++) {
+        if(seriesObj[i].fuerza !== s1.fuerza || seriesObj[i].reps !== s1.reps || seriesObj[i].rir !== s1.rir) {
+            sonIguales = false; break;
+        }
+    }
+
+    if (sonIguales) {
+        let rirTexto = (s1.rir && s1.rir !== "0") ? ` (RIR ${s1.rir})` : "";
+        return `<span style="font-weight:600; color:#f39c12;">${seriesObj.length} series:</span> <span>${s1.fuerza}% x ${s1.reps}r${rirTexto}</span>`;
+    } else {
+        return `
+            <div style="width: 100%;">
+                <div onclick="event.stopPropagation(); toggleNotasEjercicio('detalle-series-${idUnico}', this)" style="cursor: pointer; display: flex; align-items: center; gap: 4px; color: #f39c12; font-weight: 600; font-size: 0.75rem;">
+                    <span>${seriesObj.length} series personalizadas</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="transition: 0.3s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div id="detalle-series-${idUnico}" style="display: none; padding-top: 4px; padding-left: 10px; border-left: 2px solid rgba(243, 156, 18, 0.3); margin-top: 4px;">
+                    ${seriesObj.map(s => `<div style="font-size: 0.75rem; color: #888; margin-bottom: 2px;">Serie ${s.numero}: <span style="color:#555; font-weight:600;">${s.fuerza}%</span> x ${s.reps}r ${s.rir && s.rir !== "0" ? '(RIR '+s.rir+')' : ''}</div>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+}
+
+
+function sumarSerieSimple(tipo) {
+    const prefijoInput = tipo === 'pack' ? 'input-pack-simple' : 'input-simple';
+    const inputCant = document.getElementById(prefijoInput + '-cant');
+    // Le suma 1 al valor que tenga en la cajita
+    inputCant.value = (parseInt(inputCant.value) || 0) + 1;
+}
+
+
+// ==========================================
+// SISTEMA DE CAMBIO DE CONTRASEÑA
+// ==========================================
+
+function abrirModalCambiarPassword() {
+    // Cerramos el modal de editar perfil para que no se superpongan
+    document.getElementById("modal-editar-profe").style.display = "none";
+    
+    // Vaciamos las cajas por seguridad
+    document.getElementById("input-nueva-pass").value = "";
+    document.getElementById("input-confirmar-pass").value = "";
+    
+    document.getElementById("modal-cambiar-password").style.display = "flex";
+}
+
+function cerrarModalCambiarPassword() {
+    document.getElementById("modal-cambiar-password").style.display = "none";
+}
+
+async function guardarNuevaPassword() {
+    const nuevaPass = document.getElementById("input-nueva-pass").value.trim();
+    const confirmarPass = document.getElementById("input-confirmar-pass").value.trim();
+
+    if (!nuevaPass || !confirmarPass) {
+        mostrarAlerta("Atención", "Por favor, completá ambas cajas.");
+        return;
+    }
+
+    if (nuevaPass.length < 6) {
+        mostrarAlerta("Atención", "La contraseña debe tener al menos 6 caracteres por seguridad.");
+        return;
+    }
+
+    if (nuevaPass !== confirmarPass) {
+        mostrarAlerta("Atención", "Las contraseñas no coinciden. Verificalas.");
+        return;
+    }
+
+    // Efecto visual de carga
+    const btn = document.getElementById("btn-guardar-pass");
+    const textoOriginal = btn.innerText;
+    btn.innerText = "Guardando...";
+
+    try {
+        // MAGIA: Como el profe ya inició sesión, Supabase sabe exactamente de quién es el cambio
+        const { data, error } = await clienteSupabase.auth.updateUser({
+            password: nuevaPass
+        });
+
+        btn.innerText = textoOriginal;
+
+        if (error) throw error;
+
+        cerrarModalCambiarPassword();
+        mostrarAlerta("¡Éxito!", "Tu contraseña fue actualizada correctamente. Ya podés usarla la próxima vez que entres.");
+
+    } catch (e) {
+        btn.innerText = textoOriginal;
+        console.error(e);
+        mostrarAlerta("Error", "No se pudo cambiar la contraseña. Revisá tu conexión a internet.");
     }
 }

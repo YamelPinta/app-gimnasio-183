@@ -831,7 +831,12 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 .card-ejercicio {
     background: white; border-radius: 15px; padding: 12px 15px 12px 8px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
-.icono-arrastre { color: #ccc; cursor: grab; margin-right: 2px; }
+.icono-arrastre { 
+    color: #ccc; 
+    cursor: grab; 
+    margin-right: 2px; 
+    flex-shrink: 0; /* ¡Esto prohíbe que el texto lo aplaste! */
+}
 .info-ejercicio { flex-grow: 1; }
 .info-ejercicio h4 { font-size: 0.81rem; color: #2c2c2c; margin-bottom: 4px; font-weight: 640; }
 .detalle-ejercicio { font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 6px; }
@@ -2107,7 +2112,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
    ========================================================================== */
 .encabezado-series {
     display: grid;
-    grid-template-columns: 40px 1fr 1fr 1fr 35px !important; /* Ahora son 4 columnas + el tachito */
+    grid-template-columns: 55px 1fr 1fr 1fr 35px !important; /* Ahora son 4 columnas + el tachito */
     gap: 8px;
     align-items: center;
     padding: 0 5px;
@@ -2121,7 +2126,7 @@ button:active, .card-alumno:active, .card-ejercicio:active,
 
 .fila-serie {
     display: grid;
-    grid-template-columns: 40px 1fr 1fr 1fr 35px !important;
+    grid-template-columns: 55px 1fr 1fr 1fr 35px !important;
     gap: 8px;
     align-items: center;
     background: rgba(0, 0, 0, 0.25);

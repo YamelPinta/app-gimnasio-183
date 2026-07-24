@@ -1,5 +1,5 @@
-const CACHE_ESTATICO = 'gimnasio-estatico-v15'; // <-- ACORDATE DE CAMBIAR EL NÚMERO 
-const CACHE_DINAMICO = 'gimnasio-dinamico-v15'; // <-- PARA FORZAR LA ACTUALIZACIÓN
+const CACHE_ESTATICO = 'gimnasio-estatico-v16'; // <-- ACORDATE DE CAMBIAR EL NÚMERO 
+const CACHE_DINAMICO = 'gimnasio-dinamico-v16'; // <-- PARA FORZAR LA ACTUALIZACIÓN
 
 const ASSETS_CORE = [
     '/',
@@ -41,6 +41,8 @@ self.addEventListener('activate', (evento) => {
 // ... (Acá sigue tu evento 'fetch' exactamente igual que como lo tenés) ...
 self.addEventListener('fetch', (evento) => {
     const url = evento.request.url;
+
+    if (evento.request.method !== 'GET') return;
 
     // 1. REGLA ESTRICTA: Ignorar base de datos y Live Server
     if (url.includes('supabase.co/rest/v1/') || url.startsWith('ws://') || url.startsWith('chrome-extension')) {
