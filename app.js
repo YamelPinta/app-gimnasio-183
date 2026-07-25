@@ -1,21 +1,15 @@
-// --- 1. CONFIGURACIÓN DE SUPABASE ---
-const SUPABASE_URL = "https://azssqieevaglrgyacxfl.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6c3NxaWVldmFnbHJneWFjeGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjM4NjYsImV4cCI6MjA5ODIzOTg2Nn0.WsEiF1mmdlqnOILxKWKchOgUXc7Yw84lE6ATbWQha-Q";
 
 const clienteSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variable global para saber qué profesor está usando la app
 let profeActivoId = null;
 let alumnoSeleccionadoId = null;
 let ejercicioEditandoId = null;
 let modoBorradoActivo = false;
-// --- SISTEMA DE CONFIRMACIÓN UNIVERSAL ---
 let accionPendiente = null; // Guarda temporalmente la orden de borrado
 let alumnoDataActual = null; // Guarda temporalmente toda la info del alumno actual
 
-let esAdminActual = false; // <--- NUEVA MEMORIA
+let esAdminActual = false; // nueva memoria
 
-// --- SÚPER DICCIONARIO DE EJERCICIOS (3 CATEGORÍAS PRINCIPALES) ---
 const catalogoGlobal = {
     "MOVILIDAD": {
         "Cuello y Cervical": ["Flexión-extensión de cuello", "Rotación de cuello", "Inclinación cervical", "Círculos cervicales"],
@@ -52,16 +46,15 @@ function pedirConfirmacion(titulo, mensaje, textoBoton, funcionAConfirmar) {
     document.getElementById("texto-confirmacion").innerText = mensaje;
     document.getElementById("btn-confirmar-accion").innerText = textoBoton;
     
-    accionPendiente = funcionAConfirmar; // Guardamos lo que hay que ejecutar si dice que sí
+    accionPendiente = funcionAConfirmar; 
     document.getElementById("modal-confirmacion").style.display = "flex";
 }
 
 function cerrarModalConfirmacion() {
     document.getElementById("modal-confirmacion").style.display = "none";
-    accionPendiente = null; // Limpiamos la memoria
+    accionPendiente = null; 
 }
 
-// Escuchamos el clic del botón rojo del modal
 document.getElementById("btn-confirmar-accion").addEventListener("click", () => {
     if (accionPendiente) {
         accionPendiente(); // Ejecuta la función que estaba en espera
@@ -69,12 +62,10 @@ document.getElementById("btn-confirmar-accion").addEventListener("click", () => 
     }
 });
 
-// --- SISTEMA DE ALERTA VISUAL INTELIGENTE ---
 function mostrarAlerta(titulo, mensaje) {
     document.getElementById("titulo-alerta").innerText = titulo;
     document.getElementById("texto-alerta").innerText = mensaje;
     
-    // El cerebro: Detecta palabras clave en el título para saber si es un éxito
     const tituloMin = titulo.toLowerCase();
     const esExito = tituloMin.includes('éxito') || 
                     tituloMin.includes('exitosa') || 
@@ -86,7 +77,6 @@ function mostrarAlerta(titulo, mensaje) {
     const tituloDOM = document.getElementById("titulo-alerta");
 
     if (esExito) {
-        // Ícono SVG de Pulgar Arriba (Verde) con animación
         contenedorIcono.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" class="anim-exito"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`;
         tituloDOM.style.color = "#2ecc71"; // Título verde
     } else {
@@ -105,6 +95,7 @@ function cerrarModalAlerta() {
 // --- 2. ARRANQUE DE LA APP, MEMORIA Y NAVEGACIÓN INICIAL ---
 // Memoria dinámica para el login individual
 let emailProfePendiente = null;
+let esProfeNuevoLogin = false;
 let idProfePendiente = null;
 let nombreProfePendiente = null;
 let apellidoProfePendiente = null;
@@ -177,28 +168,64 @@ function volverDesdeAlumnoAInicio() {
 // --- 3. LOGIN Y LOGOUT ---
 async function iniciarSesion() {
     const passIngresada = document.getElementById("login-password").value.trim();
+    const confirmarPass = document.getElementById("login-confirmar-password").value.trim();
     const checkboxTyC = document.getElementById("checkbox-tyc").checked; 
 
     if (!checkboxTyC) {
         mostrarAlerta("Atención", "Debés aceptar los Términos y Condiciones."); return;
     }
     if (!passIngresada) {
-        mostrarAlerta("Atención", "Ingresá tu contraseña."); return;
+        mostrarAlerta("Atención", "Ingresá una contraseña."); return;
     }
 
-    try {
-        // Conexión real con el escudo de seguridad de Supabase
-        const { data, error } = await clienteSupabase.auth.signInWithPassword({
-            email: emailProfePendiente,
-            password: passIngresada,
-        });
+    // Chequeos extra si es la primera vez que entra
+    if (esProfeNuevoLogin) {
+        if (passIngresada.length < 6) {
+            mostrarAlerta("Atención", "La contraseña debe tener al menos 6 caracteres."); return;
+        }
+        if (passIngresada !== confirmarPass) {
+            mostrarAlerta("Atención", "Las contraseñas no coinciden. Revisalas."); return;
+        }
+    }
 
-        if (error) {
-            document.getElementById("modal-error-login").style.display = "flex";
-            return;
+    const btnIniciar = document.getElementById("btn-iniciar-sesion");
+    const textoOriginal = btnIniciar.innerText;
+    btnIniciar.innerText = "Conectando...";
+
+    try {
+        if (esProfeNuevoLogin) {
+            // 1. EL PROFE ES NUEVO: Creamos su bóveda oficial en Supabase
+            const { error: errorSignUp } = await clienteSupabase.auth.signUp({
+                email: emailProfePendiente,
+                password: passIngresada,
+            });
+
+            if (errorSignUp) {
+                btnIniciar.innerText = textoOriginal;
+                mostrarAlerta("Error al crear cuenta", errorSignUp.message);
+                return;
+            }
+
+            // 2. Le avisamos a tu tabla de profesores que ya tiene su mail asignado (Así no se lo vuelve a preguntar)
+            await clienteSupabase.from('profesores')
+                .update({ email_auth: emailProfePendiente })
+                .eq('id', idProfePendiente);
+
+        } else {
+            // 3. EL PROFE YA EXISTÍA: Hacemos el inicio de sesión normal
+            const { error } = await clienteSupabase.auth.signInWithPassword({
+                email: emailProfePendiente,
+                password: passIngresada,
+            });
+
+            if (error) {
+                btnIniciar.innerText = textoOriginal;
+                document.getElementById("modal-error-login").style.display = "flex";
+                return;
+            }
         }
 
-        // --- SI LA CONTRASEÑA ES CORRECTA ---
+        // --- SI TODO SALIÓ BIEN, LO DEJAMOS ENTRAR ---
         profeActivoId = idProfePendiente;
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nombreProfePendiente;
 
@@ -216,14 +243,26 @@ async function iniciarSesion() {
 
         document.getElementById("pantalla-login").style.display = "none";
         document.getElementById("pantalla-dashboard").style.display = "block";
-        document.getElementById("login-password").value = ""; // Vaciamos por seguridad
+        
+        // Vaciamos por seguridad y restauramos el botón
+        document.getElementById("login-password").value = ""; 
+        document.getElementById("login-confirmar-password").value = ""; 
+        btnIniciar.innerText = textoOriginal;
 
         cargarAlumnos(); 
         cargarChips();
         actualizarNavActivo('alumnos');
 
+        // Si era nuevo, le damos una bienvenida especial
+        if (esProfeNuevoLogin) {
+            setTimeout(() => {
+                mostrarAlerta("¡Creación Exitosa!", "Tu contraseña fue guardada con éxito. ¡Bienvenido a tu panel!");
+            }, 500);
+        }
+
     } catch (err) {
         console.error(err);
+        btnIniciar.innerText = textoOriginal;
         document.getElementById("modal-error-login").style.display = "flex";
     }
 }
@@ -246,6 +285,9 @@ async function cerrarSesion() {
     profeActivoId = null;
     document.getElementById("pantalla-dashboard").style.display = "none";
     document.getElementById("pantalla-perfiles").style.display = "flex";
+
+    // ---> NUEVO: Refrescamos los perfiles para que la app lea quién ya tiene contraseña
+    cargarProfesores();
 }
 
 
@@ -393,30 +435,64 @@ async function guardarProfeEnBD() {
         cerrarModalProfe();
         cargarProfesores(); 
 
+        // ---> NUEVO: CARTEL DE ÉXITO ACÁ <---
+        mostrarAlerta("¡Registro Exitoso!", "El perfil del profesor se creó correctamente.");
+
     } catch (error) {
         mostrarAlerta("Error al guardar el profesor", error.message);
     }
 }
 
 // --- 5. NAVEGACIÓN Y DASHBOARD DE ALUMNOS ---
-// Al tocar una cara, abre el modal de contraseña exclusivo para ese profe
+// Al tocar una cara, abre el modal y detecta si es un profe nuevo o viejo
 function entrarPerfil(id, nombre, apellido, emailAuth) {
     idProfePendiente = id;
     nombreProfePendiente = nombre;
     apellidoProfePendiente = apellido;
 
-    // MAGIA: Usamos el email que conectaste en Supabase. 
-    // Si algún día creás un profe nuevo y olvidás ponerle email en la tabla, el sistema 
-    // crea un escudo de respaldo automático usando su ID único (ej: b4a2... @gym.com)
-    emailProfePendiente = emailAuth ? emailAuth : (id + "@gym.com");
+    // MAGIA: Detectamos si tiene la columna de email vacía en la base de datos
+    if (!emailAuth || emailAuth === "null" || emailAuth === "") {
+        esProfeNuevoLogin = true;
+        emailProfePendiente = id + "@gym.com"; // Inventamos el mail interno
+    } else {
+        esProfeNuevoLogin = false;
+        emailProfePendiente = emailAuth;
+    }
 
     // Apagamos los perfiles y encendemos la pantalla de contraseña
     document.getElementById("pantalla-perfiles").style.display = "none";
     document.getElementById("pantalla-login").style.display = "flex";
 
-    // Si tu HTML tiene un título H2 adentro del login, lo personalizamos
-    const tituloLogin = document.querySelector("#pantalla-login h2");
-    if (tituloLogin) tituloLogin.innerText = "Hola, " + nombre;
+    // Vaciamos las cajas por las dudas
+    document.getElementById("login-password").value = "";
+    document.getElementById("login-confirmar-password").value = "";
+    document.getElementById("checkbox-tyc").checked = false;
+
+    // ADAPTAMOS LA PANTALLA
+    const tituloMain = document.getElementById("titulo-principal");
+    const saludo = document.getElementById("saludo-dinamico");
+    const subtitulo = document.getElementById("subtitulo-dinamico");
+    const cajaConfirmar = document.getElementById("caja-confirmar-pass");
+    const btnIniciar = document.getElementById("btn-iniciar-sesion");
+
+    if (saludo) saludo.innerText = "Hola, " + nombre;
+
+    if (esProfeNuevoLogin) {
+        // Textos para profe NUEVO
+        if (tituloMain) tituloMain.innerText = "¿SOS NUEVO?";
+        if (subtitulo) subtitulo.innerText = "Creá una contraseña para tu cuenta.";
+        
+        cajaConfirmar.style.display = "flex"; // Mostramos la segunda caja
+        btnIniciar.innerText = "Crear cuenta y Entrar";
+    } else {
+        // Textos para profe REGULAR
+        if (tituloMain) tituloMain.innerText = "APP PARA PROFESORES";
+        if (subtitulo) subtitulo.innerText = "Ingresá tu contraseña para continuar.";
+        
+        cajaConfirmar.style.display = "none"; // Ocultamos la segunda caja
+        btnIniciar.innerText = "Iniciar sesión";
+    }
+
 }
 
 // ==========================================
@@ -880,7 +956,7 @@ async function cargarAlumnos() {
 // CORRECCIÓN 3: El cerebro que recuerda qué botones o busquedas tenías activas
 function reaplicarFiltrosSilenciosamente() {
     const inputBuscador = document.getElementById("buscador-alumnos");
-    const textoBusqueda = inputBuscador ? inputBuscador.value.toLowerCase() : "";
+    const textoBusqueda = inputBuscador ? normalizarTexto(inputBuscador.value) : "";
 
     let actividadesPrendidas = [];
     let estadosPrendidos = [];
@@ -889,24 +965,26 @@ function reaplicarFiltrosSilenciosamente() {
 
     const todosLosChips = document.querySelectorAll("#contenedor-chips-dinamicos .chip");
     todosLosChips.forEach((chip, index) => {
-        if (index === 0) return; // Saltamos el lápiz
+        if (index === 0) return; 
         if (index === 1 && chip.classList.contains("activo")) chipTodosActivo = true;
 
         if (chip.classList.contains("activo") && index > 1) {
             const txt = chip.innerText.trim();
-            if (txt === 'Cuota al día') estadosPrendidos.push('al día');
+            // Tilde sacada a propósito para emparejar
+            if (txt === 'Cuota al día') estadosPrendidos.push('al dia');
             else if (txt === 'Vencida') estadosPrendidos.push('vencida');
             else if (txt === 'Con rutina') modalidadesPrendidas.push('con rutina');
             else if (txt === 'Libre') modalidadesPrendidas.push('alumno libre'); 
-            else actividadesPrendidas.push(txt.toLowerCase());
+            else actividadesPrendidas.push(normalizarTexto(txt));
         }
     });
 
     const tarjetas = document.querySelectorAll("#lista-alumnos .card-alumno");
     
     tarjetas.forEach(tarjeta => {
-        const contenido = tarjeta.innerText.toLowerCase();
-        const nombre = tarjeta.querySelector("h3").innerText.toLowerCase();
+        // Limpiamos la tarjeta entera y el nombre
+        const contenido = normalizarTexto(tarjeta.innerText);
+        const nombre = normalizarTexto(tarjeta.querySelector("h3").innerText);
         
         const pasaBuscador = nombre.includes(textoBusqueda);
         
@@ -1182,19 +1260,23 @@ function alternarVisibilidadPass(idInput) {
 }
 
 // --- 7. BUSCADOR DE ALUMNOS ---
+
+// --- HERRAMIENTA PARA IGNORAR ACENTOS Y MAYÚSCULAS ---
+function normalizarTexto(texto) {
+    // Esto pasa todo a minúscula y después le "arranca" las tildes a las letras
+    return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// --- 7. BUSCADOR DE ALUMNOS ---
 function filtrarAlumnos() {
-    // 1. Obtenemos lo que escribiste en el buscador y lo pasamos a minúsculas
-    const textoBusqueda = document.getElementById("buscador-alumnos").value.toLowerCase();
-    
-    // 2. Agarramos todas las tarjetas de alumnos que están en la pantalla
+    // 1. Obtenemos lo que escribiste, pero pasado por nuestro "limpiador"
+    const textoBusqueda = normalizarTexto(document.getElementById("buscador-alumnos").value);
     const tarjetas = document.querySelectorAll("#lista-alumnos .card-alumno");
 
-    // 3. Revisamos tarjeta por tarjeta
     tarjetas.forEach(tarjeta => {
-        // Buscamos el nombre del alumno (que está adentro de la etiqueta <h3>)
-        const nombreAlumno = tarjeta.querySelector("h3").innerText.toLowerCase();
+        // 2. Limpiamos también el nombre de la tarjeta para compararlos en igualdad de condiciones
+        const nombreAlumno = normalizarTexto(tarjeta.querySelector("h3").innerText);
         
-        // Si el nombre incluye lo que escribiste, mostramos la tarjeta. Si no, la ocultamos.
         if (nombreAlumno.includes(textoBusqueda)) {
             tarjeta.style.display = "flex";
         } else {
@@ -1206,15 +1288,11 @@ function filtrarAlumnos() {
 // --- 8. FILTROS POR CHIPS (BOTONES MÚLTIPLES E INTELIGENTES) ---
 function filtrarPorChip(botonClickeado, textoFiltro) {
     const todosLosChips = Array.from(document.querySelectorAll("#contenedor-chips-dinamicos .chip"));
-    
-    // CORRECCIÓN MAGISTRAL: Separamos el lápiz del botón "Todos"
-    const chipLapiz = todosLosChips[0]; // El índice 0 ahora es siempre el Lápiz
-    const chipTodos = todosLosChips[1]; // El índice 1 es siempre "Todos"
+    const chipLapiz = todosLosChips[0]; 
+    const chipTodos = todosLosChips[1]; 
 
-    // 1. Lógica de prendido y apagado visual
     if (textoFiltro === 'Todos') {
         todosLosChips.forEach(chip => {
-            // Le sacamos el estado "activo" a todos menos al lápiz (que nunca debe tenerlo)
             if (chip !== chipLapiz) chip.classList.remove("activo");
         });
         chipTodos.classList.add("activo");
@@ -1222,17 +1300,14 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
         chipTodos.classList.remove("activo");
         botonClickeado.classList.toggle("activo");
 
-        // Si desmarcó todo, volvemos a prender "Todos" automáticamente
         const hayAlgunoPrendido = todosLosChips.some(c => c !== chipLapiz && c.classList.contains("activo"));
         if (!hayAlgunoPrendido) {
             chipTodos.classList.add("activo");
         }
     }
 
-    // 2. Limpiamos la barra de búsqueda escrita por las dudas
     document.getElementById("buscador-alumnos").value = "";
 
-    // 3. Recolectamos qué cosas están prendidas (Ignorando el lápiz y el botón Todos)
     let actividadesPrendidas = [];
     let estadosPrendidos = [];
     let modalidadesPrendidas = []; 
@@ -1241,8 +1316,9 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
         if (chip !== chipLapiz && chip !== chipTodos && chip.classList.contains("activo")) {
             const textoBoton = chip.innerText.trim();
             
+            // OJO ACÁ: Como la tarjeta se va a limpiar de acentos, nosotros también le sacamos la tilde a 'al dia'
             if (textoBoton === 'Cuota al día') {
-                estadosPrendidos.push('al día');
+                estadosPrendidos.push('al dia'); 
             } else if (textoBoton === 'Vencida') {
                 estadosPrendidos.push('vencida');
             } else if (textoBoton === 'Con rutina') {
@@ -1250,12 +1326,12 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
             } else if (textoBoton === 'Libre') {
                 modalidadesPrendidas.push('alumno libre'); 
             } else {
-                actividadesPrendidas.push(textoBoton.toLowerCase());
+                // Pasamos las actividades por nuestro limpiador
+                actividadesPrendidas.push(normalizarTexto(textoBoton));
             }
         }
     });
 
-    // 4. Filtramos las tarjetas (Motor Lógico Inteligente)
     const tarjetas = document.querySelectorAll("#lista-alumnos .card-alumno");
     
     tarjetas.forEach(tarjeta => {
@@ -1264,7 +1340,8 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
             return;
         }
 
-        const contenidoTarjeta = tarjeta.innerText.toLowerCase();
+        // Limpiamos todo el texto de la tarjeta
+        const contenidoTarjeta = normalizarTexto(tarjeta.innerText);
 
         const pasaActividad = actividadesPrendidas.length === 0 || actividadesPrendidas.some(act => contenidoTarjeta.includes(act));
         const pasaEstado = estadosPrendidos.length === 0 || estadosPrendidos.some(est => contenidoTarjeta.includes(est));
@@ -1277,6 +1354,7 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
         }
     });
 }
+
 // --- 9. REGISTRO Y CANCELACIÓN DE PAGOS EN TARJETAS ---
 async function modificarCicloPago(alumnoId, fechaVencimientoActual, yaEstabaPagado) {
     let baseFecha = fechaVencimientoActual && fechaVencimientoActual !== "null" ? new Date(fechaVencimientoActual + 'T00:00:00') : new Date();
@@ -2030,7 +2108,7 @@ function generarChipsRutina() {
     let dias = ["D1", "D2", "D3", "D4", "D5"];
     
     // Si el alumno tiene días guardados en la BD, los usamos:
-    if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length === 5) {
+    if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length > 0) {
         dias = alumnoDataActual.nombres_dias;
     }
     
@@ -2086,46 +2164,102 @@ function seleccionarDia(numDia) {
     if(vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD(); 
 }
 
-// Abre la ventana y rellena los inputs con los nombres actuales
+let diasEditandoTemp = []; // Memoria para saber exactamente qué días borraste
+let sortableDiasModal = null; // NUEVO: Memoria para el motor de arrastre
+
 function abrirModalEditarDias() {
     let dias = ["D1", "D2", "D3", "D4", "D5"];
-    if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length === 5) {
+    if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length > 0) {
         dias = alumnoDataActual.nombres_dias;
     }
     
-    document.getElementById("input-dia-1").value = dias[0];
-    document.getElementById("input-dia-2").value = dias[1];
-    document.getElementById("input-dia-3").value = dias[2];
-    document.getElementById("input-dia-4").value = dias[3];
-    document.getElementById("input-dia-5").value = dias[4];
+    diasEditandoTemp = [...dias]; // Copiamos los días actuales a la memoria
+    
+    const contenedor = document.getElementById("contenedor-inputs-dias");
+    contenedor.innerHTML = "";
+    
+    dias.forEach((dia, index) => {
+        // Le sumamos el ícono de agarre y un diseño tipo "caja"
+        contenedor.innerHTML += `
+            <div class="campo-detalle fila-editar-dia" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center; background: #141414; padding: 8px; border-radius: 8px; border: 1px solid #262626;" data-original="${dia}">
+                <svg class="handle-dia" viewBox="0 0 24 24" width="20" style="color: #666; flex-shrink: 0; cursor: grab;"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+                <input type="text" class="input-modal input-nombre-dia" value="${dia}" placeholder="Ej: Día ${index + 1}" style="flex: 1; margin: 0; border: none; background: transparent; outline: none; padding: 0;">
+                <button type="button" class="btn-eliminar-serie" onclick="this.parentElement.remove()" style="background: none; border: none; color: #e74c3c; cursor: pointer; padding: 5px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
+        `;
+    });
     
     document.getElementById("modal-editar-dias").style.display = "flex";
+
+    // NUEVO: Prendemos el motor de arrastre
+    if (sortableDiasModal) sortableDiasModal.destroy();
+    sortableDiasModal = new Sortable(contenedor, {
+        handle: '.handle-dia', // Solo se mueve tocando los 6 puntitos
+        animation: 200,
+        ghostClass: "tarjeta-indicador-caida"
+    });
+}
+
+function agregarFilaDia() {
+    const contenedor = document.getElementById("contenedor-inputs-dias");
+    const index = contenedor.querySelectorAll('.fila-editar-dia').length;
+    
+    // Lo insertamos vacío pero con el mismo diseño "arrastrable"
+    contenedor.insertAdjacentHTML('beforeend', `
+        <div class="campo-detalle fila-editar-dia" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center; background: #141414; padding: 8px; border-radius: 8px; border: 1px solid #262626;">
+            <svg class="handle-dia" viewBox="0 0 24 24" width="20" style="color: #666; flex-shrink: 0; cursor: grab;"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+            <input type="text" class="input-modal input-nombre-dia" value="D${index + 1}" placeholder="Ej: Día ${index + 1}" style="flex: 1; margin: 0; border: none; background: transparent; outline: none; padding: 0;">
+            <button type="button" class="btn-eliminar-serie" onclick="this.parentElement.remove()" style="background: none; border: none; color: #e74c3c; cursor: pointer; padding: 5px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+        </div>
+    `);
+    
+    // Baja el scroll automáticamente si sumás muchos días
+    setTimeout(() => { contenedor.parentElement.scrollTop = contenedor.parentElement.scrollHeight; }, 10);
 }
 
 async function guardarEdicionDias() {
-    const nuevosDias = [
-        document.getElementById("input-dia-1").value.trim() || "D1",
-        document.getElementById("input-dia-2").value.trim() || "D2",
-        document.getElementById("input-dia-3").value.trim() || "D3",
-        document.getElementById("input-dia-4").value.trim() || "D4",
-        document.getElementById("input-dia-5").value.trim() || "D5"
-    ];
+    const filas = document.querySelectorAll('.fila-editar-dia');
+    const nuevosDias = [];
+    const mapeoMudanza = []; 
+    const diasConservadosOG = [];
 
-    // 1. Rescatamos los nombres VIEJOS antes de pisarlos
-    let viejosDias = ["D1", "D2", "D3", "D4", "D5"];
-    if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length === 5) {
-        viejosDias = alumnoDataActual.nombres_dias;
+    if (filas.length === 0) {
+        mostrarAlerta("Atención", "El alumno debe tener al menos un día asignado.");
+        return;
     }
 
-    // 2. Lo actualizamos en la memoria visual instantáneamente
+    filas.forEach(fila => {
+        const nuevoValor = fila.querySelector('.input-nombre-dia').value.trim() || "Día";
+        nuevosDias.push(nuevoValor);
+        
+        const valorOriginal = fila.getAttribute('data-original');
+        // Si la fila ya existía de antes y le cambió el nombre, lo anotamos
+        if (valorOriginal && valorOriginal !== "undefined") {
+            diasConservadosOG.push(valorOriginal);
+            if (valorOriginal !== nuevoValor) {
+                mapeoMudanza.push({ viejo: valorOriginal, nuevo: nuevoValor });
+            }
+        }
+    });
+
+    // Detectamos si el profe borró definitivamente alguno de los días originales
+    const diasBorrados = diasEditandoTemp.filter(viejo => !diasConservadosOG.includes(viejo));
+
+    // Blindaje: si borró el día en el que estaba parado, lo acomodamos
+    if (diaActivo > nuevosDias.length) diaActivo = nuevosDias.length;
+
+    // Actualizamos la pantalla instantáneamente
     if (!alumnoDataActual) alumnoDataActual = {};
     alumnoDataActual.nombres_dias = nuevosDias;
 
-    generarChipsRutina(); // Redibuja los botones al instante
+    generarChipsRutina();
     document.getElementById("modal-editar-dias").style.display = "none";
 
     try {
-        // 3. Guardamos los nombres nuevos en la tabla del alumno en Supabase
         const { error } = await clienteSupabase
             .from('alumnos')
             .update({ nombres_dias: nuevosDias })
@@ -2133,37 +2267,42 @@ async function guardarEdicionDias() {
         
         if (error) throw error;
 
-        // 4. LA MAGIA: Mudamos todos los ejercicios de los días viejos a los días nuevos
         const promesasMudanza = [];
-        for (let i = 0; i < 5; i++) {
-            if (viejosDias[i] !== nuevosDias[i]) {
-                // Si el nombre cambió, le avisamos a Supabase que mude las rutinas
-                promesasMudanza.push(
-                    clienteSupabase.from('rutinas_planificadas')
-                        .update({ dia_semana: nuevosDias[i] })
-                        .eq('alumno_id', alumnoSeleccionadoId)
-                        .eq('dia_semana', viejosDias[i])
-                );
-            }
+
+        // 1. Mudamos las rutinas de los días que solo cambiaron de nombre
+        mapeoMudanza.forEach(cambio => {
+            promesasMudanza.push(
+                clienteSupabase.from('rutinas_planificadas')
+                    .update({ dia_semana: cambio.nuevo })
+                    .eq('alumno_id', alumnoSeleccionadoId)
+                    .eq('dia_semana', cambio.viejo)
+            );
+        });
+
+        // 2. DESTRUCCIÓN: Borramos las rutinas de los días que el profe eliminó
+        if (diasBorrados.length > 0) {
+            promesasMudanza.push(
+                clienteSupabase.from('rutinas_planificadas')
+                    .delete()
+                    .eq('alumno_id', alumnoSeleccionadoId)
+                    .in('dia_semana', diasBorrados)
+            );
         }
 
-        // 5. Si hubo cambios de nombre, disparamos las mudanzas todas juntas
+        // Ejecutamos todo junto
         if (promesasMudanza.length > 0) {
             await Promise.all(promesasMudanza);
-            
-            // Actualizamos la vista de abajo para que los ejercicios reaparezcan al instante
+            // Actualizamos la vista
             if (vistaSliderActual === 'ejercicios') {
                 cargarEjerciciosCategoriaBD();
             } else if (vistaSliderActual === 'categorias') {
                 dibujarCategoriasAlumno();
             }
         }
-
     } catch (e) {
-        mostrarAlerta("Error", "Error al guardar los nuevos nombres de días en Supabase.");
+        mostrarAlerta("Error", "No se pudieron actualizar los días en la base de datos.");
     }
 }
-
 // ==========================================
 // CONTROLADOR DEL SLIDER Y CATEGORÍAS (BARRAS REALES)
 // ==========================================
@@ -3174,7 +3313,7 @@ async function abrirModalCheckin(alumnoId) {
         if (error) throw error;
 
         let dias = ["D1", "D2", "D3", "D4", "D5"];
-        if (alumno && alumno.nombres_dias && alumno.nombres_dias.length === 5) {
+        if (alumno && alumno.nombres_dias && alumno.nombres_dias.length > 0) {
             dias = alumno.nombres_dias;
         }
 
@@ -4203,42 +4342,117 @@ function inicializarModalSeries(tipo, arraySeries) {
             `;
         });
     }
+
+    // ---> NUEVO: RESTAURAR EL BOTÓN SEGÚN SI ESTÁ UNIFICADO O NO
+    const idBoton = tipo === 'pack' ? 'btn-toggle-series-pack' : 'btn-toggle-series-rutina';
+    const boton = document.getElementById(idBoton);
+    if (boton) {
+        if (sonIguales) {
+            // Modo Naranja (Unificado)
+            boton.setAttribute('data-modo', 'unificado');
+            boton.style.background = 'rgba(243, 156, 18, 0.1)';
+            boton.style.color = '#f39c12';
+            boton.style.borderColor = 'rgba(243, 156, 18, 0.3)';
+            boton.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="vertical-align: middle; margin-right: 4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                Modificar individualmente cada serie
+            `;
+        } else {
+            // Modo Gris (Desglosado)
+            boton.setAttribute('data-modo', 'desglosado');
+            boton.style.background = '#2c2c2c';
+            boton.style.color = '#aaaaaa';
+            boton.style.borderColor = '#444444';
+            boton.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="vertical-align: middle; margin-right: 4px;"><path d="M4 14h6v6H4z"></path><path d="M14 14h6v6h-6z"></path><path d="M14 4h6v6h-6z"></path><path d="M4 4h6v6H4z"></path></svg>
+                Volver a forma unificada
+            `;
+        }
+    }
 }
 
-function desglosarSeries(tipo) {
+function toggleSeries(tipo) {
     const idContenedor = tipo === 'pack' ? 'contenedor-filas-series-pack' : 'contenedor-filas-series';
+    const idBoton = tipo === 'pack' ? 'btn-toggle-series-pack' : 'btn-toggle-series-rutina';
     const contenedor = document.getElementById(idContenedor);
+    const boton = document.getElementById(idBoton);
     const filas = contenedor.querySelectorAll('.fila-serie');
     
-    // Solo podemos desglosar si hay 1 sola fila en pantalla y tiene un número multiplicador
-    if (filas.length === 1) {
-        const primerFila = filas[0];
-        const cantidad = parseInt(primerFila.querySelector('.input-serie-numero').value) || 1;
-        
-        if (cantidad > 1) {
+    // Leemos en qué estado está el botón
+    const modoActual = boton.getAttribute('data-modo') || 'unificado';
+
+    if (modoActual === 'unificado') {
+        // --- ACCIÓN: DESGLOSAR (Separar series) ---
+        if (filas.length === 1) {
+            const primerFila = filas[0];
+            const cantidad = parseInt(primerFila.querySelector('.input-serie-numero').value) || 1;
+            
+            if (cantidad > 1) {
+                const fuerza = primerFila.querySelector('.input-serie-fuerza').value;
+                const reps = primerFila.querySelector('.input-serie-reps').value;
+                const rir = primerFila.querySelector('.input-serie-rir').value;
+                
+                contenedor.innerHTML = "";
+                for(let i=1; i<=cantidad; i++) {
+                    contenedor.innerHTML += `
+                        <div class="fila-serie">
+                            <input type="number" class="input-serie-numero input-modal" value="${i}" style="text-align: center; padding: 8px 2px;">
+                            <input type="number" class="input-serie-fuerza input-modal" value="${fuerza}" placeholder="% RM">
+                            <input type="number" class="input-serie-reps input-modal" value="${reps}" placeholder="Reps">
+                            <input type="number" class="input-serie-rir input-modal" value="${rir}" placeholder="RIR">
+                            <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                // Transformamos el botón a GRIS y cambiamos el texto
+                boton.setAttribute('data-modo', 'desglosado');
+                boton.style.background = '#2c2c2c'; // Gris oscuro
+                boton.style.color = '#aaaaaa';
+                boton.style.borderColor = '#444444';
+                boton.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="vertical-align: middle; margin-right: 4px;"><path d="M4 14h6v6H4z"></path><path d="M14 14h6v6h-6z"></path><path d="M14 4h6v6h-6z"></path><path d="M4 4h6v6H4z"></path></svg>
+                    Volver a forma unificada
+                `;
+            } else {
+                mostrarAlerta("Atención", "Para desglosar, tenés que poner más de 1 serie en la cajita izquierda.");
+            }
+        }
+    } else {
+        // --- ACCIÓN: UNIFICAR (Volver a juntar) ---
+        if (filas.length > 0) {
+            // Tomamos los datos de la primera fila y sumamos cuántas hay en total
+            const primerFila = filas[0];
+            const cantidadTotal = filas.length; 
             const fuerza = primerFila.querySelector('.input-serie-fuerza').value;
             const reps = primerFila.querySelector('.input-serie-reps').value;
             const rir = primerFila.querySelector('.input-serie-rir').value;
-            
-            contenedor.innerHTML = "";
-            for(let i=1; i<=cantidad; i++) {
-                contenedor.innerHTML += `
-                    <div class="fila-serie">
-                        <input type="number" class="input-serie-numero input-modal" value="${i}" style="text-align: center; padding: 8px 2px;">
-                        <input type="number" class="input-serie-fuerza input-modal" value="${fuerza}" placeholder="% RM">
-                        <input type="number" class="input-serie-reps input-modal" value="${reps}" placeholder="Reps">
-                        <input type="number" class="input-serie-rir input-modal" value="${rir}" placeholder="RIR">
-                        <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
-                    </div>
-                `;
-            }
-        } else {
-            mostrarAlerta("Atención", "Para desglosar, tenés que poner más de 1 serie en la cajita izquierda.");
+
+            // Aplastamos todo de nuevo en 1 sola fila multiplicadora
+            contenedor.innerHTML = `
+                <div class="fila-serie">
+                    <input type="number" class="input-serie-numero input-modal" value="${cantidadTotal}" style="text-align: center; padding: 8px 2px;">
+                    <input type="number" class="input-serie-fuerza input-modal" value="${fuerza}" placeholder="% RM">
+                    <input type="number" class="input-serie-reps input-modal" value="${reps}" placeholder="Reps">
+                    <input type="number" class="input-serie-rir input-modal" value="${rir}" placeholder="RIR">
+                    <button type="button" class="btn-eliminar-serie" onclick="eliminarFilaSerie(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+            `;
         }
-    } else {
-        mostrarAlerta("Atención", "Las series ya están desglosadas individualmente.");
+
+        // Restauramos el botón a su color NARANJA original
+        boton.setAttribute('data-modo', 'unificado');
+        boton.style.background = 'rgba(243, 156, 18, 0.1)';
+        boton.style.color = '#f39c12';
+        boton.style.borderColor = 'rgba(243, 156, 18, 0.3)';
+        boton.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="vertical-align: middle; margin-right: 4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            Modificar individualmente cada serie
+        `;
     }
 }
 

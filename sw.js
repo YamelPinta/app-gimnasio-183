@@ -1,5 +1,5 @@
-const CACHE_ESTATICO = 'gimnasio-estatico-v16'; // <-- ACORDATE DE CAMBIAR EL NÚMERO 
-const CACHE_DINAMICO = 'gimnasio-dinamico-v16'; // <-- PARA FORZAR LA ACTUALIZACIÓN
+const CACHE_ESTATICO = 'gimnasio-estatico-v17'; // <-- ACORDATE DE CAMBIAR EL NÚMERO 
+const CACHE_DINAMICO = 'gimnasio-dinamico-v17'; // <-- PARA FORZAR LA ACTUALIZACIÓN
 
 const ASSETS_CORE = [
     '/',
@@ -13,7 +13,6 @@ const ASSETS_CORE = [
 ];
 
 self.addEventListener('install', (evento) => {
-    // 1. LA MAGIA: Obliga a la nueva versión a instalarse y tomar el control INMEDIATAMENTE
     self.skipWaiting(); 
     
     evento.waitUntil(
@@ -22,7 +21,6 @@ self.addEventListener('install', (evento) => {
 });
 
 self.addEventListener('activate', (evento) => {
-    // 2. LA MAGIA PARTE 2: Hace que la nueva versión controle todas las pestañas abiertas al instante
     evento.waitUntil(self.clients.claim()); 
 
     evento.waitUntil(
@@ -38,18 +36,15 @@ self.addEventListener('activate', (evento) => {
     );
 });
 
-// ... (Acá sigue tu evento 'fetch' exactamente igual que como lo tenés) ...
 self.addEventListener('fetch', (evento) => {
     const url = evento.request.url;
 
     if (evento.request.method !== 'GET') return;
 
-    // 1. REGLA ESTRICTA: Ignorar base de datos y Live Server
     if (url.includes('supabase.co/rest/v1/') || url.startsWith('ws://') || url.startsWith('chrome-extension')) {
         return; 
     }
 
-    // 2. MAGIA: Guardar Imágenes Y TIPOGRAFÍAS de Google
     if (evento.request.destination === 'image' || 
         url.includes('supabase.co/storage/') || 
         url.includes('fonts.googleapis.com') || 
@@ -58,7 +53,7 @@ self.addEventListener('fetch', (evento) => {
         evento.respondWith(
             caches.match(evento.request).then((respuestaCache) => {
                 if (respuestaCache) {
-                    return respuestaCache; // Devuelve al instante
+                    return respuestaCache;
                 }
                 return fetch(evento.request).then((respuestaRed) => {
                     if (respuestaRed && respuestaRed.status === 200) {
@@ -67,7 +62,6 @@ self.addEventListener('fetch', (evento) => {
                     }
                     return respuestaRed;
                 }).catch(() => {
-                    // Salvavidas silencioso si falla
                     return new Response('', { status: 404, statusText: 'Offline' });
                 });
             })
@@ -75,7 +69,6 @@ self.addEventListener('fetch', (evento) => {
         return;
     }
 
-    // 3. PARA EL RESTO (HTML, CSS, JS)
     evento.respondWith(
         fetch(evento.request).then(respuestaRed => {
             const respuestaClonada = respuestaRed.clone();
@@ -86,7 +79,6 @@ self.addEventListener('fetch', (evento) => {
             if (respuestaCache) {
                 return respuestaCache;
             }
-            // EL SALVAVIDAS que arregla tu error rojo: devuelve un archivo vacío en vez de entrar en pánico
             return new Response('Contenido no disponible offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
         })
     );

@@ -343,8 +343,8 @@ button:active, .card-alumno:active, .card-ejercicio:active,
     display: inline-block; width: 90%; max-width: 260px;
 }
 .titulo-visual {
-    color: white; font-family: 'Oswald', sans-serif; font-size: 0.95rem; 
-    letter-spacing: 1px; margin-bottom: 3px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    color: white; font-family: 'Oswald', sans-serif; font-size: 1.20rem; 
+    letter-spacing: 1px; margin-bottom: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
 }
 .subtitulo-visual {
     color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; 
@@ -2413,3 +2413,6 @@ body.tema-oscuro .header-subbloque {
 .subbloque-contenedor {
     display: flex; flex-direction: column; gap: 10px; min-height: 20px;
 }
+
+
+
