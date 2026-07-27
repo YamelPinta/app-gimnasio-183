@@ -2416,3 +2416,50 @@ body.tema-oscuro .header-subbloque {
 
 
 
+/* ========================================== */
+/* REDUCCIÓN EXTREMA DE BORDES LATERALES      */
+/* ========================================== */
+
+/* 1. Le sacamos el relleno a los contenedores principales y a la app entera */
+.contenedor-app,
+.pantalla-dashboard-moderna,
+.pantalla-fondo-claro,
+.lista-alumnos-moderna,
+.contenedor-ejercicios,
+.subbloque-contenedor {
+    padding-left: 4px !important;  /* Solo 4 píxeles de borde en la pantalla */
+    padding-right: 4px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow-x: hidden !important; /* Evita que el celular se mueva de lado a lado */
+}
+
+/* 2. Hacemos que las tarjetas ocupen ese 100% real */
+.card-alumno, 
+.card-ejercicio, 
+.tarjeta-admin-profe {
+    width: 100% !important; 
+    max-width: none !important; /* Le quitamos cualquier límite */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+    
+    /* Reducimos el colchón interno de la tarjeta para que el texto gane espacio */
+    padding-left: 8px !important;  
+    padding-right: 8px !important;
+}
+
+/* 3. El texto central se estira al máximo */
+.card-alumno .info-central,
+.card-ejercicio .info-ejercicio {
+    flex-grow: 1 !important;
+    min-width: 0 !important; 
+    padding-right: 4px !important;
+}
+
+/* 4. Protegemos los botones para que no se aprieten contra el borde */
+.card-alumno .estado-derecha,
+.card-ejercicio .acciones-ejercicio {
+    flex-shrink: 0 !important;
+    min-width: max-content !important;
+}

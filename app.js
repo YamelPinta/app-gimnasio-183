@@ -546,7 +546,6 @@ function cambiarVistaAdmin(vista) {
 async function cargarPanelAdmin() {
     const contenedor = document.getElementById("contenedor-admin-columnas");
     
-    // Configuración general del contenedor (Sin scroll visible)
     contenedor.style.display = "block"; 
     contenedor.style.overflowY = "auto";
     contenedor.style.scrollbarWidth = "none"; 
@@ -554,9 +553,7 @@ async function cargarPanelAdmin() {
     
     contenedor.innerHTML = `
         <style>
-            #contenedor-admin-columnas::-webkit-scrollbar {
-                display: none;
-            }
+            #contenedor-admin-columnas::-webkit-scrollbar { display: none; }
         </style>
         <p style='text-align:center; width: 100%; padding-top: 20px; color: #888;'>Cargando base de datos...</p>
     `;
@@ -581,21 +578,32 @@ async function cargarPanelAdmin() {
             let conteoCat = {};
             let htmlFilasAlumnos = "";
 
+            let porcentajeGym = profe.porcentaje_gym !== undefined && profe.porcentaje_gym !== null ? profe.porcentaje_gym : 30;
+
             alumnosProfe.forEach(a => {
                 let cuota = a.cuota || 0;
-                let gymCut = cuota * 0.30; 
+                
+                // MAGIA: Si el alumno tiene un porcentaje particular, lo usamos. Si no, usamos el del profe.
+                let porcAlumno = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : porcentajeGym;
+                
+                let gymCut = cuota * (porcAlumno / 100); 
                 totalProfeGym += gymCut;
                 granTotalGym += gymCut;
 
                 let act = a.actividad || "Sin Categoría";
                 conteoCat[act] = (conteoCat[act] || 0) + 1;
 
-                // (Adentro del profes.forEach)
                 htmlFilasAlumnos += `
                     <tr>
                         <td style="padding: 10px 15px; font-weight: 400; font-size: 0.85rem;">${a.nombre} ${a.apellido}</td>
                         <td style="padding: 10px 15px; font-size: 0.75rem;">${act}</td>
-                        <td style="padding: 10px 15px; text-align: right; font-weight: 500; font-size: 0.75rem;">$${gymCut.toLocaleString('es-AR')}</td>
+                        <td style="padding: 10px 15px; text-align: right; font-weight: 500; font-size: 0.75rem;">
+                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                <span style="color: #888; font-size: 0.65rem;">(${porcAlumno}%)</span>
+                                $${gymCut.toLocaleString('es-AR')}
+                                <svg onclick="cambiarPorcentajeAlumno('${a.id}', '${a.nombre}', ${porcAlumno})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="cursor: pointer; color: #3498db; flex-shrink: 0;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -604,10 +612,9 @@ async function cargarPanelAdmin() {
 
             datosAdminActualParaExcel.profesores.push({
                 nombre: `${profe.nombre} ${profe.apellido}`, alumnos: alumnosProfe,
-                totalGym: totalProfeGym, categorias: strCategorias
+                totalGym: totalProfeGym, categorias: strCategorias, porcentajeGym: porcentajeGym
             });
 
-            // TARJETA DEL PROFESOR (LIMPIA DE COLORES FORZADOS)
             htmlFilasProfes += `
                 <div class="tarjeta-admin-profe">
                     <div class="admin-profe-header" onclick="toggleAcordeonAdmin('tabla-profe-${profe.id}', 'flecha-profe-${profe.id}')">
@@ -620,7 +627,13 @@ async function cargarPanelAdmin() {
                         </div>
                         <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0; padding-left: 10px;">
                             <strong class="precio" style="font-size: 1.1rem; font-weight: 600;">$${totalProfeGym.toLocaleString('es-AR')}</strong>
-                            <span class="btn-eliminar-admin" onclick="event.stopPropagation(); darDeBajaProfe('${profe.id}')">Eliminar</span>
+                            <div style="display:flex; gap:6px; margin-top:4px;">
+                                <span class="badge-subbloque" onclick="event.stopPropagation(); cambiarPorcentajeProfesor('${profe.id}', '${profe.nombre}', ${porcentajeGym})" style="background: rgba(52, 152, 219, 0.15); color: #3498db; border: 1px solid rgba(52,152,219,0.3); font-size: 0.65rem; cursor: pointer; display: flex; align-items: center;">
+                                    Gym: ${porcentajeGym}%
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" style="margin-left: 4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                </span>
+                                <span class="btn-eliminar-admin" onclick="event.stopPropagation(); darDeBajaProfe('${profe.id}')">Eliminar</span>
+                            </div>
                         </div>
                     </div>
                     <div id="tabla-profe-${profe.id}" class="admin-profe-tabla" style="display: none;">
@@ -629,7 +642,7 @@ async function cargarPanelAdmin() {
                                 <tr style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">
                                     <th style="padding: 10px 15px; font-weight: 600;">Alumno</th>
                                     <th style="padding: 10px 15px; font-weight: 600;">Act.</th>
-                                    <th style="padding: 10px 15px; font-weight: 600; text-align: right;">30% Gym</th>
+                                    <th style="padding: 10px 15px; font-weight: 600; text-align: right;">Aporte al Gym</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -644,18 +657,18 @@ async function cargarPanelAdmin() {
         datosAdminActualParaExcel.granTotal = granTotalGym;
         contenedor.innerHTML = htmlFilasProfes;
         
-        // CAJA DE RECAUDACIÓN TOTAL (LIMPIA)
         const cajaGranTotal = document.getElementById("monto-gran-total").parentElement;
-        cajaGranTotal.removeAttribute("style"); // Borramos toda la basura inline vieja
+        cajaGranTotal.removeAttribute("style"); 
         cajaGranTotal.className = "caja-gran-total-dinamica"; 
         
         const tituloTotal = cajaGranTotal.querySelector("h3");
         tituloTotal.removeAttribute("style"); 
+        tituloTotal.innerText = "Recaudación Total (Gym)";
         
         const monto = document.getElementById("monto-gran-total");
         monto.removeAttribute("style");
         monto.style.fontSize = "2.2rem";
-        monto.style.color = "#2ecc71"; // Este sí lo dejamos fijo en verde
+        monto.style.color = "#2ecc71"; 
         monto.style.fontWeight = "bold";
         monto.style.marginTop = "4px";
         monto.innerText = `$${granTotalGym.toLocaleString('es-AR')}`;
@@ -663,6 +676,57 @@ async function cargarPanelAdmin() {
     } catch (e) {
         console.error(e);
         contenedor.innerHTML = "<p style='color:red; text-align:center;'>Error al cargar el panel.</p>";
+    }
+}
+
+// ---> NUEVO: FUNCION PARA EDITAR PORCENTAJE (PEGÁ ESTO DEBAJO DE LA ANTERIOR)
+async function cambiarPorcentajeProfesor(profeId, nombreProfe, porcentajeActual) {
+    const nuevoPorcentaje = prompt(`¿Qué porcentaje de ganancia se lleva el gimnasio por los alumnos de ${nombreProfe}?`, porcentajeActual);
+    
+    if (nuevoPorcentaje !== null && nuevoPorcentaje !== "") {
+        const valorFijo = parseInt(nuevoPorcentaje);
+        if (!isNaN(valorFijo) && valorFijo >= 0 && valorFijo <= 100) {
+            try {
+                const { error } = await clienteSupabase.from('profesores').update({ porcentaje_gym: valorFijo }).eq('id', profeId);
+                if (error) throw error;
+                cargarPanelAdmin(); 
+                mostrarAlerta("¡Actualizado!", `El porcentaje base para ${nombreProfe} ahora es del ${valorFijo}%.`);
+            } catch (e) { mostrarAlerta("Error", "No se pudo cambiar el porcentaje."); }
+        } else { mostrarAlerta("Atención", "Ingresá un número válido entre 0 y 100."); }
+    }
+}
+
+// ---> LA NUEVA FUNCIÓN PARA EL ALUMNO INDIVIDUAL <---
+async function cambiarPorcentajeAlumno(alumnoId, nombreAlumno, porcentajeActual) {
+    const nuevoPorcentaje = prompt(`¿Qué porcentaje se lleva el gimnasio por el alumno ${nombreAlumno}?\n(Dejá la caja vacía si querés que use el porcentaje base de su profesor).`, porcentajeActual);
+    
+    if (nuevoPorcentaje !== null) {
+        let valorAEscribir = null; // Si deja vacío, lo restauramos a Null
+
+        if (nuevoPorcentaje.trim() !== "") {
+            const valorFijo = parseInt(nuevoPorcentaje);
+            if (!isNaN(valorFijo) && valorFijo >= 0 && valorFijo <= 100) {
+                valorAEscribir = valorFijo;
+            } else {
+                mostrarAlerta("Atención", "Ingresá un número válido entre 0 y 100.");
+                return;
+            }
+        }
+
+        try {
+            const { error } = await clienteSupabase.from('alumnos').update({ porcentaje_gym: valorAEscribir }).eq('id', alumnoId);
+            if (error) throw error;
+            
+            cargarPanelAdmin(); // Refresca la pantalla sola
+            
+            if (valorAEscribir !== null) {
+                mostrarAlerta("¡Actualizado!", `El porcentaje para ${nombreAlumno} ahora es del ${valorAEscribir}%.`);
+            } else {
+                mostrarAlerta("¡Restaurado!", `El alumno ${nombreAlumno} volvió a usar el porcentaje base del profesor.`);
+            }
+        } catch (e) {
+            mostrarAlerta("Error", "No se pudo cambiar el porcentaje del alumno.");
+        }
     }
 }
 
@@ -730,30 +794,34 @@ function descargarExcelAdmin() {
     matrizExcel.push(["INFORME GLOBAL DE PROFESORES Y GIMNASIO"]);
     matrizExcel.push(["Fecha de emisión:", fechaEmision, "Hora:", horaEmision]);
     matrizExcel.push([]);
-    matrizExcel.push(["RECAUDACIÓN TOTAL DEL GIMNASIO (30%):", `$${datosAdminActualParaExcel.granTotal.toLocaleString('es-AR')}`]);
+    matrizExcel.push(["RECAUDACIÓN TOTAL DEL GIMNASIO:", `$${datosAdminActualParaExcel.granTotal.toLocaleString('es-AR')}`]);
     matrizExcel.push([]);
 
     datosAdminActualParaExcel.profesores.forEach(profe => {
+        let porcBase = profe.porcentajeGym || 30; 
+
         matrizExcel.push(["PROFESOR:", profe.nombre]);
-        matrizExcel.push(["Total Alumnos:", profe.alumnos.length, "Recaudación Gym (30%):", `$${profe.totalGym.toLocaleString('es-AR')}`]);
+        matrizExcel.push(["Total Alumnos:", profe.alumnos.length, `Recaudación Gym (Base ${porcBase}%):`, `$${profe.totalGym.toLocaleString('es-AR')}`]);
         matrizExcel.push(["Desglose por Categoría:", profe.categorias]);
-        matrizExcel.push([]); // Espacio
+        matrizExcel.push([]); 
         
-        // Cabeceras de los alumnos de ESTE profe
-        matrizExcel.push(["Nombre Alumno", "Categoría", "Cuota Total", "Aporte al Gym (30%)"]);
+        matrizExcel.push(["Nombre Alumno", "Categoría", "Cuota Total", `Aporte al Gym`]);
         
         profe.alumnos.forEach(a => {
             let cuota = a.cuota || 0;
-            let gymCut = cuota * 0.30;
+            // Evaluamos si el alumno tiene un % distinto
+            let porcAlum = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : porcBase;
+            let gymCut = cuota * (porcAlum / 100);
+            
             matrizExcel.push([
                 `${a.nombre} ${a.apellido}`,
                 a.actividad || "Sin Categoría",
                 `$${cuota.toLocaleString('es-AR')}`,
-                `$${gymCut.toLocaleString('es-AR')}`
+                `$${gymCut.toLocaleString('es-AR')} (${porcAlum}%)` // Imprimimos la plata y el porcentaje usado al lado
             ]);
         });
         
-        matrizExcel.push([]); // Separador visual entre profes
+        matrizExcel.push([]); 
         matrizExcel.push([]);
     });
 
@@ -799,9 +867,6 @@ function volverAlDashboard() {
 
 async function cargarAlumnos() {
     const contenedor = document.getElementById("lista-alumnos");
-    
-    // CORRECCIÓN 1: Solo mostramos "Cargando" si la lista está completamente vacía (la primera vez).
-    // Si ya hay alumnos, no borramos la pantalla para evitar que el celular pegue un salto.
     if (contenedor.innerHTML.trim() === "") {
         contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Cargando alumnos...</p>";
     }
@@ -812,13 +877,13 @@ async function cargarAlumnos() {
             .select('*')
             .eq('profesor_id', profeActivoId)
             .order('nombre', { ascending: true })
-            .order('apellido', { ascending: true }); // Orden alfabético perfecto
+            .order('apellido', { ascending: true }); 
 
         if (error) throw error;
 
         document.getElementById("contador-alumnos").innerText = `${alumnos.length} alumnos asignados`;
 
-        let htmlFinal = ""; // Memoria temporal para armar las tarjetas súper rápido
+        let htmlFinal = ""; 
 
         if (alumnos.length === 0) {
             htmlFinal = `<p style="color: #a0a0a0; text-align: center; margin-top: 20px;">Aún no tenés alumnos asignados.</p>`;
@@ -845,12 +910,22 @@ async function cargarAlumnos() {
                 let textoBadge = "Vencida";
                 let estaAlDia = false;
 
-                if (alumno.vencimiento_cuota) {
-                    const fechaVencimiento = new Date(alumno.vencimiento_cuota + 'T00:00:00'); 
-                    const diferenciaTiempo = fechaVencimiento - hoy;
+                // ---> LA MAGIA ESTRICTA: Calculamos el vencimiento (Fecha Pago + 30 días)
+                let vencimientoCalculado = null;
+                if (alumno.fecha_ultimo_pago) {
+                    let f = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
+                    f.setDate(f.getDate() + 30);
+                    vencimientoCalculado = f;
+                } else if (alumno.vencimiento_cuota) {
+                    vencimientoCalculado = new Date(alumno.vencimiento_cuota + 'T00:00:00');
+                }
+
+                if (vencimientoCalculado) {
+                    const diferenciaTiempo = vencimientoCalculado - hoy;
                     const diferenciaDias = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
 
-                    if (diferenciaDias < 0) {
+                    // REGLA CORREGIDA: Si la diferencia es 0 (ya pasaron los 30 días exactos) o menos, está vencida.
+                    if (diferenciaDias <= 0) {
                         claseBadge = "badge-vencida"; textoBadge = "Vencida";
                     } else if (diferenciaDias <= 5) {
                         claseBadge = "badge-vencepronto"; textoBadge = "Vence pronto";
@@ -859,10 +934,11 @@ async function cargarAlumnos() {
                     }
 
                     if (diferenciaDias <= 5) {
-                        let tipoNotif = diferenciaDias < 0 ? 'vencida' : 'pronto';
-                        let idNotif = `${alumno.id}_${alumno.vencimiento_cuota}_${tipoNotif}`; 
+                        let tipoNotif = diferenciaDias <= 0 ? 'vencida' : 'pronto';
+                        let fechaNotifStr = vencimientoCalculado.toISOString().split('T')[0];
+                        let idNotif = `${alumno.id}_${fechaNotifStr}_${tipoNotif}`; 
                         let esNueva = !leidasGuardadas.includes(idNotif);
-                        let fechaFormateada = alumno.vencimiento_cuota.split('-').reverse().join('/');
+                        let fechaFormateada = fechaNotifStr.split('-').reverse().join('/');
 
                         listaNotificaciones.push({
                             idNotif: idNotif, alumnoNombre: `${alumno.nombre} ${alumno.apellido}`,
@@ -936,7 +1012,8 @@ async function cargarAlumnos() {
                             <span class="badge-estado ${claseBadge}">${textoBadge}</span>
                             ${htmlBotonBorrar}
                             <div class="contenedor-accion-pago">
-                                <button class="btn-pago-status ${claseBotonPago}" onclick="event.stopPropagation(); modificarCicloPago('${alumno.id}', '${alumno.vencimiento_cuota}', ${estaAlDia})">${textoBotonPago}</button>
+                                <!-- Le pasamos la fecha de pago a la función del botón -->
+                                <button class="btn-pago-status ${claseBotonPago}" onclick="event.stopPropagation(); modificarCicloPago('${alumno.id}', '${alumno.fecha_ultimo_pago}', ${estaAlDia})">${textoBotonPago}</button>
                                 ${htmlBotonAsistencia}
                             </div>
                         </div>
@@ -946,15 +1023,10 @@ async function cargarAlumnos() {
 
             window.notificacionesGlobales = listaNotificaciones; 
             const badge = document.getElementById("badge-notificaciones");
-            if (badge) {
-                badge.style.display = nuevasNotif > 0 ? "block" : "none";
-            }
+            if (badge) badge.style.display = nuevasNotif > 0 ? "block" : "none";
         }
 
-        // PISAMOS todo el HTML de golpe (Cero parpadeo, muchísimo más rápido)
         contenedor.innerHTML = htmlFinal;
-
-        // CORRECCIÓN 2: Re-aplicamos los filtros para que los alumnos no "salten" si tenías alguno seleccionado
         reaplicarFiltrosSilenciosamente();
 
     } catch (error) {
@@ -1027,16 +1099,16 @@ function abrirModalAlumno() {
 
     setValor("input-alumno-nombre", "");
     setValor("input-alumno-dni", "");
-    setValor("select-alumno-tipo", "Con rutina"); // <-- NUEVO
+    setValor("select-alumno-tipo", "Con rutina"); 
     setValor("select-alumno-actividad", "Musculación");
     setValor("input-alumno-objetivo", "");
     setValor("input-alumno-edad", "");
     setValor("input-alumno-condicion", "");
     setValor("input-alumno-cuota", "");
 
-    const fecha = new Date();
-    fecha.setMonth(fecha.getMonth() + 1);
-    setValor("input-alumno-vencimiento", fecha.toISOString().split('T')[0]);
+    // NUEVO: La caja de fecha arranca automáticamente con el día de HOY
+    const fechaHoy = new Date();
+    setValor("input-alumno-pago", fechaHoy.toISOString().split('T')[0]);
 }
 
 async function guardarAlumnoEnBD() {
@@ -1047,25 +1119,29 @@ async function guardarAlumnoEnBD() {
 
     const nombreCompleto = getValor("input-alumno-nombre");
     const dni = getValor("input-alumno-dni");
-    
     const selectTipo = document.getElementById("select-alumno-tipo");
     const tipoRutina = selectTipo ? selectTipo.value : "Con rutina"; 
-
     const selectActividad = document.getElementById("select-alumno-actividad");
     const actividad = selectActividad ? selectActividad.value : "Musculación";
-    
     let objetivo = getValor("input-alumno-objetivo");
     const edad = getValor("input-alumno-edad");
     let condicion = getValor("input-alumno-condicion");
     const cuota = getValor("input-alumno-cuota");
-    let vencimientoCuota = getValor("input-alumno-vencimiento");
+    
+    // LA MAGIA: Calculamos el vencimiento automáticamente (Fecha Pago + 30 días)
+    let fechaPagoStr = getValor("input-alumno-pago");
+    let vencimientoCuota = null;
+    if (fechaPagoStr) {
+        let fPago = new Date(fechaPagoStr + 'T00:00:00');
+        fPago.setDate(fPago.getDate() + 30); // Le suma 30 días exactos
+        vencimientoCuota = fPago.toISOString().split('T')[0];
+    }
 
     if (!nombreCompleto) {
         mostrarAlerta("Faltan datos", "Por favor, ingresá el nombre y apellido del alumno.");
         return;
     }
 
-    // ---> ESCUDO OFFLINE: Frena la función si no hay internet
     if (!navigator.onLine) {
         mostrarAlerta("Sin conexión", "No tenés internet. Conectate a una red para poder guardar al alumno nuevo.");
         return;
@@ -1087,7 +1163,8 @@ async function guardarAlumnoEnBD() {
                 dni: dni || null, 
                 tipo_rutina: tipoRutina, 
                 profesor_id: profeActivoId, 
-                vencimiento_cuota: vencimientoCuota || null,
+                vencimiento_cuota: vencimientoCuota, // Guardamos la fecha de expiración
+                fecha_ultimo_pago: fechaPagoStr || null, // Guardamos cuándo pagó
                 actividad: actividad,
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
@@ -1102,9 +1179,8 @@ async function guardarAlumnoEnBD() {
         mostrarAlerta("¡Guardado con Éxito!", "El alumno se registró correctamente.");
         
     } catch (error) {
-        // Segundo escudo por si el internet se corta justo a la mitad del proceso
         if (error.message.includes("Failed to fetch")) {
-            mostrarAlerta("Sin conexión", "Se cortó el internet intentando guardar. Revisá tu señal e intentá de nuevo.");
+            mostrarAlerta("Sin conexión", "Se cortó el internet intentando guardar.");
         } else {
             mostrarAlerta("Error", "Error al añadir alumno: " + error.message);
         }
@@ -1123,13 +1199,21 @@ function abrirModalEditarAlumno() {
 
     setValor("input-edit-alumno-nombre", `${alumnoDataActual.nombre} ${alumnoDataActual.apellido}`);
     setValor("input-edit-alumno-dni", alumnoDataActual.dni || "");
-    setValor("select-edit-alumno-tipo", alumnoDataActual.tipo_rutina || "Con rutina"); // <-- NUEVO
+    setValor("select-edit-alumno-tipo", alumnoDataActual.tipo_rutina || "Con rutina"); 
     setValor("select-edit-alumno-actividad", alumnoDataActual.actividad || "Musculación");
     setValor("input-edit-alumno-objetivo", alumnoDataActual.objetivo || "");
     setValor("input-edit-alumno-edad", alumnoDataActual.edad || "");
     setValor("input-edit-alumno-condicion", alumnoDataActual.condicion_medica || "");
-    setValor("input-edit-alumno-vencimiento", alumnoDataActual.vencimiento_cuota || "");
     setValor("input-edit-alumno-cuota", alumnoDataActual.cuota ? alumnoDataActual.cuota.toLocaleString('es-AR') : "");
+
+    // Si ya le habías registrado un pago, lo mostramos. Si es un alumno viejo que no tiene fecha de pago, se la deducimos restándole 30 días al vencimiento
+    let fechaPago = alumnoDataActual.fecha_ultimo_pago;
+    if (!fechaPago && alumnoDataActual.vencimiento_cuota) {
+        let v = new Date(alumnoDataActual.vencimiento_cuota + 'T00:00:00');
+        v.setDate(v.getDate() - 30);
+        fechaPago = v.toISOString().split('T')[0];
+    }
+    setValor("input-edit-alumno-pago", fechaPago || "");
 }
 
 async function guardarEdicionAlumnoEnBD() {
@@ -1140,25 +1224,28 @@ async function guardarEdicionAlumnoEnBD() {
 
     const nombreCompleto = getValor("input-edit-alumno-nombre");
     const dni = getValor("input-edit-alumno-dni");
-    
     const selectTipo = document.getElementById("select-edit-alumno-tipo");
     const tipoRutina = selectTipo ? selectTipo.value : "Con rutina"; 
-
     const selectActividad = document.getElementById("select-edit-alumno-actividad");
     const actividad = selectActividad ? selectActividad.value : "Musculación";
-    
     const objetivo = getValor("input-edit-alumno-objetivo");
     const edad = getValor("input-edit-alumno-edad");
     const condicion = getValor("input-edit-alumno-condicion");
     const cuota = getValor("input-edit-alumno-cuota");
-    const vencimiento = getValor("input-edit-alumno-vencimiento");
+    
+    // Calculamos los 30 días al momento de editar
+    let fechaPagoStr = getValor("input-edit-alumno-pago");
+    let vencimientoCuota = null;
+    if (fechaPagoStr) {
+        let fPago = new Date(fechaPagoStr + 'T00:00:00');
+        fPago.setDate(fPago.getDate() + 30);
+        vencimientoCuota = fPago.toISOString().split('T')[0];
+    }
 
     if (!nombreCompleto) {
         mostrarAlerta("Faltan datos", "El nombre no puede estar vacío.");
         return;
     }
-
-    // ---> ESCUDO OFFLINE: Frena la función si no hay internet
     if (!navigator.onLine) {
         mostrarAlerta("Sin conexión", "No tenés internet. Conectate a una red para guardar los cambios.");
         return;
@@ -1180,7 +1267,8 @@ async function guardarEdicionAlumnoEnBD() {
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
                 condicion_medica: condicion,
-                vencimiento_cuota: vencimiento || null,
+                vencimiento_cuota: vencimientoCuota,
+                fecha_ultimo_pago: fechaPagoStr || null,
                 cuota: cuota ? parseInt(cuota.replace(/\./g, '')) : null
             })
             .eq('id', alumnoSeleccionadoId);
@@ -1193,11 +1281,7 @@ async function guardarEdicionAlumnoEnBD() {
         mostrarAlerta("¡Edición Exitosa!", "Los datos del alumno se actualizaron correctamente.");
 
     } catch (error) { 
-        if (error.message.includes("Failed to fetch")) {
-            mostrarAlerta("Sin conexión", "Se cortó el internet intentando guardar. Revisá tu señal e intentá de nuevo.");
-        } else {
-            mostrarAlerta("Error al actualizar", error.message); 
-        }
+        mostrarAlerta("Error al actualizar", error.message); 
     }
 }
 
@@ -1365,40 +1449,47 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
     });
 }
 
-// --- 9. REGISTRO Y CANCELACIÓN DE PAGOS EN TARJETAS ---
-async function modificarCicloPago(alumnoId, fechaVencimientoActual, yaEstabaPagado) {
-    let baseFecha = fechaVencimientoActual && fechaVencimientoActual !== "null" ? new Date(fechaVencimientoActual + 'T00:00:00') : new Date();
-
+// --- 9. REGISTRO Y CANCELACIÓN DE PAGOS RÁPIDOS EN TARJETAS ---
+async function modificarCicloPago(alumnoId, fechaUltimoPagoDb, yaEstabaPagado) {
+    let fechaBasePago = new Date();
+    
     if (yaEstabaPagado) {
-        // MODO DESHACER PAGO USANDO EL NUEVO MODAL Lindo
         pedirConfirmacion(
             "Anular Pago",
-            "¿Querés deshacer el pago? Se retrasará un mes su fecha de vencimiento.",
+            "¿Querés deshacer el pago? Se restarán 30 días de su vencimiento.",
             "Anular pago",
             async () => {
-                baseFecha.setMonth(baseFecha.getMonth() - 1);
-                ejecutarCambioDePago(alumnoId, baseFecha, false);
+                // Si anulamos, retrocedemos 30 días desde su último pago conocido
+                if (fechaUltimoPagoDb && fechaUltimoPagoDb !== "null") {
+                    fechaBasePago = new Date(fechaUltimoPagoDb + 'T00:00:00');
+                    fechaBasePago.setDate(fechaBasePago.getDate() - 30);
+                } else {
+                    fechaBasePago.setDate(fechaBasePago.getDate() - 30);
+                }
+                ejecutarCambioDePago(alumnoId, fechaBasePago, false);
             }
         );
     } else {
-        // MODO REGISTRAR PAGO DIRECTO
-        baseFecha.setMonth(baseFecha.getMonth() + 1);
-        ejecutarCambioDePago(alumnoId, baseFecha, true);
+        // REGISTRAR PAGO RÁPIDO: La fecha de pago es HOY
+        fechaBasePago = new Date(); 
+        ejecutarCambioDePago(alumnoId, fechaBasePago, true);
     }
 }
 
-// Pequeña función auxiliar para no repetir código en los pagos
-async function ejecutarCambioDePago(alumnoId, baseFecha, estadoActivo) {
-    const nuevaFecha = baseFecha.toISOString().split('T')[0];
+async function ejecutarCambioDePago(alumnoId, fechaPagoReal, estadoActivo) {
+    // 1. Guardamos la fecha exacta del pago
+    const fechaPagoStr = fechaPagoReal.toISOString().split('T')[0];
     
-    // NUEVO: Capturamos el día exacto en el que el profe apretó el botón
-    const fechaHoy = estadoActivo ? new Date().toISOString().split('T')[0] : null;
+    // 2. Calculamos el vencimiento (30 días después exactos)
+    let vencimiento = new Date(fechaPagoReal);
+    vencimiento.setDate(vencimiento.getDate() + 30);
+    const vencimientoStr = vencimiento.toISOString().split('T')[0];
 
     try {
         const { error } = await clienteSupabase.from('alumnos').update({ 
-            vencimiento_cuota: nuevaFecha, 
-            activo: estadoActivo,
-            fecha_ultimo_pago: fechaHoy // <-- Guardamos la fecha del clic en la base de datos
+            fecha_ultimo_pago: fechaPagoStr,
+            vencimiento_cuota: vencimientoStr,
+            activo: estadoActivo
         }).eq('id', alumnoId);
         
         if (error) throw error;
@@ -2074,10 +2165,22 @@ async function abrirGrillaAlumno(id) {
         document.getElementById("detalle-salud").innerText = alumno.condicion_medica || "Sin observaciones.";
         document.getElementById("detalle-cuota").innerText = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "No definida";
         
+        // ---> LA MAGIA VISUAL: Calculamos y mostramos el próximo pago (Vencimiento)
         let fechaFormateada = "Sin definir";
-        if (alumno.vencimiento_cuota) {
-            const partes = alumno.vencimiento_cuota.split('-'); 
-            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; 
+        let vencimientoCalculado = null;
+        
+        if (alumno.fecha_ultimo_pago) {
+            let f = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
+            f.setDate(f.getDate() + 30); // Le suma los 30 días
+            vencimientoCalculado = f;
+        } else if (alumno.vencimiento_cuota) {
+            vencimientoCalculado = new Date(alumno.vencimiento_cuota + 'T00:00:00');
+        }
+
+        if (vencimientoCalculado) {
+            const isoString = vencimientoCalculado.toISOString().split('T')[0];
+            const partes = isoString.split('-'); 
+            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; // Formato DD/MM/AAAA
         }
         document.getElementById("detalle-vencimiento").innerText = fechaFormateada;
 
@@ -3599,6 +3702,7 @@ function volverAlDashboardDesdeAdmin() {
 // SISTEMA DE INFORME EXCEL Y PLANILLAS
 // ==========================================
 let alumnosParaInformeActual = []; // Memoria de los alumnos que procesamos
+let porcentajeGymActualParaInforme = 30; // <-- NUEVO: Memoria del porcentaje
 
 function abrirModalInformeProfe() {
     document.getElementById("modal-informe-profe").style.display = "flex";
@@ -3638,14 +3742,16 @@ async function cargarDatosParaInforme() {
     tabla.innerHTML = "<tr><td style='text-align:center;'>Cargando datos de la base...</td></tr>";
 
     try {
-        const { data: alumnosBD, error } = await clienteSupabase
-            .from('alumnos')
-            .select('*')
-            .eq('profesor_id', profeActivoId);
+        const [respAlumnos, respProfe] = await Promise.all([
+            clienteSupabase.from('alumnos').select('*').eq('profesor_id', profeActivoId),
+            clienteSupabase.from('profesores').select('porcentaje_gym').eq('id', profeActivoId).single()
+        ]);
 
-        if (error) throw error;
+        if (respAlumnos.error) throw respAlumnos.error;
 
-        let alumnos = [...alumnosBD];
+        porcentajeGymActualParaInforme = (respProfe.data && respProfe.data.porcentaje_gym !== null) ? respProfe.data.porcentaje_gym : 30;
+
+        let alumnos = [...respAlumnos.data];
 
         if (ordenElegido === 'actividad') {
             alumnos.sort((a, b) => {
@@ -3673,7 +3779,7 @@ async function cargarDatosParaInforme() {
         tabla.innerHTML = `
             <tr>
                 <th>Nombre</th>
-                <th>Modalidad</th> <!-- NUEVA COLUMNA -->
+                <th>Modalidad</th>
                 <th>Actividad</th>
                 <th>Vencimiento</th>
                 <th>Día de Pago</th>
@@ -3707,7 +3813,7 @@ async function cargarDatosParaInforme() {
                     const diferenciaDias = Math.ceil((fechaVencimiento - hoy) / (1000 * 60 * 60 * 24));
                     fechaArg = a.vencimiento_cuota.split('-').reverse().join('/');
                     
-                    if (diferenciaDias < 0) {
+                    if (diferenciaDias <= 0) {
                         estado = "Vencida"; colorEstado = "#d32f2f"; 
                     } else if (diferenciaDias <= 5) {
                         estado = "Pronto a vencer"; colorEstado = "#f39c12"; 
@@ -3720,7 +3826,7 @@ async function cargarDatosParaInforme() {
                 }
 
                 const cuotaMonto = a.cuota ? `$${a.cuota.toLocaleString('es-AR')}` : "$0";
-                const modalidad = a.tipo_rutina || "Con rutina"; // Rescatamos el dato
+                const modalidad = a.tipo_rutina || "Con rutina"; 
 
                 tabla.innerHTML += `
                     <tr>
@@ -3737,16 +3843,22 @@ async function cargarDatosParaInforme() {
         }
 
         let totalDinero = 0;
+        let parteGym = 0;
         let conteoActividades = {};
 
         alumnos.forEach(a => {
-            if (a.cuota) totalDinero += a.cuota;
+            let cuota = a.cuota || 0;
+            totalDinero += cuota;
+            
+            // LA MAGIA DE LA SUMA: Usa el del alumno o recae en el del profe
+            let porc = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : porcentajeGymActualParaInforme;
+            parteGym += cuota * (porc / 100);
+
             const act = a.actividad || "Sin Categoría";
             conteoActividades[act] = (conteoActividades[act] || 0) + 1;
         });
 
-        const porcentajeGimnasio = totalDinero * 0.30;
-        const porcentajeProfesor = totalDinero * 0.70;
+        const parteProfesor = totalDinero - parteGym;
 
         let desgloseCategorias = "";
         for (const [cat, cantidad] of Object.entries(conteoActividades)) {
@@ -3764,10 +3876,10 @@ async function cargarDatosParaInforme() {
                 <span>Recaudación Total</span>
                 <strong style="font-size: 1.2rem;">$${totalDinero.toLocaleString('es-AR')}</strong>
                 <span style="font-size: 0.75rem; margin-top: 5px; text-transform: none;">
-                    Gym (30%): -$${porcentajeGimnasio.toLocaleString('es-AR')}
+                    Parte Gimnasio: -$${parteGym.toLocaleString('es-AR')}
                 </span>
                 <span style="font-size: 0.75rem; margin-top: 2px; text-transform: none;">
-                    Tu parte (70%): $${porcentajeProfesor.toLocaleString('es-AR')}
+                    Tu parte neta: $${parteProfesor.toLocaleString('es-AR')}
                 </span>
             </div>
             <div class="kpi-item" style="grid-column: span 2;">
@@ -3972,6 +4084,7 @@ function descargarExcelProfe() {
     matrizExcel.push(["Nombre", "Apellido", "DNI", "Fecha de Ingreso", "Modalidad", "Actividad", "Edad", "Condición", "Objetivo", "Vencimiento", "Día de Pago", "Cuota Mensual"]);
 
     let totalDinero = 0;
+    let parteGym = 0;
     let conteoActividades = {};
 
     alumnosParaInformeActual.forEach(a => {
@@ -3986,6 +4099,10 @@ function descargarExcelProfe() {
         let cuota = a.cuota || 0;
         
         totalDinero += cuota;
+        
+        let porc = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : porcentajeGymActualParaInforme;
+        parteGym += cuota * (porc / 100);
+
         const act = a.actividad || "Sin Categoría";
         conteoActividades[act] = (conteoActividades[act] || 0) + 1;
 
@@ -4005,36 +4122,27 @@ function descargarExcelProfe() {
         ]);
     });
 
-    // 3. CÁLCULOS Y RESUMEN FINAL (ALINEADOS A LA DERECHA Y SEPARADOS)
-    const porcentajeGimnasio = totalDinero * 0.30;
-    const porcentajeProfesor = totalDinero * 0.70;
+    const parteProfesor = totalDinero - parteGym;
 
-    matrizExcel.push([]); // Renglón vacío para dar aire
+    matrizExcel.push([]); 
     matrizExcel.push([]); 
 
-    // Convertimos la lista de categorías en un formato amigable
     const categoriasArr = Object.entries(conteoActividades);
 
-    // Fila de Títulos (Columna B para la Plata, Columna F para las Categorías)
     matrizExcel.push(["", "RESUMEN GENERAL", "", "", "", "ALUMNOS POR CATEGORÍA", "", ""]);
 
-    // Fila 1
     let cat1 = categoriasArr[0] || ["", ""];
     matrizExcel.push(["", "Total Alumnos:", "", alumnosParaInformeActual.length, "", cat1[0] ? cat1[0]+":" : "", "", cat1[1]]);
 
-    // Fila 2 (Le agregamos el formato de plata directamente al Excel)
     let cat2 = categoriasArr[1] || ["", ""];
     matrizExcel.push(["", "Total Recaudado:", "", totalDinero ? `$${totalDinero.toLocaleString('es-AR')}` : "$0", "", cat2[0] ? cat2[0]+":" : "", "", cat2[1]]);
 
-    // Fila 3
     let cat3 = categoriasArr[2] || ["", ""];
-    matrizExcel.push(["", "Gimnasio (30%):", "", porcentajeGimnasio ? `-$${porcentajeGimnasio.toLocaleString('es-AR')}` : "$0", "", cat3[0] ? cat3[0]+":" : "", "", cat3[1]]);
+    matrizExcel.push(["", `Parte Gimnasio:`, "", parteGym ? `-$${parteGym.toLocaleString('es-AR')}` : "$0", "", cat3[0] ? cat3[0]+":" : "", "", cat3[1]]);
 
-    // Fila 4
     let cat4 = categoriasArr[3] || ["", ""];
-    matrizExcel.push(["", "Tu parte (70%):", "", porcentajeProfesor ? `$${porcentajeProfesor.toLocaleString('es-AR')}` : "$0", "", cat4[0] ? cat4[0]+":" : "", "", cat4[1]]);
+    matrizExcel.push(["", `Tu parte neta:`, "", parteProfesor ? `$${parteProfesor.toLocaleString('es-AR')}` : "$0", "", cat4[0] ? cat4[0]+":" : "", "", cat4[1]]);
 
-    // Fila 5 en adelante (por si el profe tiene 5, 6 o más actividades distintas que no entraron arriba)
     for (let i = 4; i < categoriasArr.length; i++) {
         matrizExcel.push(["", "", "", "", "", categoriasArr[i][0] + ":", "", categoriasArr[i][1]]);
     }
@@ -4054,9 +4162,8 @@ function descargarExcelProfe() {
     XLSX.writeFile(libroExcel, `Informe_Alumnos_${fechaArchivo}.xlsx`);
 
     guardarEnHistorial(fechaArchivo, JSON.stringify(matrizExcel));
-    mostrarAlerta("¡Descarga Exitosa!", "El informe se descargó correctamente con el nuevo diseño.");
+    mostrarAlerta("¡Descarga Exitosa!", "El informe se descargó correctamente con los porcentajes reales.");
 }
-
 
 // ==========================================
 // DETECTOR AUTOMÁTICO DE CONEXIÓN A INTERNET
