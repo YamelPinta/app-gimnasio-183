@@ -10,6 +10,16 @@ let alumnoDataActual = null; // Guarda temporalmente toda la info del alumno act
 
 let esAdminActual = false; // nueva memoria
 
+// --- NUEVO: ESTILOS DINÁMICOS PARA LOS CHIPS (VERDE Y ROJO) ---
+const estilosChips = document.createElement('style');
+estilosChips.innerHTML = `
+    .chip-verde { background-color: rgba(46, 204, 113, 0.15) !important; color: #2ecc71 !important; border-color: rgba(46, 204, 113, 0.4) !important; }
+    .chip-verde.activo { background-color: #2ecc71 !important; color: #141414 !important; border-color: #2ecc71 !important; }
+    .chip-rojo { background-color: rgba(231, 76, 60, 0.1) !important; color: #e74c3c !important; border-color: rgba(231, 76, 60, 0.3) !important; }
+    .chip-rojo.activo { background-color: #e74c3c !important; color: #fff !important; border-color: #e74c3c !important; }
+`;
+document.head.appendChild(estilosChips);
+
 const catalogoGlobal = {
     "MOVILIDAD": {
         "Cuello y Cervical": ["Flexión-extensión de cuello", "Rotación de cuello", "Inclinación cervical", "Círculos cervicales"],
@@ -2018,72 +2028,75 @@ async function guardarEvaluacionProfe() {
     }
 }
 
-// --- ABRIR PANTALLA INDIVIDUAL DEL ALUMNO (VERSIÓN LIMPIA) ---
+// --- ABRIR PANTALLA INDIVIDUAL DEL ALUMNO (VERSIÓN CON NUBE) ---
 async function abrirGrillaAlumno(id) {
     alumnoSeleccionadoId = id; 
 
+    const hoy = new Date();
+    const diaHoy = hoy.getDate();
+    const mesActual = hoy.getMonth() + 1;
+    const anioActual = hoy.getFullYear();
+    const primerDiaMes = `${anioActual}-${String(mesActual).padStart(2, '0')}-01`;
+    const ultimoDiaMes = new Date(anioActual, mesActual, 0).getDate();
+    const fechaFinMes = `${anioActual}-${String(mesActual).padStart(2, '0')}-${ultimoDiaMes}`;
+
+    if (diaHoy <= 7) semanaActiva = 1;
+    else if (diaHoy <= 14) semanaActiva = 2;
+    else if (diaHoy <= 21) semanaActiva = 3;
+    else semanaActiva = 4;
+
     try {
         const { data: alumno, error } = await clienteSupabase
-            .from('alumnos')
-            .select('*')
-            .eq('id', id)
-            .single(); 
-
+            .from('alumnos').select('*').eq('id', id).single(); 
         if (error) throw error;
-
         alumnoDataActual = alumno;
+
+        // ---> NUEVO: LEEMOS LOS DÍAS GUARDADOS EN SUPABASE <---
+        window.asistenciasDiasAlumno = alumno.historial_dias ? alumno.historial_dias.split(',') : [];
+
+        const { data: asistencias } = await clienteSupabase
+            .from('registro_ejercicios').select('fecha').eq('alumno_id', id)
+            .gte('fecha', primerDiaMes).lte('fecha', fechaFinMes);
+
+        let fechasAsistencia = [];
+        if (asistencias) fechasAsistencia = asistencias.map(a => a.fecha);
+        if (alumno.ultima_sesion && alumno.ultima_sesion.startsWith(`${anioActual}-${String(mesActual).padStart(2, '0')}`)) {
+            fechasAsistencia.push(alumno.ultima_sesion);
+        }
+        window.asistenciasAlumnoMes = [...new Set(fechasAsistencia)];
 
         document.getElementById("pantalla-dashboard").style.display = "none";
         document.getElementById("pantalla-detalle-alumno").style.display = "block";
 
-        // Llenamos la tarjeta superior con la información 100% real
         document.getElementById("detalle-nombre-completo").innerText = `${alumno.nombre} ${alumno.apellido}`;
         document.getElementById("detalle-objetivo").innerText = alumno.objetivo || "General";
-        
-        // Colocamos la edad y condición de la base de datos
         document.getElementById("detalle-edad").innerText = alumno.edad ? alumno.edad : "No especificada"; 
         document.getElementById("detalle-salud").innerText = alumno.condicion_medica || "Sin observaciones.";
-
-        // Mostramos el valor de la cuota
         document.getElementById("detalle-cuota").innerText = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "No definida";
-
-        // ... (código anterior que ya tenías) ...
         
         let fechaFormateada = "Sin definir";
         if (alumno.vencimiento_cuota) {
-            const partes = alumno.vencimiento_cuota.split('-'); // Cortamos el 2026-08-15
-            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; // Lo armamos como 15/08/2026
+            const partes = alumno.vencimiento_cuota.split('-'); 
+            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; 
         }
         document.getElementById("detalle-vencimiento").innerText = fechaFormateada;
 
-        // ---> NUEVO: Formateamos la fecha a prueba de balas (adiós al NaN)
         let fechaAltaVisual = "Sin registro";
-        
-        // Agarramos el campo (leemos creado_en y por las dudas created_at)
         const fechaBase = alumno.creado_en || alumno.created_at; 
-        
         if (fechaBase && fechaBase !== "null") {
             try {
-                // Supabase devuelve un texto como "2026-07-16T18:45:35" o "2026-07-16"
-                const soloFecha = fechaBase.split('T')[0]; // Nos quedamos solo con la fecha "2026-07-16"
-                const partes = soloFecha.split('-'); // Cortamos los guiones: [2026, 07, 16]
-                
-                if (partes.length === 3) {
-                    fechaAltaVisual = `${partes[2]}/${partes[1]}/${partes[0]}`; // Lo armamos a la argentina: DD/MM/YYYY
-                }
-            } catch(e) {
-                console.error("Error al formatear fecha:", e);
-            }
+                const soloFecha = fechaBase.split('T')[0]; 
+                const partes = soloFecha.split('-'); 
+                if (partes.length === 3) fechaAltaVisual = `${partes[2]}/${partes[1]}/${partes[0]}`; 
+            } catch(e) {}
         }
         document.getElementById("detalle-fecha-alta").innerText = fechaAltaVisual;
 
-        // Reseteamos la vista al slider principal y cargamos los chips
         cerrarCategoria(); 
-        generarChipsRutina(); // <-- Dibuja las semanas y días
+        generarChipsRutina(); 
 
     } catch (error) {
-        console.error("Error al abrir la ficha:", error.message);
-        mostrarAlerta("No se pudo cargar la información del alumno.");
+        mostrarAlerta("Error", "No se pudo cargar la información del alumno.");
     }
 }
 
@@ -2097,55 +2110,91 @@ function generarChipsRutina() {
     const contenedorSemanas = document.getElementById("chips-semanas");
     const contenedorDias = document.getElementById("chips-dias");
 
-    // 1. DIBUJAR SEMANAS (1 a 4)
-    contenedorSemanas.innerHTML = "";
-    for (let i = 1; i <= 4; i++) {
-        const claseActivo = (i === semanaActiva) ? "activo" : "";
-        contenedorSemanas.innerHTML += `<button class="chip-rutina ${claseActivo}" onclick="seleccionarSemana(${i})">Semana ${i}</button>`;
-    }
+    const hoy = new Date();
+    const diaHoy = hoy.getDate();
+    const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
 
-    // 2. DIBUJAR DÍAS PERSONALIZADOS
+    // 1. DIBUJAR SEMANAS (Con Rangos de Fechas y Colores)
+    contenedorSemanas.innerHTML = "";
+    const rangosSemanas = [
+        { sem: 1, inicio: 1, fin: 7 },
+        { sem: 2, inicio: 8, fin: 14 },
+        { sem: 3, inicio: 15, fin: 21 },
+        { sem: 4, inicio: 22, fin: ultimoDiaMes }
+    ];
+
+    rangosSemanas.forEach(rango => {
+        const esActiva = (rango.sem === semanaActiva) ? "activo" : "";
+        let asistioEstaSemana = false;
+        let semanaYaPaso = diaHoy > rango.fin; 
+        
+        if (window.asistenciasAlumnoMes) {
+            asistioEstaSemana = window.asistenciasAlumnoMes.some(fechaStr => {
+                const diaAsistencia = parseInt(fechaStr.split('-')[2]);
+                return diaAsistencia >= rango.inicio && diaAsistencia <= rango.fin;
+            });
+        }
+
+        let colorClase = "";
+        if (asistioEstaSemana) colorClase = "chip-verde";
+        else if (semanaYaPaso && !asistioEstaSemana) colorClase = "chip-rojo"; 
+
+        contenedorSemanas.innerHTML += `
+            <button class="chip-rutina ${esActiva} ${colorClase}" onclick="seleccionarSemana(${rango.sem})" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; padding: 6px 12px;">
+                <span style="font-size: 0.85rem;">Semana ${rango.sem}</span>
+                <span style="font-size: 0.6rem; opacity: 0.8; font-weight: normal; margin-top: 2px;">${rango.inicio} al ${rango.fin}</span>
+            </button>`;
+    });
+
+    // 2. DIBUJAR DÍAS LEYENDO LA NUBE (Supabase)
     let dias = ["D1", "D2", "D3", "D4", "D5"];
-    
-    // Si el alumno tiene días guardados en la BD, los usamos:
     if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length > 0) {
         dias = alumnoDataActual.nombres_dias;
     }
     
     contenedorDias.innerHTML = "";
+    const rangoSemanaSeleccionada = rangosSemanas.find(r => r.sem === semanaActiva);
+    const semanaElegidaYaPaso = diaHoy > rangoSemanaSeleccionada.fin;
+
     dias.forEach((diaTexto, index) => {
         const numDia = index + 1;
-        const claseActivo = (numDia === diaActivo) ? "activo" : "";
-        contenedorDias.innerHTML += `<button class="chip-rutina ${claseActivo}" onclick="seleccionarDia(${numDia})">${diaTexto}</button>`;
+        const esActivo = (numDia === diaActivo) ? "activo" : "";
+        
+        const anioMes = `${hoy.getFullYear()}-${hoy.getMonth() + 1}`;
+        const codigoDia = `${anioMes}_Sem_${semanaActiva}_${diaTexto}`;
+        
+        let colorClase = "";
+        // Consultamos la variable inteligente que trajimos de Supabase
+        const hizoEsteDia = window.asistenciasDiasAlumno && window.asistenciasDiasAlumno.includes(codigoDia);
+        
+        if (hizoEsteDia) colorClase = "chip-verde";
+        else if (semanaElegidaYaPaso) colorClase = "chip-rojo"; 
+
+        contenedorDias.innerHTML += `<button class="chip-rutina ${esActivo} ${colorClase}" onclick="seleccionarDia(${numDia})">${diaTexto}</button>`;
     });
 
-    // 3. BOTONCITO DE EDITAR AL FINAL
     contenedorDias.innerHTML += `
         <button class="chip-rutina" style="padding: 8px 12px; border-color: #ccc; color: #888; display: flex; align-items: center;" onclick="abrirModalEditarDias()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         </button>
     `;
 
-    // Si estamos viendo las barras, las redibujamos para actualizar la cantidad de ejercicios por día
-    if (vistaSliderActual === 'categorias') {
-        dibujarCategoriasAlumno();
-    }
+    if (vistaSliderActual === 'categorias') dibujarCategoriasAlumno();
 }
 
 // Cuando el profe toca una Semana
 function seleccionarSemana(numSemana) {
     semanaActiva = numSemana;
     
-    // 1. Pintamos de naranja el botón tocado (Sin borrar el HTML, así dejamos que rebote!)
-    const botonesSemanas = document.querySelectorAll("#chips-semanas .chip-rutina");
-    botonesSemanas.forEach((btn, index) => {
-        if (index + 1 === numSemana) btn.classList.add("activo");
-        else btn.classList.remove("activo");
-    });
+    // 1. LA CLAVE: Redibujamos todos los botones para que el sistema recalcule 
+    // qué días de ESTA nueva semana tienen que ir en verde o rojo.
+    generarChipsRutina();
 
-    // 2. Actualizamos la info de abajo
-    if(vistaSliderActual === 'categorias') dibujarCategoriasAlumno();
-    if(vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD(); 
+    // 2. Actualizamos la lista de ejercicios de abajo (las barras de categorías 
+    // ya se actualizan solas por dentro de generarChipsRutina).
+    if(vistaSliderActual === 'ejercicios') {
+        cargarEjerciciosCategoriaBD(); 
+    }
 }
 
 // Cuando el profe toca un Día
@@ -3337,17 +3386,15 @@ function cerrarModalCheckin() {
     checkinAlumnoId = null;
 }
 
-// 3. El motor que lee la fuerza y la guarda mágicamente en el historial
+// 3. El motor que guarda la asistencia y el día EN LA NUBE
 async function procesarCheckin(diaSeleccionado) {
     const idSeguro = checkinAlumnoId; 
     cerrarModalCheckin(); 
     
     try {
         const { data: ejercicios, error: errorSupabase } = await clienteSupabase
-            .from('rutinas_planificadas')
-            .select('zona_muscular, series_reps')
-            .eq('alumno_id', idSeguro)
-            .eq('dia_semana', diaSeleccionado);
+            .from('rutinas_planificadas').select('zona_muscular, series_reps')
+            .eq('alumno_id', idSeguro).eq('dia_semana', diaSeleccionado);
 
         if (errorSupabase) throw errorSupabase;
 
@@ -3355,104 +3402,111 @@ async function procesarCheckin(diaSeleccionado) {
         const fechaHoy = `${tmpHoy.getFullYear()}-${String(tmpHoy.getMonth() + 1).padStart(2, '0')}-${String(tmpHoy.getDate()).padStart(2, '0')}`;
         let mensajeAlerta = "";
 
-        // 1. SI HAY EJERCICIOS, calculamos el porcentaje y lo guardamos para el gráfico
         if (ejercicios && ejercicios.length > 0) {
             const fuerzaPorZona = {};
-            
             ejercicios.forEach(ej => {
-                // Sacamos el "ej.zona_muscular &&" para que procese todos
                 if (ej.series_reps) {
-                    // Si el profe no le puso zona, le asignamos "General"
                     let zonaAsignada = ej.zona_muscular || "General"; 
-                    
                     try {
                         let series = JSON.parse(ej.series_reps);
                         if (Array.isArray(series)) {
                             series.forEach(s => {
                                 let f = parseFloat(s.fuerza);
                                 if (!isNaN(f) && f > 0) {
-                                    if (!fuerzaPorZona[zonaAsignada]) {
-                                        fuerzaPorZona[zonaAsignada] = { suma: 0, cantidad: 0 };
-                                    }
+                                    if (!fuerzaPorZona[zonaAsignada]) fuerzaPorZona[zonaAsignada] = { suma: 0, cantidad: 0 };
                                     fuerzaPorZona[zonaAsignada].suma += f;
                                     fuerzaPorZona[zonaAsignada].cantidad += 1;
                                 }
                             });
                         }
-                    } catch(e) { } // Ignora ejercicios viejos mal formateados
+                    } catch(e) { } 
                 }
             });
 
             const registros = Object.keys(fuerzaPorZona).map(zona => ({
-                alumno_id: idSeguro, 
-                fecha: fechaHoy,
-                zona_muscular: zona,
-                peso_total: Math.round(fuerzaPorZona[zona].suma / fuerzaPorZona[zona].cantidad)
+                alumno_id: idSeguro, fecha: fechaHoy, zona_muscular: zona, peso_total: Math.round(fuerzaPorZona[zona].suma / fuerzaPorZona[zona].cantidad)
             }));
 
             if (registros.length > 0) {
-                const { error: errorHistorial } = await clienteSupabase.from('registro_ejercicios').insert(registros);
-                if (errorHistorial) throw errorHistorial;
-                mensajeAlerta = `El entrenamiento de ${diaSeleccionado} se guardó correctamente en el historial.`;
+                await clienteSupabase.from('registro_ejercicios').insert(registros);
+                mensajeAlerta = `El entrenamiento de ${diaSeleccionado} se guardó correctamente.`;
             } else {
-                mensajeAlerta = `Asistencia tomada. (La rutina no tenía porcentajes para graficar).`;
+                mensajeAlerta = `Asistencia tomada (La rutina no tenía porcentajes).`;
             }
         } else {
-            // SI NO HAY EJERCICIOS, preparamos este mensaje especial
-            mensajeAlerta = `Se marcó el presente para el día "${diaSeleccionado}" (No había rutina cargada).`;
+            mensajeAlerta = `Se marcó el presente para "${diaSeleccionado}" (Sin rutina cargada).`;
         }
 
-        // 2. LA MAGIA: SIEMPRE guardamos la asistencia (haya o no haya ejercicios)
-        await clienteSupabase.from('alumnos').update({ ultima_sesion: fechaHoy }).eq('id', idSeguro);
+        // ---> NUEVO: GUARDAMOS EL DÍA ESPECÍFICO EN SUPABASE <---
+        const anioMes = `${tmpHoy.getFullYear()}-${tmpHoy.getMonth() + 1}`;
+        const codigoDia = `${anioMes}_Sem_${semanaActiva}_${diaSeleccionado}`;
+        
+        if (!window.asistenciasDiasAlumno) window.asistenciasDiasAlumno = [];
+        if (!window.asistenciasDiasAlumno.includes(codigoDia)) {
+            window.asistenciasDiasAlumno.push(codigoDia);
+        }
+        const nuevoHistorialDias = window.asistenciasDiasAlumno.join(',');
+
+        await clienteSupabase.from('alumnos').update({ 
+            ultima_sesion: fechaHoy,
+            historial_dias: nuevoHistorialDias
+        }).eq('id', idSeguro);
         
         cargarAlumnos();
+        
+        // Recargamos la vista para que pinte de verde
+        if (alumnoSeleccionadoId === idSeguro && document.getElementById("pantalla-detalle-alumno").style.display === "block") {
+            abrirGrillaAlumno(idSeguro);
+        }
+        
         mostrarAlerta("¡Asistencia Registrada!", mensajeAlerta);
         
     } catch(e) {
-        console.error(e);
         mostrarAlerta("Error Crítico", "No se pudo procesar la solicitud.");
     }
 }
 
-// 4. El motor para DESHACER la asistencia
+// 4. El motor para DESHACER la asistencia en LA NUBE
 function deshacerAsistencia(alumnoId) {
     pedirConfirmacion(
         "Deshacer Asistencia",
-        "¿Querés deshacer la Asistencia de este alumno?",
+        "¿Querés deshacer la Asistencia de hoy?",
         "Aceptar",
         async () => {
             const tmpHoy = new Date();
             const fechaHoyStr = `${tmpHoy.getFullYear()}-${String(tmpHoy.getMonth() + 1).padStart(2, '0')}-${String(tmpHoy.getDate()).padStart(2, '0')}`;
             try {
-                // 1. Borramos el historial de ejercicios de hoy (para que no sume kilos falsos)
-                await clienteSupabase
-                    .from('registro_ejercicios')
-                    .delete()
-                    .eq('alumno_id', alumnoId)
-                    .eq('fecha', fechaHoyStr);
+                await clienteSupabase.from('registro_ejercicios').delete().eq('alumno_id', alumnoId).eq('fecha', fechaHoyStr);
 
-                // 2. Buscamos la fecha anterior a la que vino (por si entrenó ayer) para no dejarlo en blanco
-                const { data: historialViejo } = await clienteSupabase
-                    .from('registro_ejercicios')
-                    .select('fecha')
-                    .eq('alumno_id', alumnoId)
-                    .lt('fecha', fechaHoyStr)
-                    .order('fecha', { ascending: false })
-                    .limit(1);
+                const { data: historialViejo } = await clienteSupabase.from('registro_ejercicios').select('fecha').eq('alumno_id', alumnoId).lt('fecha', fechaHoyStr).order('fecha', { ascending: false }).limit(1);
 
                 let fechaAnterior = null;
-                if (historialViejo && historialViejo.length > 0) {
-                    fechaAnterior = historialViejo[0].fecha;
+                if (historialViejo && historialViejo.length > 0) fechaAnterior = historialViejo[0].fecha;
+
+                // ---> NUEVO: BORRAMOS EL DÍA ESPECÍFICO EN SUPABASE <---
+                const anioMes = `${tmpHoy.getFullYear()}-${tmpHoy.getMonth() + 1}`;
+                if (window.asistenciasDiasAlumno) {
+                    let dias = ["D1", "D2", "D3", "D4", "D5"];
+                    if (alumnoDataActual && alumnoDataActual.nombres_dias) dias = alumnoDataActual.nombres_dias;
+                    
+                    dias.forEach(d => {
+                        const codigoDia = `${anioMes}_Sem_${semanaActiva}_${d}`;
+                        window.asistenciasDiasAlumno = window.asistenciasDiasAlumno.filter(item => item !== codigoDia);
+                    });
                 }
+                const nuevoHistorialDias = window.asistenciasDiasAlumno ? window.asistenciasDiasAlumno.join(',') : "";
 
-                // 3. Devolvemos el alumno a su estado anterior en la base de datos
-                await clienteSupabase
-                    .from('alumnos')
-                    .update({ ultima_sesion: fechaAnterior })
-                    .eq('id', alumnoId);
+                await clienteSupabase.from('alumnos').update({ 
+                    ultima_sesion: fechaAnterior,
+                    historial_dias: nuevoHistorialDias
+                }).eq('id', alumnoId);
 
-                // 4. Refrescamos la pantalla (el botón vuelve a estar gris automáticamente)
                 cargarAlumnos();
+                
+                // Recargamos la vista para que quite el verde
+                if (alumnoSeleccionadoId === alumnoId && document.getElementById("pantalla-detalle-alumno").style.display === "block") {
+                    abrirGrillaAlumno(alumnoId);
+                }
                 
             } catch (error) {
                 mostrarAlerta("Error", "No se pudo deshacer la asistencia: " + error.message);
