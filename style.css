@@ -2463,3 +2463,50 @@ body.tema-oscuro .header-subbloque {
     flex-shrink: 0 !important;
     min-width: max-content !important;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 3. LA MAGIA: Contenedor de la tabla con scroll horizontal */
+.admin-profe-tabla {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important; /* Deslizamiento suave en celulares */
+    padding-bottom: 5px !important; /* Espacio para que la barrita no pise el texto */
+    margin-top: 10px !important;
+}
+
+/* 1. Relleno SOLO en los costados de la pantalla (sin tocar el espacio vertical) */
+#contenedor-admin-columnas {
+    padding-left: 2px !important;   /* Mínimo espacio a la izquierda */
+    padding-right: 2px !important;  /* Mínimo espacio a la derecha */
+    gap: 15px !important;           /* Mantiene la distancia vertical original entre tarjetas */
+}
+
+/* 2. Tarjetas un poco más compactas (chiquitas) pero manteniendo la forma redonda */
+.tarjeta-admin-profe {
+    min-width: 93vw !important; /* Achicamos el ancho (antes 98vw) para que respiren a los costados */
+    max-width: 93vw !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+    
+    /* Redujimos el relleno de arriba y abajo para hacerlas un poco más "petisas" */
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+
+    /* Acompañamos el nuevo tamaño con un borde apenas más sutil */
+    border-radius: 20px !important; 
+}

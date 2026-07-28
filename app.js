@@ -583,10 +583,12 @@ async function cargarPanelAdmin() {
             alumnosProfe.forEach(a => {
                 let cuota = a.cuota || 0;
                 
-                // MAGIA: Si el alumno tiene un porcentaje particular, lo usamos. Si no, usamos el del profe.
-                let porcAlumno = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : porcentajeGym;
+                // Leemos si el alumno tiene un % propio en la base de datos (para dárselo al modal)
+                let porcAlumnoReal = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : 'null';
+                // Calculamos con el del alumno, o caemos en el del profe si es null
+                let porcCalculado = porcAlumnoReal !== 'null' ? porcAlumnoReal : porcentajeGym;
                 
-                let gymCut = cuota * (porcAlumno / 100); 
+                let gymCut = cuota * (porcCalculado / 100); 
                 totalProfeGym += gymCut;
                 granTotalGym += gymCut;
 
@@ -599,9 +601,9 @@ async function cargarPanelAdmin() {
                         <td style="padding: 10px 15px; font-size: 0.75rem;">${act}</td>
                         <td style="padding: 10px 15px; text-align: right; font-weight: 500; font-size: 0.75rem;">
                             <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
-                                <span style="color: #888; font-size: 0.65rem;">(${porcAlumno}%)</span>
+                                <span style="color: #888; font-size: 0.65rem;">(${porcCalculado}%)</span>
                                 $${gymCut.toLocaleString('es-AR')}
-                                <svg onclick="cambiarPorcentajeAlumno('${a.id}', '${a.nombre}', ${porcAlumno})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="cursor: pointer; color: #3498db; flex-shrink: 0;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                <svg onclick="abrirModalPorcentaje('alumno', '${a.id}', '${a.nombre}', ${porcAlumnoReal})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" style="cursor: pointer; color: #3498db; flex-shrink: 0;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                             </div>
                         </td>
                     </tr>
@@ -628,7 +630,7 @@ async function cargarPanelAdmin() {
                         <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0; padding-left: 10px;">
                             <strong class="precio" style="font-size: 1.1rem; font-weight: 600;">$${totalProfeGym.toLocaleString('es-AR')}</strong>
                             <div style="display:flex; gap:6px; margin-top:4px;">
-                                <span class="badge-subbloque" onclick="event.stopPropagation(); cambiarPorcentajeProfesor('${profe.id}', '${profe.nombre}', ${porcentajeGym})" style="background: rgba(52, 152, 219, 0.15); color: #3498db; border: 1px solid rgba(52,152,219,0.3); font-size: 0.65rem; cursor: pointer; display: flex; align-items: center;">
+                                <span class="badge-subbloque" onclick="event.stopPropagation(); abrirModalPorcentaje('profe', '${profe.id}', '${profe.nombre}', ${porcentajeGym})" style="background: rgba(52, 152, 219, 0.15); color: #3498db; border: 1px solid rgba(52,152,219,0.3); font-size: 0.65rem; cursor: pointer; display: flex; align-items: center;">
                                     Gym: ${porcentajeGym}%
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" style="margin-left: 4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                 </span>
@@ -679,54 +681,70 @@ async function cargarPanelAdmin() {
     }
 }
 
-// ---> NUEVO: FUNCION PARA EDITAR PORCENTAJE (PEGÁ ESTO DEBAJO DE LA ANTERIOR)
-async function cambiarPorcentajeProfesor(profeId, nombreProfe, porcentajeActual) {
-    const nuevoPorcentaje = prompt(`¿Qué porcentaje de ganancia se lleva el gimnasio por los alumnos de ${nombreProfe}?`, porcentajeActual);
+// ==============================================================
+// ---> NUEVO SISTEMA DE MODAL PARA LOS PORCENTAJES
+// ==============================================================
+let porcentajeEditando = { tipo: null, id: null, nombre: null };
+
+function abrirModalPorcentaje(tipo, id, nombre, porcentajeActual) {
+    porcentajeEditando = { tipo, id, nombre };
     
-    if (nuevoPorcentaje !== null && nuevoPorcentaje !== "") {
-        const valorFijo = parseInt(nuevoPorcentaje);
-        if (!isNaN(valorFijo) && valorFijo >= 0 && valorFijo <= 100) {
-            try {
-                const { error } = await clienteSupabase.from('profesores').update({ porcentaje_gym: valorFijo }).eq('id', profeId);
-                if (error) throw error;
-                cargarPanelAdmin(); 
-                mostrarAlerta("¡Actualizado!", `El porcentaje base para ${nombreProfe} ahora es del ${valorFijo}%.`);
-            } catch (e) { mostrarAlerta("Error", "No se pudo cambiar el porcentaje."); }
-        } else { mostrarAlerta("Atención", "Ingresá un número válido entre 0 y 100."); }
-    }
+    document.getElementById("titulo-modal-porcentaje").innerText = tipo === 'profe' ? "Porcentaje del Profesor" : "Porcentaje del Alumno";
+    
+    let texto = tipo === 'profe' 
+        ? `Porcentaje base para los alumnos de ${nombre}.` 
+        : `Excepción para ${nombre}.\n(Dejá la caja vacía para que use el porcentaje base de su profesor).`;
+    document.getElementById("texto-modal-porcentaje").innerText = texto;
+    
+    document.getElementById("input-modal-porcentaje").value = porcentajeActual !== null && porcentajeActual !== undefined ? porcentajeActual : "";
+    
+    document.getElementById("modal-porcentaje").style.display = "flex";
 }
 
-// ---> LA NUEVA FUNCIÓN PARA EL ALUMNO INDIVIDUAL <---
-async function cambiarPorcentajeAlumno(alumnoId, nombreAlumno, porcentajeActual) {
-    const nuevoPorcentaje = prompt(`¿Qué porcentaje se lleva el gimnasio por el alumno ${nombreAlumno}?\n(Dejá la caja vacía si querés que use el porcentaje base de su profesor).`, porcentajeActual);
-    
-    if (nuevoPorcentaje !== null) {
-        let valorAEscribir = null; // Si deja vacío, lo restauramos a Null
+function cerrarModalPorcentaje() {
+    document.getElementById("modal-porcentaje").style.display = "none";
+    porcentajeEditando = { tipo: null, id: null, nombre: null };
+}
 
-        if (nuevoPorcentaje.trim() !== "") {
-            const valorFijo = parseInt(nuevoPorcentaje);
-            if (!isNaN(valorFijo) && valorFijo >= 0 && valorFijo <= 100) {
-                valorAEscribir = valorFijo;
-            } else {
-                mostrarAlerta("Atención", "Ingresá un número válido entre 0 y 100.");
-                return;
-            }
-        }
+async function guardarPorcentajeBD() {
+    const inputVal = document.getElementById("input-modal-porcentaje").value.trim();
+    let valorAEscribir = null;
 
-        try {
-            const { error } = await clienteSupabase.from('alumnos').update({ porcentaje_gym: valorAEscribir }).eq('id', alumnoId);
-            if (error) throw error;
-            
-            cargarPanelAdmin(); // Refresca la pantalla sola
-            
-            if (valorAEscribir !== null) {
-                mostrarAlerta("¡Actualizado!", `El porcentaje para ${nombreAlumno} ahora es del ${valorAEscribir}%.`);
-            } else {
-                mostrarAlerta("¡Restaurado!", `El alumno ${nombreAlumno} volvió a usar el porcentaje base del profesor.`);
-            }
-        } catch (e) {
-            mostrarAlerta("Error", "No se pudo cambiar el porcentaje del alumno.");
+    if (inputVal !== "") {
+        const valorFijo = parseInt(inputVal);
+        if (!isNaN(valorFijo) && valorFijo >= 0 && valorFijo <= 100) {
+            valorAEscribir = valorFijo;
+        } else {
+            mostrarAlerta("Atención", "Ingresá un número válido entre 0 y 100.");
+            return;
         }
+    } else if (porcentajeEditando.tipo === 'profe') {
+        // Un profe no puede quedar vacío, siempre debe tener una base
+        mostrarAlerta("Atención", "El profesor debe tener un porcentaje base asignado (ej: 30).");
+        return;
+    }
+
+    try {
+        const tabla = porcentajeEditando.tipo === 'profe' ? 'profesores' : 'alumnos';
+        
+        const { error } = await clienteSupabase
+            .from(tabla)
+            .update({ porcentaje_gym: valorAEscribir })
+            .eq('id', porcentajeEditando.id);
+            
+        if (error) throw error;
+        
+        cerrarModalPorcentaje();
+        cargarPanelAdmin(); // Refresca el panel de admin instantáneamente
+        
+        if (valorAEscribir !== null) {
+            mostrarAlerta("¡Actualizado!", `El porcentaje para ${porcentajeEditando.nombre} ahora es del ${valorAEscribir}%.`);
+        } else {
+            mostrarAlerta("¡Restaurado!", `El alumno ${porcentajeEditando.nombre} volvió a usar la base del profesor.`);
+        }
+        
+    } catch (e) {
+        mostrarAlerta("Error", "No se pudo cambiar el porcentaje.");
     }
 }
 
@@ -3379,6 +3397,7 @@ window.addEventListener('popstate', function (event) {
             { id: "modal-terminos", cerrar: cerrarModalTerminos },
             { id: "modal-editar-pack", cerrar: cerrarModalEditarPack },
             { id: "modal-cambiar-password", cerrar: cerrarModalCambiarPassword },
+            { id: "modal-porcentaje", cerrar: cerrarModalPorcentaje },
             { id: "modal-informe-profe", cerrar: cerrarModalInformeProfe }
         ];
 
