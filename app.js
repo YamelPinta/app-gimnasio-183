@@ -727,6 +727,9 @@ async function guardarPorcentajeBD() {
     try {
         const tabla = porcentajeEditando.tipo === 'profe' ? 'profesores' : 'alumnos';
         
+        // MAGIA: Guardamos el nombre en una variable segura ANTES de cerrar la ventana y vaciar la memoria
+        const nombreGuardado = porcentajeEditando.nombre;
+        
         const { error } = await clienteSupabase
             .from(tabla)
             .update({ porcentaje_gym: valorAEscribir })
@@ -734,19 +737,21 @@ async function guardarPorcentajeBD() {
             
         if (error) throw error;
         
-        cerrarModalPorcentaje();
-        cargarPanelAdmin(); // Refresca el panel de admin instantáneamente
+        cerrarModalPorcentaje(); // Ahora sí lo cerramos sin problema
+        cargarPanelAdmin(); 
         
+        // Cambiamos el título a "¡Éxito!" para que el sistema active el Pulgar Verde
         if (valorAEscribir !== null) {
-            mostrarAlerta("¡Actualizado!", `El porcentaje para ${porcentajeEditando.nombre} ahora es del ${valorAEscribir}%.`);
+            mostrarAlerta("¡Éxito!", `El porcentaje para ${nombreGuardado} ahora es del ${valorAEscribir}%.`);
         } else {
-            mostrarAlerta("¡Restaurado!", `El alumno ${porcentajeEditando.nombre} volvió a usar la base del profesor.`);
+            mostrarAlerta("¡Éxito!", `El alumno ${nombreGuardado} volvió a usar la base del profesor.`);
         }
         
     } catch (e) {
         mostrarAlerta("Error", "No se pudo cambiar el porcentaje.");
     }
 }
+
 
 // ---> NUEVA FUNCIÓN: EL MOTOR DEL ACORDEÓN <---
 // (Pegá esto justo debajo de cargarPanelAdmin)
