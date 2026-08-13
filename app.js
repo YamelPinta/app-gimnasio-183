@@ -2679,17 +2679,20 @@ const mapaAnimaciones = {
     "sentadilla low bar": ["ejercicios/sentadilla1.jpg", "ejercicios/sentadilla2.jpg"],
     "sentadilla frontal": ["ejercicios/frontsquat1.jpg", "ejercicios/frontsquat2.jpg"],
     "goblet squat": ["ejercicios/gobletsquat1.jpg", "ejercicios/gobletsquat2.jpg"],
+    "sentadilla overhead": ["ejercicios/sentadillaoverhead1.jpg", "ejercicios/sentadillaoverhead2.jpg"],
     "box squat": ["ejercicios/boxsquat1.jpg", "ejercicios/boxsquat2.jpg"],
     "sentadilla con pausa": ["ejercicios/sentadilla1.jpg", "ejercicios/sentadilla2.jpg"],
     "sentadilla tempo": ["ejercicios/sentadilla1.jpg", "ejercicios/sentadilla2.jpg"],
     "sentadilla hack en maquina": ["ejercicios/sentadillahack1.jpg", "ejercicios/sentadillahack2.jpg"],
     "sentadilla hack con barra": ["ejercicios/sentadillahackconbarra1.jpg", "ejercicios/sentadillahackconbarra2.jpg"],
+    "sentadilla multipower": ["ejercicios/sentadillamultipower1.jpg", "ejercicios/sentadillamultipower2.jpg"],
     "sentadilla sumo": ["ejercicios/sentadillasumo1.jpg", "ejercicios/sentadillasumo2.jpg"],
     "sentadilla talones elevados": ["ejercicios/sentadillataloneselevados1.jpg", "ejercicios/sentadillataloneselevados2.jpg"],
     "sentadilla sissy": ["ejercicios/sentadillasissy1.jpg", "ejercicios/sentadillasissy2.jpg"],
     "sentadilla con salto": ["ejercicios/sentadillaconsalto1.jpg", "ejercicios/sentadillaconsalto2.jpg"],
     "estocada adelante": ["ejercicios/estocadahaciaadelante1.jpg", "ejercicios/estocadahaciaadelante2.jpg"],
     "estocada atras": ["ejercicios/estocadahaciaatras1.jpg", "ejercicios/estocadahaciaatras2.jpg"],
+    "estocada back rack": ["ejercicios/estocadabackrack1.jpg", "ejercicios/estocadabackrack2.jpg"],
     "estocada con barra frontal": ["ejercicios/estocadaconbarrafrontal1.jpg", "ejercicios/estocadaconbarrafrontal2.jpg"],
     "estocada con mancuernas": ["ejercicios/estocadaconmancuerna1.jpg", "ejercicios/estocadaconmancuerna2.jpg"],
     "estocada con peso y rotacion": ["ejercicios/estocadaconpesoyrotacion1.jpg", "ejercicios/estocadaconpesoyrotacion2.jpg"],
@@ -2700,23 +2703,34 @@ const mapaAnimaciones = {
     "estocada lateral": ["ejercicios/estocadalateral1.jpg", "ejercicios/estocadalateral2.jpg"],
     "estocada cruzada": ["ejercicios/estocadacruzada1.jpg", "ejercicios/estocadacruzada2.jpg"],
     "estocada con salto": ["ejercicios/estocadaconsalto1.jpg", "ejercicios/estocadaconsalto2.jpg"],
-    // "estocada estatica"
+    "estocada estatica": ["ejercicios/splitsquat1.jpg", "ejercicios/splitsquat2.jpg"],
     "estocada bulgara": ["ejercicios/estocadabulgara1.jpg", "ejercicios/estocadabulgara2.jpg"],
     "split squat pie delantero elevado": ["ejercicios/splitsquatpiedelanteroelevado1.jpg", "ejercicios/splitsquatpiedelanteroelevado2.jpg"],
     "estocada bulgara en deficit": ["ejercicios/splitsquatbulgaroendeficit1.jpg", "ejercicios/splitsquatbulgaroendeficit2.jpg"],
     "goblet split squat": ["ejercicios/gobletsplitsquat1.jpg", "ejercicios/gobletsplitsquat2.jpg"],
     "split squat con barra": ["ejercicios/barbellsplitsquat1.jpg", "ejercicios/barbellsplitsquat2.jpg"],
+    "split squat multipower": ["ejercicios/splitsquatsmithmachine1.jpg", "ejercicios/multipowersplitsquat2.jpg"],
+    "split squat con barra entre las piernas": ["ejercicios/splitsquatconbarraentrelaspiernas1.jpg", "ejercicios/splitsquatconbarraentrelaspiernas2.jpg"],
     "step up frontal": ["ejercicios/stepupfrontal1.jpg", "ejercicios/stepupfrontal2.jpg"],
+    "step up con mancuerna": ["ejercicios/stepupconmancuerna1.jpg", "ejercicios/stepupconmancuerna2.jpg"],
+    "step up con pesa rusa": ["ejercicios/stepupconpesarusa1.jpg", "ejercicios/stepupconpesarusa2.jpg"],
     "step up con barra": ["ejercicios/stepupconbarra1.jpg", "ejercicios/stepupconbarra2.jpg"],
+    "step up lateral": ["ejercicios/stepuplateral1.jpg", "ejercicios/stepuplateral2.jpg"],
     "step up peterson": ["ejercicios/stepuppeterson1.jpg", "ejercicios/stepuppeterson2.jpg","ejercicios/stepuppeterson3.jpg"],
-
+    "step down frontal": ["ejercicios/stepdownfrontal1.jpg", "ejercicios/stepdownfrontal2.jpg"],
+    "step down lateral": ["ejercicios/stepdownlateral1.jpg", "ejercicios/stepdownlateral2.jpg"],
     "prensa unilateral": ["ejercicios/prensaunilateral1.jpg", "ejercicios/prensaunilateral2.jpg"],
     "prensa 45 grados": ["ejercicios/prensa45grados1.jpg", "ejercicios/prensa45grados2.jpg"],
+    "prensa horizontal": ["ejercicios/prensahorizontal1.jpg", "ejercicios/prensahorizontal2.jpg"],
+    "prensa vertical": ["ejercicios/prensavertical1.jpg", "ejercicios/prensavertical2.jpg"],
     "extension de cuadriceps": ["ejercicios/extensiondecuadricepsbilateral1.jpg", "ejercicios/extensiondecuadricepsbilateral2.jpg"],
     "extension de cuadriceps unilateral": ["ejercicios/extensiondecuadricepsunilateral1.jpg", "ejercicios/extensiondecuadricepsunilateral2.jpg"],
+    "extension de cuadriceps alternada": ["ejercicios/extensiondecuadricepsunilateral1.jpg", "ejercicios/extensiondecuadricepsunilateral2.jpg"],
+    "extension de cuadriceps isometrica": ["ejercicios/extensiondecuadricepsunilateral1.jpg", "ejercicios/extensiondecuadricepsunilateral2.jpg"], 
     "spanish squat dinamica": ["ejercicios/spanishsquat1.jpg", "ejercicios/spanishsquat2.jpg"],
     "spanish squat isometrica": ["ejercicios/spanishsquat1.jpg", "ejercicios/spanishsquat2.jpg"],
     "spanish squat con carga": ["ejercicios/spanishsquat1.jpg", "ejercicios/spanishsquat2.jpg"],
+    "wall ball": ["ejercicios/wallball1.jpg", "ejercicios/wallball2.jpg"],
 
     //Gluteo
     "peso muerto": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"],
@@ -2743,7 +2757,7 @@ const mapaAnimaciones = {
     "hip thrust con mancuerna": ["ejercicios/hipthrustconmancuerna1.jpg", "ejercicios/hipthrustconmancuerna2.jpg"],
     "hip thrust en maquina": ["ejercicios/hipthrustenmaquina1.jpg", "ejercicios/hipthrustenmaquina2.jpg"],
     "hip thrust en smith": ["ejercicios/hipthrustsmith1.jpg", "ejercicios/hipthrustsmith2.jpg"],
-
+    
 
 
     //Pecho
@@ -2777,6 +2791,10 @@ const aliasEjercicios = {
 
     "sentadilla copa": "goblet squat",
 
+    "sentadilla carga sobre cabeza": "sentadilla overhead",
+    "ohs": "sentadilla overhead",
+    "overhead squat": "sentadilla overhead",
+
     "sentadilla en caja": "box squat",
     "sentadilla a cajon": "box squat",
 
@@ -2791,6 +2809,10 @@ const aliasEjercicios = {
 
     "barbell hack squat": "sentadilla hack con barra",
     "hack squat con barra": "sentadilla hack con barra",
+
+    "smith machine squat":"sentadilla multipower",
+    "sentadilla en smith":"sentadilla multipower",
+    "multipower":"sentadilla multipower",
 
     "sumo squat": "sentadilla sumo",
 
@@ -2812,6 +2834,11 @@ const aliasEjercicios = {
     "estocada hacia atras": "estocada atras",
     "zancada atras": "estocada atras",
     "reverse lunge": "estocada atras",
+
+    "back-rack lunge": "estocada back rack",
+    "barbell lunge": "estocada back rack",
+    "estocada back-rack": "estocada back rack",
+    "estocada con barra atras": "estocada back rack",
 
     "front rack lunge": "estocada con barra frontal",
     "front-rack lunge": "estocada con barra frontal",
@@ -2866,17 +2893,40 @@ const aliasEjercicios = {
 
     "barbell split squat": "split squat con barra",
 
+    "split squat en smith": "split squat multipower",
+    "smith machine split squat": "split squat multipower",
+
+    "jefferson split squat": "split squat con barra entre las piernas",
+
     "step-up": "step up frontal",
     "box step-up": "step up frontal",
     "subida al cajon": "step up frontal",
     "subida al banco": "step up frontal",
 
+    "dumbbell step-up": "step up con mancuerna",
+    "step-up con mancuernas": "step up con mancuerna",
+    "kettlebell step-up": "step up con mancuerna",
+    "step-up con peso": "step up con mancuerna",
+
+    "kettlebell step-up ": "step up con pesa rusa",
+    "step-up con peso": "step up con pesa rusa",
+
     "barbell step-up": "step up con barra",
+
+    "lateral step-up": "step up lateral",
+    "subida lateral": "step up lateral",
 
     "3 ways": "step up peterson",
     "peterson step / 3 ways": "step up peterson",
     "peterson step-up": "step up peterson",
     "peterson step": "step up peterson",
+
+    "bajada controlada": "step down frontal",
+    "forward step-down": "step down frontal",
+    "step-down": "step down frontal",
+
+    "lateral step-down": "step down lateral",
+    "bajada lateral": "step down lateral",
 
     "prensa a una pierna": "prensa unilateral",
     "single-leg press": "prensa unilateral",
@@ -2884,6 +2934,10 @@ const aliasEjercicios = {
     "45 leg press": "prensa 45 grados",
     "prensa inclinada": "prensa 45 grados",
     "prensa 45": "prensa 45 grados",
+
+    "horizontal leg press": "prensa horizontal",
+
+    "vertical leg press ": "prensa vertical",
 
     "leg extension": "extension de cuadriceps",
     "knee extension": "extension de cuadriceps",
@@ -2895,6 +2949,12 @@ const aliasEjercicios = {
     "extension unilateral": "extension de cuadriceps unilateral",
     "sillon de cuadriceps a una pierna": "extension de cuadriceps unilateral",
 
+    "extension alternada": "extension de cuadriceps alternada",
+    "alternating leg extension": "extension de cuadriceps alternada",
+
+    "isometric leg extension": "extension de cuadriceps isometrica",
+    "isometric knee extension": "extension de cuadriceps isometrica",
+
     "sentadilla española": "spanish squat dinamica",
     "spanish squat": "spanish squat dinamica",
 
@@ -2904,6 +2964,8 @@ const aliasEjercicios = {
 
     "spanish squat lastrado": "spanish squat con carga",
     "loaded spanish squat": "spanish squat con carga",
+
+    "wall ball con peso": "wall ball",
 
 
     //Gluteo
@@ -2977,7 +3039,7 @@ const aliasEjercicios = {
     "multipower": "hip thrust en smith",
     "smith hip thrust": "hip thrust en smith",
 
-    
+
 
 
 
