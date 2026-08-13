@@ -2735,7 +2735,14 @@ const mapaAnimaciones = {
     "peso muerto con kettlebell": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
     "peso muerto multipower": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"],
     "good morning con barra": ["ejercicios/goodmorningconbarra1.jpg", "ejercicios/goodmorningconbarra2.jpg"],
-
+    "good morning sentado": ["ejercicios/goodmorningsentado1.jpg", "ejercicios/goodmorningsentado2.jpg"],
+    "good morning con safety bar": ["ejercicios/safetybargoodmorning1.jpg", "ejercicios/safetybargoodmorning2.jpg"],
+    "good morning con banda": ["ejercicios/goodmorningconbanda1.jpg", "ejercicios/goodmorningconbanda2.jpg"],
+    "good morning zercher": ["ejercicios/goodmorningzercher1.jpg", "ejercicios/goodmorningzercher2.jpg"],
+    "hip thrust con barra": ["ejercicios/hipthrustconbarra1.jpg", "ejercicios/hipthrustconbarra2.jpg"],
+    "hip thrust con mancuerna": ["ejercicios/hipthrustconmancuerna1.jpg", "ejercicios/hipthrustconmancuerna2.jpg"],
+    "hip thrust en maquina": ["ejercicios/hipthrustenmaquina1.jpg", "ejercicios/hipthrustenmaquina2.jpg"],
+    "hip thrust en smith": ["ejercicios/hipthrustsmith1.jpg", "ejercicios/hipthrustsmith2.jpg"],
 
 
 
@@ -2946,6 +2953,39 @@ const aliasEjercicios = {
     "buenos días con barra": "good morning con barra",
     "barbell good morning": "good morning con barra",
 
+    "good morning": "good morning sentado",
+    "seated good morning": "good morning sentado",
+    "buenos dias sentado": "good morning sentado",
+
+    "safety-bar good morning": "good morning con safety bar",
+    "safety-bar good morning": "good morning con safety bar",
+    "buenos dias con safety bar": "good morning con safety bar",
+
+    "banded good morning": "good morning con banda",
+    "buenos dias con banda": "good morning con banda",
+
+    "buenos días zercher": "good morning zercher",
+    "zercher good morning": "good morning zercher",
+
+    "empuje de cadera con barra": "hip thrust con barra",
+    "barbell hip thrust": "hip thrust con barra",
+
+    "dumbbell hip thrust ": "hip thrust con mancuerna",
+
+    "machine hip thrust": "hip thrust en maquina",
+
+    "multipower": "hip thrust en smith",
+    "smith hip thrust": "hip thrust en smith",
+
+    
+
+
+
+
+
+
+
+
 
 
 
@@ -3015,6 +3055,8 @@ async function cargarEjerciciosCategoriaBD() {
 
         const { data: ejercicios, error } = await query;
         if (error) throw error;
+
+        ejerciciosActualesCache = ejercicios;
         
         contenedorEjercicios.innerHTML = ""; 
 
@@ -3038,7 +3080,7 @@ async function cargarEjerciciosCategoriaBD() {
 
         // NUEVO DISEÑO DE TARJETA CON DESPLEGABLE DE NOTAS INCLUIDO
         const generarTarjeta = (ej) => `
-            <div class="card-ejercicio" data-id="${ej.id}" style="flex-wrap: wrap;">
+            <div class="card-ejercicio" data-id="${ej.id}" style="flex-wrap: wrap; cursor: pointer;" onclick="abrirBottomSheetEjercicio('${ej.id}')">
                 <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
                     <svg class="icono-arrastre" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
                     ${obtenerAnimacionHTML(ej.ejercicio_nombre)}
@@ -3056,12 +3098,12 @@ async function cargarEjerciciosCategoriaBD() {
                         </div>
                     </div>
                     <div class="acciones-ejercicio">
-                        <svg onclick="abrirModalEditarPorId('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>                        
-                        <svg onclick="borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <svg onclick="event.stopPropagation(); abrirModalEditarPorId('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>                        
+                        <svg onclick="event.stopPropagation(); borrarEjercicio('${ej.id}')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </div>
                 </div>
                 ${ej.notas ? `
-                <div style="width: 100%; border-top: 1px dashed rgba(136, 136, 136, 0.3); margin-top: 6px; padding-top: 6px;">
+                <div style="width: 100%; border-top: 1px dashed rgba(136, 136, 136, 0.3); margin-top: 6px; padding-top: 6px;" onclick="event.stopPropagation();">
                     <div onclick="toggleNotasEjercicio('notas-${ej.id}', this)" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 4px 0;">
                         <span style="font-size: 0.75rem; color: #888; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -5100,4 +5142,244 @@ async function guardarNuevaPassword() {
         console.error(e);
         mostrarAlerta("Error", "No se pudo cambiar la contraseña. Revisá tu conexión a internet.");
     }
+}
+
+
+// ==========================================
+// SISTEMA DE BOTTOM SHEET (VISTA Y EDICIÓN DE EJERCICIOS)
+// ==========================================
+
+let ejerciciosActualesCache = []; // Guardamos los ejercicios al cargar la pantalla
+let ejercicioBSActivo = null; // El ejercicio que estamos viendo ahora
+let isDraggingBS = false;
+let startYBS = 0;
+let currentYBS = 0;
+
+// Buscar alias para mostrarlos debajo de la foto
+function obtenerListaAliasString(nombreOficial) {
+    if (!nombreOficial) return "";
+    const oficialNorm = normalizarTexto(nombreOficial.trim());
+    
+    // 1. Descubrimos cuál es el nombre "padre" (canónico)
+    const nombreCanonico = aliasEjercicios[oficialNorm] || oficialNorm;
+    
+    let nombresRelacionados = [];
+
+    // 2. Si el título no es el nombre padre, sumamos el nombre padre a la lista de alias
+    if (nombreCanonico !== oficialNorm) {
+        nombresRelacionados.push(nombreCanonico);
+    }
+
+    // 3. Buscamos TODOS los alias hermanos que apunten al mismo padre
+    for (const [alias, canonico] of Object.entries(aliasEjercicios)) {
+        if (canonico === nombreCanonico && alias !== oficialNorm && alias !== nombreCanonico) {
+            nombresRelacionados.push(alias);
+        }
+    }
+
+    // 4. Los ponemos bonitos (Primera letra mayúscula)
+    nombresRelacionados = nombresRelacionados.map(nombre => 
+        nombre.charAt(0).toUpperCase() + nombre.slice(1)
+    );
+
+    return nombresRelacionados.length > 0 
+        ? "También conocido como: " + nombresRelacionados.join(", ") 
+        : "Sin alias adicionales registrados.";
+}
+
+function abrirBottomSheetEjercicio(idEjercicio) {
+    // Buscamos el ejercicio en la memoria caché convirtiendo ambos a String para evitar fallos
+    ejercicioBSActivo = ejerciciosActualesCache.find(ej => String(ej.id) === String(idEjercicio));
+    if (!ejercicioBSActivo) return;
+
+    const bsContent = document.getElementById("bottom-sheet-content");
+    
+    // --- MAGIA 1: Reseteamos cualquier movimiento previo antes de abrir ---
+    bsContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    bsContent.style.transform = ''; 
+
+    // 1. Limpiamos y preparamos el modal
+    document.getElementById("bs-botones-edicion").style.display = "none";
+    document.getElementById("bs-btn-editar").style.display = "flex";
+    
+    // 2. Título y Alias
+    document.getElementById("bs-titulo").innerText = ejercicioBSActivo.ejercicio_nombre;
+    document.getElementById("bs-alias").innerText = obtenerListaAliasString(ejercicioBSActivo.ejercicio_nombre);
+
+    // 3. Imagen (Reutilizamos la animación gigante)
+    const clave = normalizarTexto(ejercicioBSActivo.ejercicio_nombre.trim());
+    const nombreOficial = aliasEjercicios[clave] || clave;
+    const frames = mapaAnimaciones[nombreOficial];
+    const imgWrapper = document.getElementById("bs-imagen-wrapper");
+    
+    if (frames) {
+        imgWrapper.innerHTML = `<div class="anim-dinamica" style="width: 100%; height: 100%; border-radius: 0; background-size: contain; background-repeat: no-repeat; --img-1: url('${frames[0]}'); --img-2: url('${frames[1]}');"></div>`;
+    } else {
+        imgWrapper.innerHTML = `<div style="width: 100%; height: 100%; background: #e0e0e0; display:flex; justify-content:center; align-items:center; color:#888;">Sin imagen</div>`;
+    }
+
+    // 4. Llenamos los datos (Descanso y Notas)
+    const inputDescanso = document.getElementById("bs-input-descanso");
+    const inputNotas = document.getElementById("bs-input-notas");
+    
+    inputDescanso.value = ejercicioBSActivo.descanso || "Sin descanso";
+    inputNotas.value = ejercicioBSActivo.notas || "Sin notas";
+    
+    // Aseguramos que arranquen en modo "Lectura"
+    [inputDescanso, inputNotas].forEach(input => {
+        input.readOnly = true;
+        input.classList.remove("bs-input-modo-edicion");
+    });
+
+    // 5. Llenamos las Series
+    const contenedorSeries = document.getElementById("bs-contenedor-series");
+    contenedorSeries.innerHTML = "";
+    
+    let arraySeries = [];
+    try { if (ejercicioBSActivo.series_reps) arraySeries = JSON.parse(ejercicioBSActivo.series_reps); } catch(e){}
+
+    if(arraySeries.length === 0) {
+        contenedorSeries.innerHTML = "<p style='color:#888; font-size:0.8rem;'>No hay series registradas.</p>";
+    } else {
+        arraySeries.forEach(s => {
+            contenedorSeries.innerHTML += `
+                <div class="fila-serie" style="background: rgba(255,255,255,0.05); border: none;">
+                    <span style="color:#f39c12; font-weight:bold; text-align:center;">#${s.numero}</span>
+                    <input type="number" class="input-modal bs-input-edit bs-input-serie-fuerza" value="${s.fuerza || ''}" placeholder="%RM" readonly>
+                    <input type="number" class="input-modal bs-input-edit bs-input-serie-reps" value="${s.reps || ''}" placeholder="Reps" readonly>
+                    <input type="number" class="input-modal bs-input-edit bs-input-serie-rir" value="${s.rir || ''}" placeholder="RIR" readonly>
+                </div>
+            `;
+        });
+    }
+
+    // 6. Mostramos el modal
+    const overlay = document.getElementById("bottom-sheet-overlay");
+    overlay.style.display = "flex";
+    // Pequeño delay para que la clase de animación haga efecto
+    setTimeout(() => overlay.classList.add("activo"), 10);
+}
+
+function cerrarBottomSheet() {
+    const overlay = document.getElementById("bottom-sheet-overlay");
+    const bsContent = document.getElementById("bottom-sheet-content");
+    
+    overlay.classList.remove("activo");
+    
+    setTimeout(() => { 
+        overlay.style.display = "none"; 
+        // --- MAGIA 2: Al terminar de ocultarse, borramos el "empuje" del dedo ---
+        bsContent.style.transform = ''; 
+    }, 300); // Espera a que baje antes de ocultarlo
+}
+
+function activarEdicionBS() {
+    // Escondemos el lápiz y mostramos los botones de guardar/cancelar
+    document.getElementById("bs-btn-editar").style.display = "none";
+    document.getElementById("bs-botones-edicion").style.display = "flex";
+
+    // Activamos todos los inputs para que se puedan editar
+    document.querySelectorAll('.bs-input-edit').forEach(input => {
+        input.readOnly = false;
+        input.classList.add("bs-input-modo-edicion");
+    });
+}
+
+function cancelarEdicionBS() {
+    // Si cancela, volvemos a cargar los datos originales
+    abrirBottomSheetEjercicio(ejercicioBSActivo.id); 
+}
+
+async function guardarEdicionBS() {
+    // Juntamos los datos nuevos de los inputs
+    const nuevoDescanso = document.getElementById("bs-input-descanso").value;
+    const nuevasNotas = document.getElementById("bs-input-notas").value;
+    
+    // Armamos el JSON de las series con los valores nuevos
+    let nuevasSeries = [];
+    const filasSeries = document.querySelectorAll("#bs-contenedor-series .fila-serie");
+    filasSeries.forEach((fila, index) => {
+        let f = fila.querySelector('.bs-input-serie-fuerza').value;
+        let rep = fila.querySelector('.bs-input-serie-reps').value;
+        let r = fila.querySelector('.bs-input-serie-rir').value;
+        nuevasSeries.push({ numero: index + 1, fuerza: f, reps: rep, rir: r });
+    });
+
+    try {
+        const { error } = await clienteSupabase
+            .from('rutinas_planificadas')
+            .update({ 
+                descanso: nuevoDescanso, 
+                notas: nuevasNotas, 
+                series_reps: JSON.stringify(nuevasSeries) 
+            })
+            .eq('id', ejercicioBSActivo.id);
+
+        if (error) throw error;
+        
+        cerrarBottomSheet();
+        cargarEjerciciosCategoriaBD(); // Refresca la lista de fondo
+        mostrarAlerta("Éxito", "Los cambios se guardaron correctamente.");
+
+    } catch (e) {
+        mostrarAlerta("Error", "No se pudo guardar la edición.");
+    }
+}
+
+// LOGICA PARA EL GESTO DE DESLIZAR HACIA ABAJO (SCROLL DOWN)
+const bsDragArea = document.getElementById('bs-drag-area');
+const bsContent = document.getElementById('bottom-sheet-content');
+
+bsDragArea.addEventListener('touchstart', (e) => {
+    startYBS = e.touches[0].clientY;
+    isDraggingBS = true;
+    bsContent.style.transition = 'none'; // Sacamos la animación para que siga el dedo
+}, {passive: true});
+
+bsDragArea.addEventListener('touchmove', (e) => {
+    if (!isDraggingBS) return;
+    currentYBS = e.touches[0].clientY;
+    const dif = currentYBS - startYBS;
+    // Solo permite moverlo hacia abajo
+    if (dif > 0) {
+        bsContent.style.transform = `translateY(${dif}px)`;
+    }
+}, {passive: true});
+
+bsDragArea.addEventListener('touchend', () => {
+    if (!isDraggingBS) return;
+    isDraggingBS = false;
+    
+    const dif = currentYBS - startYBS;
+    bsContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    
+    // Si lo arrastró más de 100px para abajo, lo cerramos
+    if (dif > 100) {
+        // --- MAGIA 3: Lo empujamos visualmente hasta abajo de todo ---
+        bsContent.style.transform = `translateY(100%)`; 
+        cerrarBottomSheet();
+    } else {
+        // Si no, vuelve a rebotar hacia arriba a su posición original intacta
+        bsContent.style.transform = ''; 
+    }
+});
+
+// VISOR FULLSCREEN DE IMÁGENES
+function abrirImagenFullscreen() {
+    const visor = document.getElementById("visor-fullscreen");
+    const contenedorImg = document.getElementById("fullscreen-img-container");
+    
+    // Le copiamos la misma imagen/animación que tiene la tarjeta activa
+    contenedorImg.innerHTML = document.getElementById("bs-imagen-wrapper").innerHTML;
+    
+    // LA SOLUCIÓN: Obligamos al contenedor a ser un cuadrado gigante (aspect-ratio: 1/1)
+    // para que la imagen adentro no colapse a 0 píxeles de altura.
+    contenedorImg.style.aspectRatio = "1 / 1";
+    contenedorImg.style.width = "100%";
+    
+    visor.style.display = "flex";
+}
+
+function cerrarImagenFullscreen() {
+    document.getElementById("visor-fullscreen").style.display = "none";
 }
