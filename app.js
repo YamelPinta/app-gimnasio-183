@@ -39,7 +39,7 @@ const catalogoGlobal = {
         "Con Elementos": ["Remo suave", "Bicicleta suave", "Caminata en cinta", "Trote en cinta", "Air bike", "Soga", "Battle rope suave", "Empuje de trineo liviano", "Arrastre de trineo", "Step-up bajo", "Swing liviano", "Peso muerto técnico", "Remo técnico", "Press técnico"]
     },
     "ENTRENAMIENTO": {
-        "Piernas y Glúteos": ["Sentadilla", "Back squat", "Front squat", "Goblet squat", "Sentadilla sumo", "Búlgara", "Pistol squat", "Estocada frontal", "Estocada atrás", "Estocada lateral", "Estocadas caminando", "Prensa", "Hack squat", "Extensión de piernas", "Curl femoral", "Curl femoral sentado", "Peso muerto", "Peso muerto rumano", "Buenos días", "Hip thrust", "Puente de glúteos", "Patada de glúteo", "Abducción de cadera", "Aducción de cadera", "Step-up", "Gemelos de pie", "Gemelos sentado", "Thruster", "Clean", "Snatch"],
+        "Piernas y Glúteos": ["Sentadilla", "Back squat", "Front squat", "Goblet squat", "Sentadilla sumo", "Zercher Squat", "Sentadilla Zercher", "Búlgara", "Pistol squat", "Estocada frontal", "Estocada atrás", "Estocada lateral", "Estocadas caminando", "Prensa", "Hack squat", "Extensión de piernas", "Curl femoral", "Curl femoral sentado", "Peso muerto", "Peso muerto rumano", "Buenos días", "Hip thrust", "Puente de glúteos", "Patada de glúteo", "Abducción de cadera", "Aducción de cadera", "Step-up", "Gemelos de pie", "Gemelos sentado", "Thruster", "Clean", "Snatch"],
         "Pecho": ["Press banca", "Press con mancuernas", "Press inclinado", "Press inclinado mancuernas", "Press declinado", "Press de pecho", "Flexiones", "Flexiones asistidas", "Flexiones inclinadas", "Flexiones declinadas", "Aperturas", "Peck deck", "Cruce de poleas", "Fondos de pecho", "Press con banda"],
         "Espalda": ["Dominadas", "Dominadas asistidas", "Chin-ups", "Jalón al pecho", "Jalón cerrado", "Remo con barra", "Remo con mancuerna", "Remo en polea", "Remo en máquina", "Remo apoyado", "Remo invertido", "Pullover en polea", "Pullover", "Peso muerto", "Peso muerto rumano", "Hiperextensiones", "Buenos días", "Face pull", "Clean", "Snatch", "Muscle-up"],
         "Hombros": ["Press militar", "Press de hombros", "Press Arnold", "Press en máquina", "Elevaciones laterales", "Elevaciones frontales", "Pájaros con mancuernas", "Posteriores en máquina", "Face pull", "Remo al mentón", "Encogimientos", "Parada de manos", "Flexión vertical", "Pike push-up"],
@@ -110,7 +110,7 @@ let idProfePendiente = null;
 let nombreProfePendiente = null;
 let apellidoProfePendiente = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     document.querySelectorAll('input:not([list])').forEach(input => {
         input.setAttribute('autocomplete', 'nope'); 
         input.setAttribute('data-lpignore', 'true'); 
@@ -130,9 +130,14 @@ document.addEventListener("DOMContentLoaded", () => {
         
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nombreProfePendiente;
         
-        const nombreCompleto = (nombreProfePendiente + " " + apellidoProfePendiente).toLowerCase();
-        esAdminActual = (nombreCompleto.includes('moye') || nombreCompleto.includes('german'));
-        document.querySelectorAll('.nav-admin-only').forEach(btn => btn.style.display = esAdminActual ? 'flex' : 'none');
+        // --- NUEVA CONSULTA A SUPABASE PARA EL AUTO-LOGIN ---
+        const { data: datosProfeAuto } = await clienteSupabase
+            .from('profesores')
+            .select('es_admin')
+            .eq('id', profeActivoId)
+            .single();
+        
+        esAdminActual = datosProfeAuto ? datosProfeAuto.es_admin : false;
 
         document.getElementById("pantalla-inicio").style.display = "none";
         document.getElementById("pantalla-login").style.display = "none";
@@ -239,8 +244,14 @@ async function iniciarSesion() {
         profeActivoId = idProfePendiente;
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nombreProfePendiente;
 
-        const nombreCompleto = (nombreProfePendiente + " " + apellidoProfePendiente).toLowerCase();
-        esAdminActual = (nombreCompleto.includes('moye') || nombreCompleto.includes('german') || nombreCompleto.includes('germán'));
+        // --- NUEVA CONSULTA A SUPABASE PARA VER SI ES ADMIN ---
+        const { data: datosProfe } = await clienteSupabase
+            .from('profesores')
+            .select('es_admin')
+            .eq('id', profeActivoId)
+            .single();
+        
+        esAdminActual = datosProfe ? datosProfe.es_admin : false;
 
         document.querySelectorAll('.nav-admin-only').forEach(btn => {
             btn.style.display = esAdminActual ? 'flex' : 'none';
@@ -2658,15 +2669,327 @@ async function guardarRenombrarCategoriaBD() {
     }
 }
 
+// 1. Catálogo principal de animaciones (Claves TODO EN MINÚSCULAS Y SIN TILDES)
+const mapaAnimaciones = {
+    // Piernas - gluteos
+    "zercher squat": ["ejercicios/zerchersquat1.jpg", "ejercicios/zerchersquat2.jpg"],
+    "sentadilla": ["ejercicios/sentadilla1.jpg", "ejercicios/sentadilla2.jpg"],
+    "back squat": ["ejercicios/backsquat1.jpg", "ejercicios/backsquat2.jpg"],
+    "sentadilla high bar": ["ejercicios/sentadilla1.jpg", "ejercicios/sentadilla2.jpg"],
+    "sentadilla low bar": ["ejercicios/sentadilla1.jpg", "ejercicios/sentadilla2.jpg"],
+    "sentadilla frontal": ["ejercicios/frontsquat1.jpg", "ejercicios/frontsquat2.jpg"],
+    "goblet squat": ["ejercicios/gobletsquat1.jpg", "ejercicios/gobletsquat2.jpg"],
+    "box squat": ["ejercicios/boxsquat1.jpg", "ejercicios/boxsquat2.jpg"],
+    "sentadilla con pausa": ["ejercicios/sentadilla1.jpg", "ejercicios/sentadilla2.jpg"],
+    "sentadilla tempo": ["ejercicios/sentadilla1.jpg", "ejercicios/sentadilla2.jpg"],
+    "sentadilla hack en maquina": ["ejercicios/sentadillahack1.jpg", "ejercicios/sentadillahack2.jpg"],
+    "sentadilla hack con barra": ["ejercicios/sentadillahackconbarra1.jpg", "ejercicios/sentadillahackconbarra2.jpg"],
+    "sentadilla sumo": ["ejercicios/sentadillasumo1.jpg", "ejercicios/sentadillasumo2.jpg"],
+    "sentadilla talones elevados": ["ejercicios/sentadillataloneselevados1.jpg", "ejercicios/sentadillataloneselevados2.jpg"],
+    "sentadilla sissy": ["ejercicios/sentadillasissy1.jpg", "ejercicios/sentadillasissy2.jpg"],
+    "sentadilla con salto": ["ejercicios/sentadillaconsalto1.jpg", "ejercicios/sentadillaconsalto2.jpg"],
+    "estocada adelante": ["ejercicios/estocadahaciaadelante1.jpg", "ejercicios/estocadahaciaadelante2.jpg"],
+    "estocada atras": ["ejercicios/estocadahaciaatras1.jpg", "ejercicios/estocadahaciaatras2.jpg"],
+    "estocada con barra frontal": ["ejercicios/estocadaconbarrafrontal1.jpg", "ejercicios/estocadaconbarrafrontal2.jpg"],
+    "estocada con mancuernas": ["ejercicios/estocadaconmancuerna1.jpg", "ejercicios/estocadaconmancuerna2.jpg"],
+    "estocada con peso y rotacion": ["ejercicios/estocadaconpesoyrotacion1.jpg", "ejercicios/estocadaconpesoyrotacion2.jpg"],
+    "estocada overhead": ["ejercicios/estocadaoverhead1.jpg", "ejercicios/estocadaoverhead2.jpg"],
+    "estocada hacia atras con banda": ["ejercicios/estocadahaciaatrasconbanda1.jpg", "ejercicios/estocadahaciaatrasconbanda2.jpg"],
+    "estocada hacia atras con rotacion": ["ejercicios/estocadahaciaatrasconrotacion1.jpg", "ejercicios/estocadahaciaatrasconrotacion2.jpg"],  
+    "estocada en deficit": ["ejercicios/estocadadeficit1.jpg", "ejercicios/estocadadeficit2.jpg"],
+    "estocada lateral": ["ejercicios/estocadalateral1.jpg", "ejercicios/estocadalateral2.jpg"],
+    "estocada cruzada": ["ejercicios/estocadacruzada1.jpg", "ejercicios/estocadacruzada2.jpg"],
+    "estocada con salto": ["ejercicios/estocadaconsalto1.jpg", "ejercicios/estocadaconsalto2.jpg"],
+    // "estocada estatica"
+    "estocada bulgara": ["ejercicios/estocadabulgara1.jpg", "ejercicios/estocadabulgara2.jpg"],
+    "split squat pie delantero elevado": ["ejercicios/splitsquatpiedelanteroelevado1.jpg", "ejercicios/splitsquatpiedelanteroelevado2.jpg"],
+    "estocada bulgara en deficit": ["ejercicios/splitsquatbulgaroendeficit1.jpg", "ejercicios/splitsquatbulgaroendeficit2.jpg"],
+    "goblet split squat": ["ejercicios/gobletsplitsquat1.jpg", "ejercicios/gobletsplitsquat2.jpg"],
+    "split squat con barra": ["ejercicios/barbellsplitsquat1.jpg", "ejercicios/barbellsplitsquat2.jpg"],
+    "step up frontal": ["ejercicios/stepupfrontal1.jpg", "ejercicios/stepupfrontal2.jpg"],
+    "step up con barra": ["ejercicios/stepupconbarra1.jpg", "ejercicios/stepupconbarra2.jpg"],
+    "step up peterson": ["ejercicios/stepuppeterson1.jpg", "ejercicios/stepuppeterson2.jpg","ejercicios/stepuppeterson3.jpg"],
+
+    "prensa unilateral": ["ejercicios/prensaunilateral1.jpg", "ejercicios/prensaunilateral2.jpg"],
+    "prensa 45 grados": ["ejercicios/prensa45grados1.jpg", "ejercicios/prensa45grados2.jpg"],
+    "extension de cuadriceps": ["ejercicios/extensiondecuadricepsbilateral1.jpg", "ejercicios/extensiondecuadricepsbilateral2.jpg"],
+    "extension de cuadriceps unilateral": ["ejercicios/extensiondecuadricepsunilateral1.jpg", "ejercicios/extensiondecuadricepsunilateral2.jpg"],
+    "spanish squat dinamica": ["ejercicios/spanishsquat1.jpg", "ejercicios/spanishsquat2.jpg"],
+    "spanish squat isometrica": ["ejercicios/spanishsquat1.jpg", "ejercicios/spanishsquat2.jpg"],
+    "spanish squat con carga": ["ejercicios/spanishsquat1.jpg", "ejercicios/spanishsquat2.jpg"],
+
+    //Gluteo
+    "peso muerto": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"],
+    "peso muerto sumo": ["ejercicios/pesomuertosumo1.jpg", "ejercicios/pesomuertosumo2.jpg"],
+    "peso muerto rumano": ["ejercicios/pesomuertorumano1.jpg", "ejercicios/pesomuertorumano2.jpg"],
+    "peso muerto pienas rigidas": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"],
+    "peso muerto trap bar": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
+    "peso muerto snatch grip" : ["ejercicios/pesomuertosnatchgrip1.jpg", "ejercicios/pesomuertosnatchgrip2.jpg"],
+    "peso muerto en deficit": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
+    "peso muerto rack pull": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
+    "peso muerto block pull": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
+    "peso muerto con pausa": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
+    "peso muerto con tempo": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
+    "peso muerto unilateral": ["ejercicios/pesomuertounilateral1.jpg", "ejercicios/pesomuertounilateral2.jpg"],
+    "peso muerto con mancuernas": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
+    "peso muerto con kettlebell": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"], 
+    "peso muerto multipower": ["ejercicios/pesomuerto1.jpg", "ejercicios/pesomuerto2.jpg"],
+    "good morning con barra": ["ejercicios/goodmorningconbarra1.jpg", "ejercicios/goodmorningconbarra2.jpg"],
+
+
+
+
+    //Pecho
+    "press banca con barra": ["ejercicios/pressdebancaconbarra1.jpg", "ejercicios/pressdebancaconbarra2.jpg"],
+    "press banca con mancuerna" : ["ejercicios/pressdebancaconmancuerna1.jpg", "ejercicios/pressdebancaconmancuerna2.jpg"],
+    "press banca cerrado": ["ejercicios/pressdebancacerrado1.jpg", "ejercicios/pressdebancacerrado2.jpg"],
+
+    // Tren Superior
+    "vuelos laterales": ["ejercicios/lateralesx500.jpg", "ejercicios/laterales2x500.jpg"],
+    
+};
+
+// 2. Diccionario de Alias (CLAVE en minúscula -> VALOR igual a la clave de mapaAnimaciones)
+const aliasEjercicios = {
+    // Piernas - Gluteos
+    "sentadilla zercher": "zercher squat",
+
+    "air squat": "sentadilla", 
+    "bodyweight squat": "sentadilla",
+    "sentadilla libre": "sentadilla",
+
+    "sentadilla trasera": "back squat",
+
+    "high-bar back squat": "sentadilla high bar",
+    "sentadilla barra alta": "sentadilla high bar",
+
+    "low-bar back squat": "sentadilla low bar",
+    "sentadilla barra baja": "sentadilla low bar",
+
+    "front squat": "sentadilla frontal",
+
+    "sentadilla copa": "goblet squat",
+
+    "sentadilla en caja": "box squat",
+    "sentadilla a cajon": "box squat",
+
+    "pause squat": "sentadilla con pausa",
+    "sentadilla pausada": "sentadilla con pausa",
+
+    "tempo squat": "sentadilla tempo",
+    "sentadilla con tempo": "sentadilla tempo",
+
+    "hack squat machine": "sentadilla hack en maquina",
+    "sentadilla hack": "sentadilla hack en maquina",
+
+    "barbell hack squat": "sentadilla hack con barra",
+    "hack squat con barra": "sentadilla hack con barra",
+
+    "sumo squat": "sentadilla sumo",
+
+    "heel raises squat": "sentadilla talones elevados",
+    "cyclist squat": "sentadilla talones elevados",
+    "heel-elevated squat": "sentadilla talones elevados",
+    "sentadilla ciclista": "sentadilla talones elevados",
+
+    "sissy squat": "sentadilla sissy",
+
+    "jump squat": "sentadilla con salto",
+    "squat jump": "sentadilla con salto",
+
+    "estocada hacia adelante": "estocada adelante",
+    "estocada caminando": "estocada adelante",
+    "forward lunge": "estocada adelante",
+    "zancada adelante": "estocada adelante",
+
+    "estocada hacia atras": "estocada atras",
+    "zancada atras": "estocada atras",
+    "reverse lunge": "estocada atras",
+
+    "front rack lunge": "estocada con barra frontal",
+    "front-rack lunge": "estocada con barra frontal",
+    "estocada front-rack": "estocada con barra frontal",
+
+    "zancada con mancuernas": "estocada con mancuernas",
+    "dumbbell lunge": "estocada con mancuernas",
+    "estocada con peso": "estocada con mancuernas",
+
+    "kettlebell lunge": "estocada con peso y rotacion",
+    "zancada con pesa rusa": "estocada con peso y rotacion",
+
+    "estocada con overhead": "estocada overhead",
+    "zancada sobre cabeza": "estocada overhead",
+    "overhead lunge": "estocada overhead",
+
+    "estocada con bandita hacia atras en equilibrio": "estocada hacia atras con banda",
+
+    "estocada hacia atras con rotacion de torso": "estocada hacia atras con rotacion",
+
+    "estocada deficit": "estocada en deficit",
+    "deficit lunge": "estocada en deficit",
+    "zancada en deficit": "estocada en deficit",
+
+    "lateral lunge": "estocada lateral",
+    "zancada lateral": "estocada lateral",
+    "side lunge": "estocada lateral",
+
+    "reverencia": "estocada cruzada",
+    "zancada cruzada": "estocada cruzada",
+    "curtsy lunge": "estocada cruzada",
+
+    "jumping lunge": "estocada con salto",
+    "zancada con salto": "estocada con salto",
+    "split jump": "estocada con salto",
+
+    "split squat": "split squat estatico", // Asumiendo que tenías "split squat estatico" en mapaAnimaciones (si no, agregala)
+    "sentadilla dividida": "split squat estatico",
+    "zancada estatica": "split squat estatico",
+    "estocada estatica": "split squat estatico",
+
+    "rfess / bulgaras": "estocada bulgara",
+    "sentadilla bulgara": "estocada bulgara",
+    "bulgarian split squat": "estocada bulgara",
+    "bulgaras": "estocada bulgara",
+
+    "ffess / split squat pie delantero elevado": "split squat pie delantero elevado",
+    "front-foot elevated split squat": "split squat pie delantero elevado",
+    
+    "deficit bulgarian split squat": "estocada bulgara en deficit",
+    "bulgara en deficit": "estocada bulgara en deficit",
+
+    "barbell split squat": "split squat con barra",
+
+    "step-up": "step up frontal",
+    "box step-up": "step up frontal",
+    "subida al cajon": "step up frontal",
+    "subida al banco": "step up frontal",
+
+    "barbell step-up": "step up con barra",
+
+    "3 ways": "step up peterson",
+    "peterson step / 3 ways": "step up peterson",
+    "peterson step-up": "step up peterson",
+    "peterson step": "step up peterson",
+
+    "prensa a una pierna": "prensa unilateral",
+    "single-leg press": "prensa unilateral",
+
+    "45 leg press": "prensa 45 grados",
+    "prensa inclinada": "prensa 45 grados",
+    "prensa 45": "prensa 45 grados",
+
+    "leg extension": "extension de cuadriceps",
+    "knee extension": "extension de cuadriceps",
+    "extension de piernas": "extension de cuadriceps",
+    "extension de rodilla": "extension de cuadriceps",
+    "sillon de cuadriceps": "extension de cuadriceps",
+
+    "single-leg extension": "extension de cuadriceps unilateral",
+    "extension unilateral": "extension de cuadriceps unilateral",
+    "sillon de cuadriceps a una pierna": "extension de cuadriceps unilateral",
+
+    "sentadilla española": "spanish squat dinamica",
+    "spanish squat": "spanish squat dinamica",
+
+    "isometric spanish squat": "spanish squat isometrica",
+    "sentadilla española isometrica": "spanish squat isometrica",
+    "spanish squat hold": "spanish squat isometrica",
+
+    "spanish squat lastrado": "spanish squat con carga",
+    "loaded spanish squat": "spanish squat con carga",
+
+
+    //Gluteo
+    "deadlift": "peso muerto",
+    "conventional deadlift": "peso muerto",
+    "peso muerto convencional": "peso muerto",
+
+    "sumo deadlift": "peso muerto sumo",
+
+    "peso muerto rumano": "peso muerto rumano",
+    "rdl": "peso muerto rumano",
+    "romanian deadlift": "peso muerto rumano",
+
+    "stiff-leg deadlift ": "peso muerto pienas rigidas",
+
+    "trap-bar deadlift": "peso muerto trap bar",
+    "hex-bar deadlift": "peso muerto trap bar",
+
+    "snatch-grip deadlift": "peso muerto snatch grip",
+    "peso muerto agarre amplio": "peso muerto snatch grip",
+
+    "deficit deadlift ": "peso muerto en deficit",
+
+    "tiron desde rack": "peso muerto rack pull",
+
+    "tiron desde bloques": "peso muerto block pull",
+
+    "peso muerto pausado": "peso muerto con pausa",
+    "pause deadlift": "peso muerto con pausa",
+
+    "tempo deadlift": "peso muerto con tempo",
+    "peso muerto tempo": "peso muerto con tempo",
+
+    "peso muerto a una pierna": "peso muerto unilateral",
+    "single-leg deadlift": "peso muerto unilateral",
+    "deadlift a una pierna": "peso muerto unilateral",
+
+    "dumbbell deadlift": "peso muerto con mancuernas",
+
+    "peso muerto con pesa rusa": "peso muerto con kettlebell",
+    "kettlebell deadlift": "peso muerto con kettlebell",
+
+    "peso muerto en smith": "peso muerto multipower",
+    "smith machine deadlift": "peso muerto multipower",
+
+    "good morning": "good morning con barra",
+    "buenos días con barra": "good morning con barra",
+    "barbell good morning": "good morning con barra",
+
+
+
+
+    // Pecho 
+    "press de pecho": "press banca con barra",
+    "press de banca": "press banca con barra",
+    "press con barra": "press banca con barra",
+    "bench press": "press banca con barra",
+    "barbell bench press": "press banca con barra",
+
+    "press plano con mancuernas": "press banca con mancuerna",
+    "dumbbell bench press": "press banca con mancuerna",
+
+    "close-grip bench press": "press banca cerrado",
+    "press banca agarre cerrado": "press banca cerrado",
+
+
+
+
+    // Tren superior
+    "banca plana": "press banca",
+    "elevaciones laterales": "vuelos laterales",
+    
+};
+
 function obtenerAnimacionHTML(nombreEj) {
     if (!nombreEj) return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
-    const n = nombreEj.trim();
-    if (n === "Vuelos laterales") return `<div class="img-animada anim-vuelos-laterales"></div>`;
-    if (n === "Press de banca") return `<div class="img-animada anim-press-banca"></div>`;
-    if (n === "Back squat" || n === "Sentadilla") return `<div class="img-animada anim-back-squat"></div>`;
-    if (n === "Peso muerto") return `<div class="img-animada anim-peso-muerto"></div>`;
+    
+    // Normalizamos el texto ingresado
+    const clave = normalizarTexto(nombreEj.trim());
+
+    // Si la clave es un alias, obtenemos el nombre oficial; si no, usamos la misma clave
+    const nombreOficial = aliasEjercicios[clave] || clave;
+
+    // Buscamos las fotos con el nombre oficial
+    const frames = mapaAnimaciones[nombreOficial];
+
+    if (frames) {
+        return `<div class="anim-dinamica" style="--img-1: url('${frames[0]}'); --img-2: url('${frames[1]}');"></div>`;
+    }
+
     return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
 }
+
 
 // ==========================================
 // EJERCICIOS Y RUTINAS DESDE BD
