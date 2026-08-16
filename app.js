@@ -5,12 +5,11 @@ let profeActivoId = null;
 let alumnoSeleccionadoId = null;
 let ejercicioEditandoId = null;
 let modoBorradoActivo = false;
-let accionPendiente = null; // Guarda temporalmente la orden de borrado
-let alumnoDataActual = null; // Guarda temporalmente toda la info del alumno actual
+let accionPendiente = null; 
+let alumnoDataActual = null; 
 
-let esAdminActual = false; // nueva memoria
+let esAdminActual = false; 
 
-// --- NUEVO: ESTILOS DINÁMICOS PARA LOS CHIPS (VERDE Y ROJO) ---
 const estilosChips = document.createElement('style');
 estilosChips.innerHTML = `
     .chip-verde { background-color: rgba(46, 204, 113, 0.15) !important; color: #2ecc71 !important; border-color: rgba(46, 204, 113, 0.4) !important; }
@@ -112,8 +111,8 @@ function cerrarModalConfirmacion() {
 
 document.getElementById("btn-confirmar-accion").addEventListener("click", () => {
     if (accionPendiente) {
-        accionPendiente(); // Ejecuta la función que estaba en espera
-        cerrarModalConfirmacion(); // Cierra el modal
+        accionPendiente(); 
+        cerrarModalConfirmacion(); 
     }
 });
 
@@ -133,11 +132,10 @@ function mostrarAlerta(titulo, mensaje) {
 
     if (esExito) {
         contenedorIcono.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" class="anim-exito"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`;
-        tituloDOM.style.color = "#2ecc71"; // Título verde
+        tituloDOM.style.color = "#2ecc71"; 
     } else {
-        // Ícono SVG de Peligro / Warning (Naranja) con animación
         contenedorIcono.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2.5" width="48" height="48" class="anim-alerta"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
-        tituloDOM.style.color = "#ffffff"; // Título blanco
+        tituloDOM.style.color = "#ffffff"; 
     }
 
     document.getElementById("modal-alerta").style.display = "flex";
@@ -147,8 +145,6 @@ function cerrarModalAlerta() {
     document.getElementById("modal-alerta").style.display = "none";
 }
 
-// --- 2. ARRANQUE DE LA APP, MEMORIA Y NAVEGACIÓN INICIAL ---
-// Memoria dinámica para el login individual
 let emailProfePendiente = null;
 let esProfeNuevoLogin = false;
 let idProfePendiente = null;
@@ -164,18 +160,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     inicializarTema();
     cargarProfesores();
 
-    // Verificamos si el profe dejó su sesión abierta en este celular
     const sesionGuardadaId = localStorage.getItem('sesionGimnasioID');
 
     if (sesionGuardadaId) {
-        // Auto-login directo al Dashboard
         profeActivoId = sesionGuardadaId;
         nombreProfePendiente = localStorage.getItem('sesionGimnasioNombre');
         apellidoProfePendiente = localStorage.getItem('sesionGimnasioApellido');
         
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nombreProfePendiente;
         
-        // --- NUEVA CONSULTA A SUPABASE PARA EL AUTO-LOGIN ---
         const { data: datosProfeAuto } = await clienteSupabase
             .from('profesores')
             .select('es_admin')
@@ -193,26 +186,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         cargarChips();
         actualizarNavActivo('alumnos');
     } else {
-        // Primera vez en la app
         document.getElementById("pantalla-inicio").style.display = "flex";
         document.getElementById("pantalla-login").style.display = "none";
         document.getElementById("pantalla-perfiles").style.display = "none";
     }
 });
 
-// Al tocar "Soy Profesor", salta directo a las caras
 function irPantallaLoginProfe() {
     document.getElementById("pantalla-inicio").style.display = "none";
     document.getElementById("pantalla-perfiles").style.display = "flex";
 }
 
-// Botón "ALUMNO": Te lleva a la futura pantalla de alumnos
 function irPantallaAlumno() {
     document.getElementById("pantalla-inicio").style.display = "none";
     document.getElementById("pantalla-alumno-proximamente").style.display = "flex";
 }
 
-// Botones para volver atrás a la selección de roles
 function volverDesdeLoginAInicio() {
     document.getElementById("pantalla-login").style.display = "none";
     document.getElementById("pantalla-inicio").style.display = "flex";
@@ -224,8 +213,6 @@ function volverDesdeAlumnoAInicio() {
 }
 
 
-
-// --- 3. LOGIN Y LOGOUT ---
 async function iniciarSesion() {
     const passIngresada = document.getElementById("login-password").value.trim();
     const confirmarPass = document.getElementById("login-confirmar-password").value.trim();
@@ -238,7 +225,6 @@ async function iniciarSesion() {
         mostrarAlerta("Atención", "Ingresá una contraseña."); return;
     }
 
-    // Chequeos extra si es la primera vez que entra
     if (esProfeNuevoLogin) {
         if (passIngresada.length < 6) {
             mostrarAlerta("Atención", "La contraseña debe tener al menos 6 caracteres."); return;
@@ -254,7 +240,6 @@ async function iniciarSesion() {
 
     try {
         if (esProfeNuevoLogin) {
-            // 1. EL PROFE ES NUEVO: Creamos su bóveda oficial en Supabase
             const { error: errorSignUp } = await clienteSupabase.auth.signUp({
                 email: emailProfePendiente,
                 password: passIngresada,
@@ -266,13 +251,11 @@ async function iniciarSesion() {
                 return;
             }
 
-            // 2. Le avisamos a tu tabla de profesores que ya tiene su mail asignado (Así no se lo vuelve a preguntar)
             await clienteSupabase.from('profesores')
                 .update({ email_auth: emailProfePendiente })
                 .eq('id', idProfePendiente);
 
         } else {
-            // 3. EL PROFE YA EXISTÍA: Hacemos el inicio de sesión normal
             const { error } = await clienteSupabase.auth.signInWithPassword({
                 email: emailProfePendiente,
                 password: passIngresada,
@@ -284,12 +267,9 @@ async function iniciarSesion() {
                 return;
             }
         }
-
-        // --- SI TODO SALIÓ BIEN, LO DEJAMOS ENTRAR ---
         profeActivoId = idProfePendiente;
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nombreProfePendiente;
 
-        // --- NUEVA CONSULTA A SUPABASE PARA VER SI ES ADMIN ---
         const { data: datosProfe } = await clienteSupabase
             .from('profesores')
             .select('es_admin')
@@ -302,7 +282,6 @@ async function iniciarSesion() {
             btn.style.display = esAdminActual ? 'flex' : 'none';
         });
 
-        // Guardamos su sello en este celular
         localStorage.setItem('sesionGimnasioID', profeActivoId);
         localStorage.setItem('sesionGimnasioNombre', nombreProfePendiente);
         localStorage.setItem('sesionGimnasioApellido', apellidoProfePendiente);
@@ -310,7 +289,6 @@ async function iniciarSesion() {
         document.getElementById("pantalla-login").style.display = "none";
         document.getElementById("pantalla-dashboard").style.display = "block";
         
-        // Vaciamos por seguridad y restauramos el botón
         document.getElementById("login-password").value = ""; 
         document.getElementById("login-confirmar-password").value = ""; 
         btnIniciar.innerText = textoOriginal;
@@ -319,7 +297,6 @@ async function iniciarSesion() {
         cargarChips();
         actualizarNavActivo('alumnos');
 
-        // Si era nuevo, le damos una bienvenida especial
         if (esProfeNuevoLogin) {
             setTimeout(() => {
                 mostrarAlerta("¡Creación Exitosa!", "Tu contraseña fue guardada con éxito. ¡Bienvenido a tu panel!");
@@ -333,36 +310,30 @@ async function iniciarSesion() {
     }
 }
 
-// Función para cerrar la ventanita de error
 function cerrarModalErrorLogin() {
     document.getElementById("modal-error-login").style.display = "none";
 }
 
 async function cerrarSesion() {
-    // Cerramos la puerta en la base de datos
     await clienteSupabase.auth.signOut(); 
     
-    // Borramos la memoria del celular
     localStorage.removeItem('sesionGimnasioID');
     localStorage.removeItem('sesionGimnasioNombre');
     localStorage.removeItem('sesionGimnasioApellido');
-    localStorage.removeItem('sesionGimnasio'); // Por si quedó el viejo
+    localStorage.removeItem('sesionGimnasio'); 
     
     profeActivoId = null;
     document.getElementById("pantalla-dashboard").style.display = "none";
     document.getElementById("pantalla-perfiles").style.display = "flex";
 
-    // ---> NUEVO: Refrescamos los perfiles para que la app lea quién ya tiene contraseña
     cargarProfesores();
 }
 
 
-// --- 4. GESTIÓN DE PROFESORES (PERFILES) ---
 async function cargarProfesores() {
     const contenedor = document.getElementById("grilla-profesores");
     contenedor.innerHTML = "";
 
-    // 2. Cargamos profes desde la base de datos
     try {
         const { data: profesores, error } = await clienteSupabase
             .from('profesores')
@@ -372,10 +343,8 @@ async function cargarProfesores() {
         if (error) throw error;
         
         profesores.forEach(profe => {
-            // Usamos la foto que guardamos en la base de datos
-            // Si no tiene foto, ponemos una por defecto
             const foto = profe.foto_url || "imagenes/perfil2.png"; 
-            const emailAuth = profe.email_auth || ""; // <-- ATRAPAMOS EL EMAIL
+            const emailAuth = profe.email_auth || ""; 
             
             contenedor.innerHTML += `
                 <div class="tarjeta-perfil-moderna" onclick="entrarPerfil('${profe.id}', '${profe.nombre}', '${profe.apellido}', '${emailAuth}')">
@@ -389,20 +358,16 @@ async function cargarProfesores() {
     }
 }
 
-// --- LÓGICA PARA CREAR PROFESOR CON VENTANA EMERGENTE ---
 
-let fotoProfeElegida = "imagenes/perfil1.png"; // Guarda el texto (Ruta o URL)
-let archivoFotoProfeBlob = null; // NUEVO: Guarda el archivo físico comprimido listo para subir
-
+let fotoProfeElegida = "imagenes/perfil1.png"; 
+let archivoFotoProfeBlob = null; 
 function abrirModalProfe() {
     document.getElementById("modal-profe").style.display = "flex";
     
-    // Limpiamos los campos al abrir
     document.getElementById("input-profe-nombre").value = "";
     document.getElementById("select-profe-avatar").value = "imagenes/perfil1.png";
     document.getElementById("input-foto-profe").value = ""; 
     
-    // Reseteamos la foto visual
     fotoProfeElegida = "imagenes/perfil1.png";
     document.getElementById("img-preview-profe").src = fotoProfeElegida;
 }
@@ -411,11 +376,10 @@ function cerrarModalProfe() {
     document.getElementById("modal-profe").style.display = "none";
 }
 
-// Si el usuario elige un avatar de la lista
 function cambiarPreviewAvatar() {
     fotoProfeElegida = document.getElementById("select-profe-avatar").value;
     document.getElementById("img-preview-profe").src = fotoProfeElegida;
-    document.getElementById("input-foto-profe").value = ""; // Borra la foto real si se arrepiente y elige avatar
+    document.getElementById("input-foto-profe").value = "";  
 }
 
 function procesarFotoSubida(event) {
@@ -435,11 +399,9 @@ function procesarFotoSubida(event) {
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             
-            // LA MAGIA DE LA OPTIMIZACIÓN: Convertimos el canvas a un archivo JPG miniatura puro (Blob)
             canvas.toBlob((blob) => {
-                archivoFotoProfeBlob = blob; // Guardamos el archivo físico en la memoria
+                archivoFotoProfeBlob = blob; 
                 
-                // Creamos una URL temporal solo para que el profe se vea en la pantallita antes de guardar
                 fotoProfeElegida = URL.createObjectURL(blob); 
                 document.getElementById("img-preview-profe").src = fotoProfeElegida;
                 document.getElementById("select-profe-avatar").value = ""; 
@@ -450,7 +412,6 @@ function procesarFotoSubida(event) {
     reader.readAsDataURL(file);
 }
 
-// Guardar finalmente en Supabase
 async function guardarProfeEnBD() {
     const nombreCompleto = document.getElementById("input-profe-nombre").value.trim();
 
@@ -464,29 +425,24 @@ async function guardarProfeEnBD() {
     const apellido = partes.slice(1).join(" ") || ""; 
 
     try {
-        let urlFinalParaBaseDeDatos = fotoProfeElegida; // Por defecto, es el avatar que eligió
+        let urlFinalParaBaseDeDatos = fotoProfeElegida; 
 
-        // Si el usuario subió una foto real (tenemos el archivo atrapado en la memoria)
         if (archivoFotoProfeBlob) {
-            // 1. Le inventamos un nombre único para que no se pisen
             const nombreArchivo = `profe_${Date.now()}.jpg`;
             
-            // 2. Subimos la foto al Storage de Supabase (Al cajón 'avatares')
             const { error: errStorage } = await clienteSupabase.storage
                 .from('avatares')
                 .upload(nombreArchivo, archivoFotoProfeBlob, { contentType: 'image/jpeg' });
 
             if (errStorage) throw errStorage;
 
-            // 3. Le pedimos a Supabase el Link público de la foto que acabamos de subir
             const { data: publicUrlData } = clienteSupabase.storage
                 .from('avatares')
                 .getPublicUrl(nombreArchivo);
                 
-            urlFinalParaBaseDeDatos = publicUrlData.publicUrl; // Guardamos el link limpio!
+            urlFinalParaBaseDeDatos = publicUrlData.publicUrl; 
         }
 
-        // 4. Guardamos todo en la base de datos (con la URL súper liviana)
         const { error } = await clienteSupabase.from('profesores').insert([{ 
             nombre: nombre, 
             apellido: apellido, 
@@ -495,13 +451,10 @@ async function guardarProfeEnBD() {
         
         if (error) throw error;
 
-        // Limpiamos la memoria para el próximo profe
         archivoFotoProfeBlob = null; 
         
         cerrarModalProfe();
         cargarProfesores(); 
-
-        // ---> NUEVO: CARTEL DE ÉXITO ACÁ <---
         mostrarAlerta("¡Registro Exitoso!", "El perfil del profesor se creó correctamente.");
 
     } catch (error) {
@@ -509,32 +462,26 @@ async function guardarProfeEnBD() {
     }
 }
 
-// --- 5. NAVEGACIÓN Y DASHBOARD DE ALUMNOS ---
-// Al tocar una cara, abre el modal y detecta si es un profe nuevo o viejo
 function entrarPerfil(id, nombre, apellido, emailAuth) {
     idProfePendiente = id;
     nombreProfePendiente = nombre;
     apellidoProfePendiente = apellido;
 
-    // MAGIA: Detectamos si tiene la columna de email vacía en la base de datos
     if (!emailAuth || emailAuth === "null" || emailAuth === "") {
         esProfeNuevoLogin = true;
-        emailProfePendiente = id + "@gym.com"; // Inventamos el mail interno
+        emailProfePendiente = id + "@gym.com"; 
     } else {
         esProfeNuevoLogin = false;
         emailProfePendiente = emailAuth;
     }
 
-    // Apagamos los perfiles y encendemos la pantalla de contraseña
     document.getElementById("pantalla-perfiles").style.display = "none";
     document.getElementById("pantalla-login").style.display = "flex";
 
-    // Vaciamos las cajas por las dudas
     document.getElementById("login-password").value = "";
     document.getElementById("login-confirmar-password").value = "";
     document.getElementById("checkbox-tyc").checked = false;
 
-    // ADAPTAMOS LA PANTALLA
     const tituloMain = document.getElementById("titulo-principal");
     const saludo = document.getElementById("saludo-dinamico");
     const subtitulo = document.getElementById("subtitulo-dinamico");
@@ -544,28 +491,22 @@ function entrarPerfil(id, nombre, apellido, emailAuth) {
     if (saludo) saludo.innerText = "Hola, " + nombre;
 
     if (esProfeNuevoLogin) {
-        // Textos para profe NUEVO
         if (tituloMain) tituloMain.innerText = "¿SOS NUEVO?";
         if (subtitulo) subtitulo.innerText = "Creá una contraseña para tu cuenta.";
         
-        cajaConfirmar.style.display = "flex"; // Mostramos la segunda caja
+        cajaConfirmar.style.display = "flex"; 
         btnIniciar.innerText = "Crear cuenta y Entrar";
     } else {
-        // Textos para profe REGULAR
         if (tituloMain) tituloMain.innerText = "APP PARA PROFESORES";
         if (subtitulo) subtitulo.innerText = "Ingresá tu contraseña para continuar.";
         
-        cajaConfirmar.style.display = "none"; // Ocultamos la segunda caja
+        cajaConfirmar.style.display = "none"; 
         btnIniciar.innerText = "Iniciar sesión";
     }
 
 }
 
-// ==========================================
-// FUNCIONES EXCLUSIVAS DEL PANEL DE ADMIN (ESTILO EXCEL)
-// ==========================================
-
-let datosAdminActualParaExcel = null; // Memoria para armar el Excel rápido
+let datosAdminActualParaExcel = null; 
 
 function abrirPantallaInforme() {
     document.getElementById("pantalla-perfiles").style.display = "none";
@@ -574,7 +515,6 @@ function abrirPantallaInforme() {
     document.getElementById("pantalla-rutinas").style.display = "none";
     document.getElementById("pantalla-detalle-pack").style.display = "none";
 
-    // ---> LA MAGIA: Cambiamos "block" por "flex" para que no se aplaste
     document.getElementById("pantalla-admin").style.display = "flex"; 
     
     cambiarVistaAdmin('actual');
@@ -639,9 +579,7 @@ async function cargarPanelAdmin() {
             alumnosProfe.forEach(a => {
                 let cuota = a.cuota || 0;
                 
-                // Leemos si el alumno tiene un % propio en la base de datos (para dárselo al modal)
                 let porcAlumnoReal = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : 'null';
-                // Calculamos con el del alumno, o caemos en el del profe si es null
                 let porcCalculado = porcAlumnoReal !== 'null' ? porcAlumnoReal : porcentajeGym;
                 
                 let gymCut = cuota * (porcCalculado / 100); 
@@ -737,9 +675,6 @@ async function cargarPanelAdmin() {
     }
 }
 
-// ==============================================================
-// ---> NUEVO SISTEMA DE MODAL PARA LOS PORCENTAJES
-// ==============================================================
 let porcentajeEditando = { tipo: null, id: null, nombre: null };
 
 function abrirModalPorcentaje(tipo, id, nombre, porcentajeActual) {
@@ -775,7 +710,6 @@ async function guardarPorcentajeBD() {
             return;
         }
     } else if (porcentajeEditando.tipo === 'profe') {
-        // Un profe no puede quedar vacío, siempre debe tener una base
         mostrarAlerta("Atención", "El profesor debe tener un porcentaje base asignado (ej: 30).");
         return;
     }
@@ -783,7 +717,6 @@ async function guardarPorcentajeBD() {
     try {
         const tabla = porcentajeEditando.tipo === 'profe' ? 'profesores' : 'alumnos';
         
-        // MAGIA: Guardamos el nombre en una variable segura ANTES de cerrar la ventana y vaciar la memoria
         const nombreGuardado = porcentajeEditando.nombre;
         
         const { error } = await clienteSupabase
@@ -793,10 +726,9 @@ async function guardarPorcentajeBD() {
             
         if (error) throw error;
         
-        cerrarModalPorcentaje(); // Ahora sí lo cerramos sin problema
+        cerrarModalPorcentaje(); 
         cargarPanelAdmin(); 
         
-        // Cambiamos el título a "¡Éxito!" para que el sistema active el Pulgar Verde
         if (valorAEscribir !== null) {
             mostrarAlerta("¡Éxito!", `El porcentaje para ${nombreGuardado} ahora es del ${valorAEscribir}%.`);
         } else {
@@ -809,18 +741,16 @@ async function guardarPorcentajeBD() {
 }
 
 
-// ---> NUEVA FUNCIÓN: EL MOTOR DEL ACORDEÓN <---
-// (Pegá esto justo debajo de cargarPanelAdmin)
 function toggleAcordeonAdmin(idTabla, idFlecha) {
     const tabla = document.getElementById(idTabla);
     const flecha = document.getElementById(idFlecha);
     
-    // Si está oculto, lo mostramos y giramos la flechita
+
     if (tabla.style.display === "none" || tabla.style.display === "") {
         tabla.style.display = "block";
         flecha.style.transform = "rotate(180deg)"; 
     } else {
-        // Si está abierto, lo ocultamos y la flecha vuelve a apuntar abajo
+
         tabla.style.display = "none";
         flecha.style.transform = "rotate(0deg)"; 
     }
@@ -834,31 +764,27 @@ function darDeBajaProfe(idAEliminar) {
         "Eliminar definitivamente",
         async () => {
             try {
-                // Buscamos a todos sus alumnos
                 const { data: alumnos } = await clienteSupabase.from('alumnos').select('id').eq('profesor_id', idAEliminar);
                 
                 if (alumnos && alumnos.length > 0) {
                     const idsAlumnos = alumnos.map(a => a.id);
-                    // Borramos todas las rutinas de esos alumnos
                     await clienteSupabase.from('rutinas_planificadas').delete().in('alumno_id', idsAlumnos);
-                    // Borramos a los alumnos
+                   
                     await clienteSupabase.from('alumnos').delete().eq('profesor_id', idAEliminar);
                 }
                 
-                // Finalmente borramos al profesor
+   
                 const { error } = await clienteSupabase.from('profesores').delete().eq('id', idAEliminar);
                 if (error) throw error;
-                
-                // Actualizamos las listas al instante
-                cargarPanelAdmin(); // Refresca la pantalla del panel admin
-                cargarProfesores(); // Refresca la grilla principal de perfiles
+               
+                cargarPanelAdmin();
+                cargarProfesores(); 
                 
             } catch (e) { mostrarAlerta("Error al dar de baja: " + e.message); }
         }
     );
 }
 
-// Lógica de Descarga Global
 function descargarExcelAdmin() {
     if (!datosAdminActualParaExcel || datosAdminActualParaExcel.profesores.length === 0) {
         mostrarAlerta("Sin datos", "No hay información para generar el reporte.");
@@ -888,7 +814,6 @@ function descargarExcelAdmin() {
         
         profe.alumnos.forEach(a => {
             let cuota = a.cuota || 0;
-            // Evaluamos si el alumno tiene un % distinto
             let porcAlum = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : porcBase;
             let gymCut = cuota * (porcAlum / 100);
             
@@ -896,7 +821,7 @@ function descargarExcelAdmin() {
                 `${a.nombre} ${a.apellido}`,
                 a.actividad || "Sin Categoría",
                 `$${cuota.toLocaleString('es-AR')}`,
-                `$${gymCut.toLocaleString('es-AR')} (${porcAlum}%)` // Imprimimos la plata y el porcentaje usado al lado
+                `$${gymCut.toLocaleString('es-AR')} (${porcAlum}%)` 
             ]);
         });
         
@@ -921,7 +846,7 @@ function descargarExcelAdmin() {
 
 function volverAPerfiles() {
     profeActivoId = null;
-    esAdminActual = false; // Le sacamos la llave maestra al salir
+    esAdminActual = false; 
     
     document.getElementById("pantalla-dashboard").style.display = "none";
     document.getElementById("pantalla-detalle-alumno").style.display = "none";
@@ -989,7 +914,6 @@ async function cargarAlumnos() {
                 let textoBadge = "Vencida";
                 let estaAlDia = false;
 
-                // ---> LA MAGIA ESTRICTA: Calculamos el vencimiento (Fecha Pago + 30 días)
                 let vencimientoCalculado = null;
                 if (alumno.fecha_ultimo_pago) {
                     let f = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
@@ -1003,7 +927,6 @@ async function cargarAlumnos() {
                     const diferenciaTiempo = vencimientoCalculado - hoy;
                     const diferenciaDias = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
 
-                    // REGLA CORREGIDA: Si la diferencia es 0 (ya pasaron los 30 días exactos) o menos, está vencida.
                     if (diferenciaDias <= 0) {
                         claseBadge = "badge-vencida"; textoBadge = "Vencida";
                     } else if (diferenciaDias <= 5) {
@@ -1114,7 +1037,6 @@ async function cargarAlumnos() {
     }
 }
 
-// CORRECCIÓN 3: El cerebro que recuerda qué botones o busquedas tenías activas
 function reaplicarFiltrosSilenciosamente() {
     const inputBuscador = document.getElementById("buscador-alumnos");
     const textoBusqueda = inputBuscador ? normalizarTexto(inputBuscador.value) : "";
@@ -1131,7 +1053,6 @@ function reaplicarFiltrosSilenciosamente() {
 
         if (chip.classList.contains("activo") && index > 1) {
             const txt = chip.innerText.trim();
-            // Tilde sacada a propósito para emparejar
             if (txt === 'Cuota al día') estadosPrendidos.push('al dia');
             else if (txt === 'Vencida') estadosPrendidos.push('vencida');
             else if (txt === 'Con rutina') modalidadesPrendidas.push('con rutina');
@@ -1143,7 +1064,6 @@ function reaplicarFiltrosSilenciosamente() {
     const tarjetas = document.querySelectorAll("#lista-alumnos .card-alumno");
     
     tarjetas.forEach(tarjeta => {
-        // Limpiamos la tarjeta entera y el nombre
         const contenido = normalizarTexto(tarjeta.innerText);
         const nombre = normalizarTexto(tarjeta.querySelector("h3").innerText);
         
@@ -1165,9 +1085,6 @@ function reaplicarFiltrosSilenciosamente() {
     });
 }
 
-// --- LÓGICA PARA CREAR ALUMNO CON VENTANA EMERGENTE ---
-
-// --- LÓGICA DE ALUMNOS (A PRUEBA DE FALLOS) ---
 function abrirModalAlumno() {
     document.getElementById("modal-alumno").style.display = "flex";
     
@@ -1185,7 +1102,6 @@ function abrirModalAlumno() {
     setValor("input-alumno-condicion", "");
     setValor("input-alumno-cuota", "");
 
-    // NUEVO: La caja de fecha arranca automáticamente con el día de HOY
     const fechaHoy = new Date();
     setValor("input-alumno-pago", fechaHoy.toISOString().split('T')[0]);
 }
@@ -1207,12 +1123,12 @@ async function guardarAlumnoEnBD() {
     let condicion = getValor("input-alumno-condicion");
     const cuota = getValor("input-alumno-cuota");
     
-    // LA MAGIA: Calculamos el vencimiento automáticamente (Fecha Pago + 30 días)
+
     let fechaPagoStr = getValor("input-alumno-pago");
     let vencimientoCuota = null;
     if (fechaPagoStr) {
         let fPago = new Date(fechaPagoStr + 'T00:00:00');
-        fPago.setDate(fPago.getDate() + 30); // Le suma 30 días exactos
+        fPago.setDate(fPago.getDate() + 30); 
         vencimientoCuota = fPago.toISOString().split('T')[0];
     }
 
@@ -1242,8 +1158,8 @@ async function guardarAlumnoEnBD() {
                 dni: dni || null, 
                 tipo_rutina: tipoRutina, 
                 profesor_id: profeActivoId, 
-                vencimiento_cuota: vencimientoCuota, // Guardamos la fecha de expiración
-                fecha_ultimo_pago: fechaPagoStr || null, // Guardamos cuándo pagó
+                vencimiento_cuota: vencimientoCuota, 
+                fecha_ultimo_pago: fechaPagoStr || null,
                 actividad: actividad,
                 objetivo: objetivo,
                 edad: edad ? parseInt(edad) : null,
@@ -1285,7 +1201,6 @@ function abrirModalEditarAlumno() {
     setValor("input-edit-alumno-condicion", alumnoDataActual.condicion_medica || "");
     setValor("input-edit-alumno-cuota", alumnoDataActual.cuota ? alumnoDataActual.cuota.toLocaleString('es-AR') : "");
 
-    // Si ya le habías registrado un pago, lo mostramos. Si es un alumno viejo que no tiene fecha de pago, se la deducimos restándole 30 días al vencimiento
     let fechaPago = alumnoDataActual.fecha_ultimo_pago;
     if (!fechaPago && alumnoDataActual.vencimiento_cuota) {
         let v = new Date(alumnoDataActual.vencimiento_cuota + 'T00:00:00');
@@ -1312,7 +1227,6 @@ async function guardarEdicionAlumnoEnBD() {
     const condicion = getValor("input-edit-alumno-condicion");
     const cuota = getValor("input-edit-alumno-cuota");
     
-    // Calculamos los 30 días al momento de editar
     let fechaPagoStr = getValor("input-edit-alumno-pago");
     let vencimientoCuota = null;
     if (fechaPagoStr) {
@@ -1412,42 +1326,37 @@ async function anularPago(idAlumno, nombreAlumno, fechaVencimientoActual) {
 }
 
 
-// Función para alternar la visibilidad de la contraseña
 function alternarPassword() {
     const inputPass = document.getElementById("login-password");
     
     if (inputPass.type === "password") {
-        inputPass.type = "text"; // Muestra la contraseña
+        inputPass.type = "text"; 
     } else {
-        inputPass.type = "password"; // Oculta la contraseña
+        inputPass.type = "password"; 
     }
 }
-// Función universal para mostrar/ocultar cualquier contraseña en los modales
+
 function alternarVisibilidadPass(idInput) {
     const input = document.getElementById(idInput);
     if (input.type === "password") {
-        input.type = "text"; // Muestra la clave
+        input.type = "text"; 
     } else {
-        input.type = "password"; // Oculta la clave
+        input.type = "password"; 
     }
 }
 
-// --- 7. BUSCADOR DE ALUMNOS ---
-
-// --- HERRAMIENTA PARA IGNORAR ACENTOS Y MAYÚSCULAS ---
 function normalizarTexto(texto) {
-    // Esto pasa todo a minúscula y después le "arranca" las tildes a las letras
+
     return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-// --- 7. BUSCADOR DE ALUMNOS ---
+
 function filtrarAlumnos() {
-    // 1. Obtenemos lo que escribiste, pero pasado por nuestro "limpiador"
+   
     const textoBusqueda = normalizarTexto(document.getElementById("buscador-alumnos").value);
     const tarjetas = document.querySelectorAll("#lista-alumnos .card-alumno");
 
     tarjetas.forEach(tarjeta => {
-        // 2. Limpiamos también el nombre de la tarjeta para compararlos en igualdad de condiciones
         const nombreAlumno = normalizarTexto(tarjeta.querySelector("h3").innerText);
         
         if (nombreAlumno.includes(textoBusqueda)) {
@@ -1458,7 +1367,6 @@ function filtrarAlumnos() {
     });
 }
 
-// --- 8. FILTROS POR CHIPS (BOTONES MÚLTIPLES E INTELIGENTES) ---
 function filtrarPorChip(botonClickeado, textoFiltro) {
     const todosLosChips = Array.from(document.querySelectorAll("#contenedor-chips-dinamicos .chip"));
     const chipLapiz = todosLosChips[0]; 
@@ -1489,7 +1397,6 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
         if (chip !== chipLapiz && chip !== chipTodos && chip.classList.contains("activo")) {
             const textoBoton = chip.innerText.trim();
             
-            // OJO ACÁ: Como la tarjeta se va a limpiar de acentos, nosotros también le sacamos la tilde a 'al dia'
             if (textoBoton === 'Cuota al día') {
                 estadosPrendidos.push('al dia'); 
             } else if (textoBoton === 'Vencida') {
@@ -1499,7 +1406,6 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
             } else if (textoBoton === 'Libre') {
                 modalidadesPrendidas.push('alumno libre'); 
             } else {
-                // Pasamos las actividades por nuestro limpiador
                 actividadesPrendidas.push(normalizarTexto(textoBoton));
             }
         }
@@ -1513,7 +1419,6 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
             return;
         }
 
-        // Limpiamos todo el texto de la tarjeta
         const contenidoTarjeta = normalizarTexto(tarjeta.innerText);
 
         const pasaActividad = actividadesPrendidas.length === 0 || actividadesPrendidas.some(act => contenidoTarjeta.includes(act));
@@ -1528,7 +1433,6 @@ function filtrarPorChip(botonClickeado, textoFiltro) {
     });
 }
 
-// --- 9. REGISTRO Y CANCELACIÓN DE PAGOS RÁPIDOS EN TARJETAS ---
 async function modificarCicloPago(alumnoId, fechaUltimoPagoDb, yaEstabaPagado) {
     let fechaBasePago = new Date();
     
@@ -1538,7 +1442,7 @@ async function modificarCicloPago(alumnoId, fechaUltimoPagoDb, yaEstabaPagado) {
             "¿Querés deshacer el pago? Se restarán 30 días de su vencimiento.",
             "Anular pago",
             async () => {
-                // Si anulamos, retrocedemos 30 días desde su último pago conocido
+                
                 if (fechaUltimoPagoDb && fechaUltimoPagoDb !== "null") {
                     fechaBasePago = new Date(fechaUltimoPagoDb + 'T00:00:00');
                     fechaBasePago.setDate(fechaBasePago.getDate() - 30);
@@ -1549,17 +1453,15 @@ async function modificarCicloPago(alumnoId, fechaUltimoPagoDb, yaEstabaPagado) {
             }
         );
     } else {
-        // REGISTRAR PAGO RÁPIDO: La fecha de pago es HOY
+        
         fechaBasePago = new Date(); 
         ejecutarCambioDePago(alumnoId, fechaBasePago, true);
     }
 }
 
 async function ejecutarCambioDePago(alumnoId, fechaPagoReal, estadoActivo) {
-    // 1. Guardamos la fecha exacta del pago
     const fechaPagoStr = fechaPagoReal.toISOString().split('T')[0];
     
-    // 2. Calculamos el vencimiento (30 días después exactos)
     let vencimiento = new Date(fechaPagoReal);
     vencimiento.setDate(vencimiento.getDate() + 30);
     const vencimientoStr = vencimiento.toISOString().split('T')[0];
@@ -1578,7 +1480,6 @@ async function ejecutarCambioDePago(alumnoId, fechaPagoReal, estadoActivo) {
     }
 }
 
-// --- 10. LÓGICA DE DÍAS Y RUTINAS (CON SUPABASE) ---
 
 function abrirModalEjercicio() {
     document.getElementById("modal-ejercicio").style.display = "flex";
@@ -1597,7 +1498,7 @@ function abrirModalEjercicio() {
     document.getElementById("input-ej-nombre").value = "";
     document.getElementById("input-ej-descanso").value = "";
     document.getElementById("input-ej-subbloque").value = ""; 
-    document.getElementById("input-ej-notas").value = ""; // <-- Vaciamos las notas
+    document.getElementById("input-ej-notas").value = ""; 
     
     const contenedorSeries = document.getElementById('contenedor-filas-series');
     inicializarModalSeries('rutina', []);
@@ -1633,7 +1534,6 @@ function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, su
     try { if (seriesRepsJson && typeof seriesRepsJson === 'string') arraySeries = JSON.parse(seriesRepsJson); } catch (e) {}
     inicializarModalSeries('rutina', arraySeries);
 }
-// --- LÓGICA DE EDICIÓN Y BORRADO ---
 
 function borrarEjercicio(id) {
     pedirConfirmacion(
@@ -1661,7 +1561,6 @@ async function abrirModalEditarPorId(idEjercicio) {
         if (error) throw error;
         if (!ej) return;
 
-        // <-- Ahora mandamos también las notas a la función
         abrirModalEditar(ej.id, ej.zona_muscular, ej.ejercicio_nombre, ej.series_reps, ej.fuerza, ej.descanso, ej.sub_bloque, ej.notas);
 
     } catch (e) {
@@ -1670,12 +1569,10 @@ async function abrirModalEditarPorId(idEjercicio) {
     }
 }
 
-// --- EDICIÓN DE PROFESOR ---
 
 let fotoEditProfeElegida = ""; 
-let archivoEditFotoProfeBlob = null; // NUEVA memoria temporal para la edición
+let archivoEditFotoProfeBlob = null; 
 
-// Abrir ventana y cargar los datos
 async function editarProfe() {
     try {
         const { data: profe, error } = await clienteSupabase
@@ -1686,15 +1583,12 @@ async function editarProfe() {
         
         if (error) throw error;
 
-        // Rellenamos los textos
         document.getElementById("input-edit-nombre").value = profe.nombre || "";
         document.getElementById("input-edit-apellido").value = profe.apellido || ""; 
         
-        // Cargamos la foto que ya tenía en la base de datos
         fotoEditProfeElegida = profe.foto_url || "imagenes/perfil1.png";
         document.getElementById("img-preview-edit-profe").src = fotoEditProfeElegida;
         
-        // Reseteamos los selectores
         document.getElementById("select-edit-profe-avatar").value = "";
         document.getElementById("input-foto-edit-profe").value = "";
 
@@ -1705,22 +1599,19 @@ async function editarProfe() {
     }
 }
 
-// Ventana de cerrar
 function cerrarModalEditarProfe() {
     document.getElementById("modal-editar-profe").style.display = "none";
 }
 
-// Si en la edición elige cambiar por un avatar de la lista
 function cambiarPreviewEditAvatar() {
     const avatarElegido = document.getElementById("select-edit-profe-avatar").value;
     if (avatarElegido) {
         fotoEditProfeElegida = avatarElegido;
         document.getElementById("img-preview-edit-profe").src = fotoEditProfeElegida;
-        document.getElementById("input-foto-edit-profe").value = ""; // Descartamos la foto subida
+        document.getElementById("input-foto-edit-profe").value = "";
     }
 }
 
-// Si se saca una selfie nueva o sube de galería (Compresión automática)
 function procesarFotoEditSubida(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1750,7 +1641,6 @@ function procesarFotoEditSubida(event) {
     reader.readAsDataURL(file);
 }
 
-// Guardar los cambios nuevos
 async function guardarEdicionProfe() {
     const nuevoNombre = document.getElementById("input-edit-nombre").value.trim();
     const nuevoApellido = document.getElementById("input-edit-apellido").value.trim();
@@ -1790,7 +1680,7 @@ async function guardarEdicionProfe() {
         
         if (error) throw error;
 
-        archivoEditFotoProfeBlob = null; // Limpiamos
+        archivoEditFotoProfeBlob = null; 
 
         cerrarModalEditarProfe();
         document.getElementById("nombre-profe-activo").innerText = "Profe " + nuevoNombre;
@@ -1825,14 +1715,12 @@ function activarModoBorrado() {
     const btnTachito = document.getElementById("btn-activar-borrado");
 
     if (modoBorradoActivo) {
-        // ACTIVAMOS MODO BORRADO: El tachito se pone rojo
         btnTachito.classList.add("activo"); 
     } else {
-        // VOLVEMOS AL ESTADO NORMAL: El tachito vuelve a gris
         btnTachito.classList.remove("activo"); 
     }
 
-    cargarAlumnos(); // Refrescamos la lista para que aparezcan/desaparezcan los botones de borrar en cada alumno
+    cargarAlumnos(); 
 }
 
 
@@ -1842,7 +1730,6 @@ function cerrarModalEditarAlumno() {
 }
 
 
-// --- GUARDAR EL ORDEN AL ARRASTRAR ---
 async function guardarOrdenYSubbloque() {
     const contenedores = document.querySelectorAll('.subbloque-contenedor');
     const promesas = [];
@@ -1873,9 +1760,6 @@ async function guardarOrdenYSubbloque() {
 }
 
 
-// ==========================================
-// SISTEMA GLOBAL DE VIBRACIÓN (FEEDBACK HÁPTICO)
-// ==========================================
 document.addEventListener('click', function(e) {
     if (!navigator.vibrate) return; 
     const elementoTocado = e.target.closest('button, .card-alumno, .tarjeta-perfil-moderna, .tarjeta-rol, .chip, svg[onclick]');
@@ -1889,31 +1773,26 @@ mostrarAlerta = function(titulo, mensaje) {
         const esExito = tituloMin.includes('éxito') || tituloMin.includes('exitosa') || tituloMin.includes('registrada') || tituloMin.includes('copiada') || tituloMin.includes('limpio');
         
         if (esExito) {
-            // Vibración de éxito: Una sola vibración larga y satisfactoria
             navigator.vibrate(100); 
         } else {
-            // Vibración de error: Tres cortitas de alerta
             navigator.vibrate([50, 50, 50]); 
         }
     }
     funcionAlertaOriginal(titulo, mensaje); 
 };
 
-// ==========================================
-// SISTEMA DE RENDIMIENTO Y EVALUACIONES
-// ==========================================
 let graficoInstancia = null; 
-let graficoRadarInstancia = null; // NUEVA MEMORIA PARA EL RADAR
+let graficoRadarInstancia = null; 
 
 function abrirModalRendimiento() {
     document.getElementById("modal-rendimiento").style.display = "flex";
     
-    // Setear mes y año actual automáticamente al abrir
+ 
     const hoy = new Date();
     document.getElementById("select-rend-anio").value = hoy.getFullYear().toString();
     document.getElementById("select-rend-mes").value = (hoy.getMonth() + 1).toString();
     
-    cargarRendimiento(); // Trae los datos de Supabase
+    cargarRendimiento(); 
 }
 
 function cerrarModalRendimiento() {
@@ -1932,7 +1811,6 @@ async function cargarRendimiento() {
         const ultimoDia = new Date(anio, mes, 0).getDate();
         const fechaFin = `${anio}-${mes}-${ultimoDia}`;
 
-        // 1. Traemos las evaluaciones
         const { data: evaluaciones, error: errEval } = await clienteSupabase
             .from('evaluaciones_rendimiento')
             .select('*')
@@ -1943,15 +1821,13 @@ async function cargarRendimiento() {
 
         if (errEval) throw errEval;
 
-        // 2. Traemos LA RUTINA DEL ALUMNO para armar el gráfico muscular
         const { data: rutina, error: errRut } = await clienteSupabase
             .from('rutinas_planificadas')
-            .select('zona_muscular, fuerza') /* ACÁ AGREGAMOS LA FUERZA */
+            .select('zona_muscular, fuerza') 
             .eq('alumno_id', alumnoSeleccionadoId);
 
         if (errRut) throw errRut;
 
-        // 3. Traemos el HISTORIAL REAL DE PESOS para el gráfico de evolución
         const { data: historialPeso, error: errHistorial } = await clienteSupabase
             .from('registro_ejercicios')
             .select('*')
@@ -1962,7 +1838,6 @@ async function cargarRendimiento() {
 
         if (errHistorial) throw errHistorial;
 
-        // --- RENDERIZADO DE COMENTARIOS ---
         contenedor.innerHTML = "";
         if (evaluaciones.length === 0) {
             contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.85rem;'>No hay evaluaciones en este período.</p>";
@@ -1985,16 +1860,13 @@ async function cargarRendimiento() {
             });
         }
 
-        // --- CÁLCULO DE KPIs ---
         const evAlumno = evaluaciones.filter(e => e.tipo === 'alumno' && e.calificacion);
         
-        // Calcular Esfuerzo Promedio
         if (evAlumno.length > 0) {
             const suma = evAlumno.reduce((acc, curr) => acc + parseInt(curr.calificacion), 0);
             const promedio = (suma / evAlumno.length).toFixed(1);
             document.getElementById("kpi-esfuerzo").innerHTML = `${promedio} <span style="font-size:0.9rem; color:#888;">/10</span>`;
             
-            // Simular cumplimiento de asistencia basado en cantidad de reportes (ej: 12 reportes al mes = 100%)
             let porcentaje = Math.min(Math.round((evAlumno.length / 12) * 100), 100);
             document.getElementById("kpi-asistencia").innerText = `${porcentaje}%`;
             document.getElementById("kpi-barra-fill").style.width = `${porcentaje}%`;
@@ -2004,7 +1876,6 @@ async function cargarRendimiento() {
             document.getElementById("kpi-barra-fill").style.width = `0%`;
         }
 
-        // --- DIBUJAR LOS 2 GRÁFICOS ---
         dibujarGraficoEvolucion(historialPeso);
         dibujarGraficoMuscular(rutina);
 
@@ -2024,12 +1895,10 @@ function dibujarGraficoEvolucion(historial) {
         const fechaArg = reg.fecha.split('-').reverse().slice(0,2).join('/');
         fechasSet.add(fechaArg);
         
-        // Si viene nulo de la base de datos, usamos "General"
         let zonaGrafico = reg.zona_muscular || "General";
         
         if(!zonasMap[zonaGrafico]) zonasMap[zonaGrafico] = {};
         
-        // Al ser porcentaje, no sumamos, pisamos con el promedio guardado ese día
         zonasMap[zonaGrafico][fechaArg] = reg.peso_total; 
     });
 
@@ -2043,7 +1912,7 @@ function dibujarGraficoEvolucion(historial) {
     const datasets = Object.keys(zonasMap).map(zona => {
         const dataPuntos = labels.map(fecha => zonasMap[zona][fecha] || null); 
         return {
-            label: zona + ' (%)', // Texto con porcentaje
+            label: zona + ' (%)', 
             data: dataPuntos,
             borderColor: colores[zona] || '#f39c12',
             backgroundColor: 'transparent',
@@ -2063,7 +1932,7 @@ function dibujarGraficoEvolucion(historial) {
             scales: {
                 y: { 
                     beginAtZero: true, 
-                    suggestedMax: 100, // Forzamos escala de 0 a 100%
+                    suggestedMax: 100, 
                     title: { display: true, text: 'Intensidad (%)', color: '#666' }, 
                     ticks: { color: '#888' }, 
                     grid: { color: 'rgba(255,255,255,0.05)' } 
@@ -2082,12 +1951,10 @@ function dibujarGraficoMuscular(rutina) {
     const ctx = document.getElementById('grafico-radar-musculos').getContext('2d');
     if (graficoRadarInstancia) { graficoRadarInstancia.destroy(); }
     
-    // Recopilamos el promedio de RM y RIR para cada músculo
     const statsZonas = {};
     
     if(rutina) {
         rutina.forEach(ej => {
-            // Sacamos el filtro estricto de zona
             if (ej.series_reps) {
                 let zonaAsignada = ej.zona_muscular || "General";
 
@@ -2098,7 +1965,6 @@ function dibujarGraficoMuscular(rutina) {
                             let rm = parseFloat(s.fuerza);
                             let rir = parseFloat(s.rir);
                             
-                            // Si tiene asignado al menos % RM, lo contamos
                             if (!isNaN(rm) && rm > 0) {
                                 if (!statsZonas[zonaAsignada]) {
                                     statsZonas[zonaAsignada] = {rm: 0, rir: 0, cant: 0};
@@ -2115,11 +1981,9 @@ function dibujarGraficoMuscular(rutina) {
     }
 
     const labels = Object.keys(statsZonas);
-    // Armamos la info matemática
     const dataRM = labels.map(zona => statsZonas[zona].cant > 0 ? Math.round(statsZonas[zona].rm / statsZonas[zona].cant) : 0);
     const dataRIR = labels.map(zona => statsZonas[zona].cant > 0 ? (statsZonas[zona].rir / statsZonas[zona].cant).toFixed(1) : 0);
 
-    // Creamos el Gráfico de Barras Doble
     graficoRadarInstancia = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -2128,16 +1992,16 @@ function dibujarGraficoMuscular(rutina) {
                 {
                     label: 'Intensidad (% RM)',
                     data: dataRM,
-                    backgroundColor: 'rgba(52, 152, 219, 0.8)', // Azul
+                    backgroundColor: 'rgba(52, 152, 219, 0.8)', 
                     borderRadius: 4,
-                    yAxisID: 'y' // Lo ata a la escala izquierda
+                    yAxisID: 'y'
                 },
                 {
                     label: 'RIR Promedio',
                     data: dataRIR,
-                    backgroundColor: 'rgba(243, 156, 18, 0.8)', // Naranja
+                    backgroundColor: 'rgba(243, 156, 18, 0.8)', 
                     borderRadius: 4,
-                    yAxisID: 'y1' // Lo ata a la escala derecha
+                    yAxisID: 'y1' 
                 }
             ]
         },
@@ -2170,7 +2034,6 @@ async function guardarEvaluacionProfe() {
         return;
     }
     
-    // CORRECCIÓN HORARIA: Usamos la hora exacta de tu dispositivo
     const tmpHoy = new Date();
     const fechaHoyStr = `${tmpHoy.getFullYear()}-${String(tmpHoy.getMonth() + 1).padStart(2, '0')}-${String(tmpHoy.getDate()).padStart(2, '0')}`;
 
@@ -2181,24 +2044,22 @@ async function guardarEvaluacionProfe() {
             tipo: 'profe',
             comentario: comentario,
             fecha: fechaHoyStr,
-            calificacion: null // <-- BLINDAJE: Le avisamos a Supabase que el profe no pone puntaje numérico
+            calificacion: null 
         }]);
         
         if (error) throw error;
         
         document.getElementById("input-comentario-profe").value = "";
         
-        // NUEVO: Feedback visual para que sepas que se guardó
         mostrarAlerta("¡Éxito!", "La evaluación se guardó correctamente."); 
         
-        cargarRendimiento(); // Recarga la base de datos para mostrar tu comentario al instante
+        cargarRendimiento(); 
         
     } catch (e) {
         mostrarAlerta("Error", "No se pudo guardar la anotación: " + e.message);
     }
 }
 
-// --- ABRIR PANTALLA INDIVIDUAL DEL ALUMNO (VERSIÓN CON NUBE) ---
 async function abrirGrillaAlumno(id) {
     alumnoSeleccionadoId = id; 
 
@@ -2221,7 +2082,6 @@ async function abrirGrillaAlumno(id) {
         if (error) throw error;
         alumnoDataActual = alumno;
 
-        // ---> NUEVO: LEEMOS LOS DÍAS GUARDADOS EN SUPABASE <---
         window.asistenciasDiasAlumno = alumno.historial_dias ? alumno.historial_dias.split(',') : [];
 
         const { data: asistencias } = await clienteSupabase
@@ -2244,13 +2104,12 @@ async function abrirGrillaAlumno(id) {
         document.getElementById("detalle-salud").innerText = alumno.condicion_medica || "Sin observaciones.";
         document.getElementById("detalle-cuota").innerText = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "No definida";
         
-        // ---> LA MAGIA VISUAL: Calculamos y mostramos el próximo pago (Vencimiento)
         let fechaFormateada = "Sin definir";
         let vencimientoCalculado = null;
         
         if (alumno.fecha_ultimo_pago) {
             let f = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
-            f.setDate(f.getDate() + 30); // Le suma los 30 días
+            f.setDate(f.getDate() + 30); 
             vencimientoCalculado = f;
         } else if (alumno.vencimiento_cuota) {
             vencimientoCalculado = new Date(alumno.vencimiento_cuota + 'T00:00:00');
@@ -2259,7 +2118,7 @@ async function abrirGrillaAlumno(id) {
         if (vencimientoCalculado) {
             const isoString = vencimientoCalculado.toISOString().split('T')[0];
             const partes = isoString.split('-'); 
-            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; // Formato DD/MM/AAAA
+            fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; 
         }
         document.getElementById("detalle-vencimiento").innerText = fechaFormateada;
 
@@ -2282,9 +2141,6 @@ async function abrirGrillaAlumno(id) {
     }
 }
 
-// ==========================================
-// SISTEMA DE CHIPS (SEMANAS Y DÍAS)
-// ==========================================
 let semanaActiva = 1; 
 let diaActivo = 1;    
 
@@ -2296,7 +2152,7 @@ function generarChipsRutina() {
     const diaHoy = hoy.getDate();
     const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
 
-    // 1. DIBUJAR SEMANAS (Con Rangos de Fechas y Colores)
+ 
     contenedorSemanas.innerHTML = "";
     const rangosSemanas = [
         { sem: 1, inicio: 1, fin: 7 },
@@ -2328,7 +2184,6 @@ function generarChipsRutina() {
             </button>`;
     });
 
-    // 2. DIBUJAR DÍAS LEYENDO LA NUBE (Supabase)
     let dias = ["D1", "D2", "D3", "D4", "D5"];
     if (alumnoDataActual && alumnoDataActual.nombres_dias && alumnoDataActual.nombres_dias.length > 0) {
         dias = alumnoDataActual.nombres_dias;
@@ -2346,7 +2201,7 @@ function generarChipsRutina() {
         const codigoDia = `${anioMes}_Sem_${semanaActiva}_${diaTexto}`;
         
         let colorClase = "";
-        // Consultamos la variable inteligente que trajimos de Supabase
+ 
         const hizoEsteDia = window.asistenciasDiasAlumno && window.asistenciasDiasAlumno.includes(codigoDia);
         
         if (hizoEsteDia) colorClase = "chip-verde";
@@ -2364,39 +2219,32 @@ function generarChipsRutina() {
     if (vistaSliderActual === 'categorias') dibujarCategoriasAlumno();
 }
 
-// Cuando el profe toca una Semana
+
 function seleccionarSemana(numSemana) {
     semanaActiva = numSemana;
     
-    // 1. LA CLAVE: Redibujamos todos los botones para que el sistema recalcule 
-    // qué días de ESTA nueva semana tienen que ir en verde o rojo.
     generarChipsRutina();
 
-    // 2. Actualizamos la lista de ejercicios de abajo (las barras de categorías 
-    // ya se actualizan solas por dentro de generarChipsRutina).
     if(vistaSliderActual === 'ejercicios') {
         cargarEjerciciosCategoriaBD(); 
     }
 }
 
-// Cuando el profe toca un Día
+
 function seleccionarDia(numDia) {
     diaActivo = numDia;
     
-    // 1. Pintamos de naranja el botón tocado (Sin borrar el HTML, así dejamos que rebote!)
     const botonesDias = document.querySelectorAll("#chips-dias .chip-rutina");
     botonesDias.forEach((btn, index) => {
         if (index + 1 === numDia) btn.classList.add("activo");
         else btn.classList.remove("activo");
     });
-
-    // 2. Actualizamos la info de abajo
     if(vistaSliderActual === 'categorias') dibujarCategoriasAlumno();
     if(vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD(); 
 }
 
-let diasEditandoTemp = []; // Memoria para saber exactamente qué días borraste
-let sortableDiasModal = null; // NUEVO: Memoria para el motor de arrastre
+let diasEditandoTemp = []; 
+let sortableDiasModal = null; 
 
 function abrirModalEditarDias() {
     let dias = ["D1", "D2", "D3", "D4", "D5"];
@@ -2404,13 +2252,12 @@ function abrirModalEditarDias() {
         dias = alumnoDataActual.nombres_dias;
     }
     
-    diasEditandoTemp = [...dias]; // Copiamos los días actuales a la memoria
+    diasEditandoTemp = [...dias]; 
     
     const contenedor = document.getElementById("contenedor-inputs-dias");
     contenedor.innerHTML = "";
     
     dias.forEach((dia, index) => {
-        // Le sumamos el ícono de agarre y un diseño tipo "caja"
         contenedor.innerHTML += `
             <div class="campo-detalle fila-editar-dia" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center; background: #141414; padding: 8px; border-radius: 8px; border: 1px solid #262626;" data-original="${dia}">
                 <svg class="handle-dia" viewBox="0 0 24 24" width="20" style="color: #666; flex-shrink: 0; cursor: grab;"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
@@ -2424,10 +2271,9 @@ function abrirModalEditarDias() {
     
     document.getElementById("modal-editar-dias").style.display = "flex";
 
-    // NUEVO: Prendemos el motor de arrastre
     if (sortableDiasModal) sortableDiasModal.destroy();
     sortableDiasModal = new Sortable(contenedor, {
-        handle: '.handle-dia', // Solo se mueve tocando los 6 puntitos
+        handle: '.handle-dia', 
         animation: 200,
         ghostClass: "tarjeta-indicador-caida"
     });
@@ -2437,7 +2283,6 @@ function agregarFilaDia() {
     const contenedor = document.getElementById("contenedor-inputs-dias");
     const index = contenedor.querySelectorAll('.fila-editar-dia').length;
     
-    // Lo insertamos vacío pero con el mismo diseño "arrastrable"
     contenedor.insertAdjacentHTML('beforeend', `
         <div class="campo-detalle fila-editar-dia" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center; background: #141414; padding: 8px; border-radius: 8px; border: 1px solid #262626;">
             <svg class="handle-dia" viewBox="0 0 24 24" width="20" style="color: #666; flex-shrink: 0; cursor: grab;"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
@@ -2448,7 +2293,6 @@ function agregarFilaDia() {
         </div>
     `);
     
-    // Baja el scroll automáticamente si sumás muchos días
     setTimeout(() => { contenedor.parentElement.scrollTop = contenedor.parentElement.scrollHeight; }, 10);
 }
 
@@ -2468,7 +2312,6 @@ async function guardarEdicionDias() {
         nuevosDias.push(nuevoValor);
         
         const valorOriginal = fila.getAttribute('data-original');
-        // Si la fila ya existía de antes y le cambió el nombre, lo anotamos
         if (valorOriginal && valorOriginal !== "undefined") {
             diasConservadosOG.push(valorOriginal);
             if (valorOriginal !== nuevoValor) {
@@ -2477,13 +2320,10 @@ async function guardarEdicionDias() {
         }
     });
 
-    // Detectamos si el profe borró definitivamente alguno de los días originales
     const diasBorrados = diasEditandoTemp.filter(viejo => !diasConservadosOG.includes(viejo));
 
-    // Blindaje: si borró el día en el que estaba parado, lo acomodamos
     if (diaActivo > nuevosDias.length) diaActivo = nuevosDias.length;
 
-    // Actualizamos la pantalla instantáneamente
     if (!alumnoDataActual) alumnoDataActual = {};
     alumnoDataActual.nombres_dias = nuevosDias;
 
@@ -2500,7 +2340,6 @@ async function guardarEdicionDias() {
 
         const promesasMudanza = [];
 
-        // 1. Mudamos las rutinas de los días que solo cambiaron de nombre
         mapeoMudanza.forEach(cambio => {
             promesasMudanza.push(
                 clienteSupabase.from('rutinas_planificadas')
@@ -2510,7 +2349,6 @@ async function guardarEdicionDias() {
             );
         });
 
-        // 2. DESTRUCCIÓN: Borramos las rutinas de los días que el profe eliminó
         if (diasBorrados.length > 0) {
             promesasMudanza.push(
                 clienteSupabase.from('rutinas_planificadas')
@@ -2520,10 +2358,8 @@ async function guardarEdicionDias() {
             );
         }
 
-        // Ejecutamos todo junto
         if (promesasMudanza.length > 0) {
             await Promise.all(promesasMudanza);
-            // Actualizamos la vista
             if (vistaSliderActual === 'ejercicios') {
                 cargarEjerciciosCategoriaBD();
             } else if (vistaSliderActual === 'categorias') {
@@ -2534,9 +2370,6 @@ async function guardarEdicionDias() {
         mostrarAlerta("Error", "No se pudieron actualizar los días en la base de datos.");
     }
 }
-// ==========================================
-// CONTROLADOR DEL SLIDER Y CATEGORÍAS (BARRAS REALES)
-// ==========================================
 let vistaSliderActual = 'categorias'; 
 let categoriaSeleccionada = null;
 let categoriaOpcionesActiva = null; 
@@ -2545,30 +2378,28 @@ async function dibujarCategoriasAlumno() {
     const contenedor = document.getElementById("lista-categorias-rutina");
     contenedor.innerHTML = "<p style='text-align:center; color:#888; font-size:0.9rem; margin-top:20px;'>Cargando barras...</p>";
 
-    // 1. Buscamos las barras del alumno en Supabase (o le damos las 3 por defecto)
+  
     let categorias = ["Movilidad", "Entrada en calor", "Entrenamiento"];
     if (alumnoDataActual && alumnoDataActual.categorias_rutina) {
         categorias = alumnoDataActual.categorias_rutina;
     }
 
-    // 2. Traemos el día actual para contar cuántos ejercicios tiene cada barra
     let dias = ["D1", "D2", "D3", "D4", "D5"];
     if (alumnoDataActual && alumnoDataActual.nombres_dias) { dias = alumnoDataActual.nombres_dias; }
     const diaSeleccionado = dias[diaActivo - 1]; 
 
     try {
-        // Consultamos todos los ejercicios del día para hacer el conteo
+       
         const { data: ejercicios } = await clienteSupabase
             .from('rutinas_planificadas')
             .select('categoria')
             .eq('alumno_id', alumnoSeleccionadoId)
             .eq('dia_semana', diaSeleccionado)
-            .eq('semana', semanaActiva); // <--- NUEVO FILTRO
+            .eq('semana', semanaActiva); 
 
         contenedor.innerHTML = "";
         
         categorias.forEach(cat => {
-            // Contamos los ejercicios. (Si la categoría es "Entrenamiento", incluimos los ejercicios viejos que no tenían categoría)
             let cantidad = 0;
             if (ejercicios) {
                 cantidad = ejercicios.filter(e => {
@@ -2577,11 +2408,8 @@ async function dibujarCategoriasAlumno() {
                 }).length;
             }
 
-            // Asignamos íconos visuales
-            // Por defecto dejamos una estrellita por si el profe crea una categoría nueva (ej: "Estiramiento")
             let iconoHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
             
-            // Si es una de las principales, usamos tus imágenes espectaculares
             if (cat.toUpperCase() === "MOVILIDAD") {
                 iconoHTML = `<img src="imagenes/MOVILIDAD.jpg" class="img-cat-rutina" alt="Movilidad">`;
             }
@@ -2621,7 +2449,7 @@ function cerrarCategoria() {
     categoriaSeleccionada = null;
     document.getElementById('track-slider-rutinas').style.transform = 'translateX(0%)';
     vistaSliderActual = 'categorias';
-    dibujarCategoriasAlumno(); // Actualiza los numeritos al volver atrás
+    dibujarCategoriasAlumno(); 
 }
 
 function accionBotonFabInteligente() {
@@ -2639,7 +2467,6 @@ function abrirOpcionesCategoria(nombreCategoria) {
     document.getElementById('modal-opciones-categoria').style.display = 'flex';
 }
 
-// CONEXIÓN: CREAR BARRA EN BD
 async function guardarNuevaCategoriaBD() { 
     const nuevaCat = document.getElementById('input-nueva-categoria').value.trim();
     if(!nuevaCat) return;
@@ -2657,7 +2484,7 @@ async function guardarNuevaCategoriaBD() {
     catch (e) { console.error(e); }
 }
 
-// CONEXIÓN: BORRAR BARRA EN BD
+
 async function borrarCategoriaActiva() { 
     document.getElementById('modal-opciones-categoria').style.display = 'none';
     pedirConfirmacion("Borrar Categoría", `¿Seguro que querés borrar '${categoriaOpcionesActiva}' y TODOS sus ejercicios adentro?`, "Borrar", async () => {
@@ -2669,21 +2496,20 @@ async function borrarCategoriaActiva() {
         dibujarCategoriasAlumno();
         
         try { 
-            // Borra la barra del alumno y borra todos los ejercicios que vivían ahí adentro
             await clienteSupabase.from('alumnos').update({ categorias_rutina: categorias }).eq('id', alumnoSeleccionadoId); 
             await clienteSupabase.from('rutinas_planificadas').delete().eq('alumno_id', alumnoSeleccionadoId).eq('categoria', categoriaOpcionesActiva);
         } catch (e) { console.error(e); }
     });
 }
 
-// Abre la ventana hermosa para renombrar
+
 function editarNombreCategoria() { 
     document.getElementById('modal-opciones-categoria').style.display = 'none';
     document.getElementById('input-renombrar-categoria').value = categoriaOpcionesActiva;
     document.getElementById('modal-renombrar-categoria').style.display = 'flex';
 }
 
-// Guarda el nuevo nombre en la pantalla y en Supabase
+
 async function guardarRenombrarCategoriaBD() {
     const nuevoNombre = document.getElementById('input-renombrar-categoria').value.trim();
     
@@ -2706,7 +2532,6 @@ async function guardarRenombrarCategoriaBD() {
     dibujarCategoriasAlumno();
 
     try {
-        // Actualiza el nombre en el alumno, y muda todos los ejercicios a la barra con el nombre nuevo
         await clienteSupabase.from('alumnos').update({ categorias_rutina: categorias }).eq('id', alumnoSeleccionadoId);
         await clienteSupabase.from('rutinas_planificadas').update({ categoria: nuevoNombre }).eq('alumno_id', alumnoSeleccionadoId).eq('categoria', categoriaOpcionesActiva);
     } catch (e) { 
@@ -2714,7 +2539,7 @@ async function guardarRenombrarCategoriaBD() {
     }
 }
 
-// 1. Catálogo principal de animaciones (Claves TODO EN MINÚSCULAS Y SIN TILDES)
+
 const mapaAnimaciones = {
     // Piernas - gluteos
     "zercher squat": ["ejercicios/Piernas/zerchersquat1.webp", "ejercicios/Piernas/zerchersquat2.webp"],
@@ -3376,17 +3201,13 @@ const aliasEjercicios = {
 function obtenerAnimacionHTML(nombreEj) {
     if (!nombreEj) return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
     
-    // Normalizamos el texto ingresado
     const clave = normalizarTexto(nombreEj.trim());
 
-    // Si la clave es un alias, obtenemos el nombre oficial; si no, usamos la misma clave
     const nombreOficial = aliasEjercicios[clave] || clave;
 
-    // Buscamos las fotos con el nombre oficial
     const frames = mapaAnimaciones[nombreOficial];
 
     if (frames) {
-        // LE AGREGAMOS EL ONCLICK DIRECTO Y EL EVENT PARA QUE FRENE LA APERTURA DE LA TARJETA
         return `<div class="anim-dinamica" style="--img-1: url('${frames[0]}'); --img-2: url('${frames[1]}'); cursor: zoom-in;" onclick="abrirImagenFullscreenDirecto(this, event)"></div>`;
     }
 
@@ -3394,10 +3215,6 @@ function obtenerAnimacionHTML(nombreEj) {
 }
 
 
-
-// ==========================================
-// EJERCICIOS Y RUTINAS DESDE BD
-// ==========================================
 async function cargarEjerciciosCategoriaBD() {
     const contenedorEjercicios = document.getElementById("lista-ejercicios-detalle");
     contenedorEjercicios.innerHTML = "<p style='text-align:center; color:#888; margin-top: 20px;'>Cargando rutina...</p>";
@@ -3442,8 +3259,7 @@ async function cargarEjerciciosCategoriaBD() {
 
         let htmlFinal = "";
 
-        // NUEVO DISEÑO DE TARJETA CON DESPLEGABLE DE NOTAS INCLUIDO
-        const generarTarjeta = (ej) => `
+       const generarTarjeta = (ej) => `
             <div class="card-ejercicio" data-id="${ej.id}" style="flex-wrap: wrap; cursor: pointer;" onclick="abrirBottomSheetEjercicio('${ej.id}')">
                 <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
                     <svg class="icono-arrastre" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
@@ -3527,7 +3343,6 @@ async function guardarEjercicioEnBD() {
 
     if (!nombre) { mostrarAlerta("Faltan datos", "Por favor, ponele un nombre al ejercicio."); return; }
 
-    // MAGIA: Extrae las series ya sea que estén en modo unificado o individual
     const seriesRepsTexto = extraerSeriesDelModal('rutina');
     const descansoTexto = document.getElementById("input-ej-descanso").value;
 
@@ -3564,7 +3379,6 @@ async function guardarEjercicioEnPack() {
     const seriesTexto = extraerSeriesDelModal('pack');
     const descanso = document.getElementById("input-pack-ej-descanso").value; 
 
-    // Si abrimos con el lápiz, actualizamos. Si es nuevo, lo agregamos a la lista.
     if (ejercicioPackEditandoIndex !== null) {
         packActivoEjercicios[ejercicioPackEditandoIndex] = { zona: zona, nombre: nombre, series: seriesTexto, descanso: descanso, notas: notasTexto };
     } else {
@@ -3574,16 +3388,15 @@ async function guardarEjercicioEnPack() {
     try { 
         await clienteSupabase.from('packs_rutinas').update({ ejercicios: packActivoEjercicios }).eq('id', packActivoId); 
         document.getElementById("modal-ejercicio-pack").style.display = "none"; 
-        ejercicioPackEditandoIndex = null; // Reseteamos la memoria
+        ejercicioPackEditandoIndex = null;
         cargarEjerciciosDePack(); 
     } catch(e) { console.error(e); }
 }
 
 
-// --- 11. SISTEMA DE PACKS PREDEFINIDOS (Navegación Blindada) ---
 let packActivoId = null;
 let packActivoEjercicios = []; 
-let ejercicioPackEditandoIndex = null; // Nos avisa si estamos editando o creando uno nuevo
+let ejercicioPackEditandoIndex = null; 
 
 function abrirPantallaRutinas() {
     document.getElementById("pantalla-dashboard").style.display = "none";
@@ -3591,12 +3404,11 @@ function abrirPantallaRutinas() {
     document.getElementById("pantalla-perfiles").style.display = "none"; 
     document.getElementById("pantalla-admin").style.display = "none"; 
     
-    // --> ESTO ARREGLA LA SUPERPOSICIÓN (Apaga el detalle del pack)
-    document.getElementById("pantalla-detalle-pack").style.display = "none"; 
+   document.getElementById("pantalla-detalle-pack").style.display = "none"; 
     
     document.getElementById("pantalla-rutinas").style.display = "block";
     cargarPacks();
-    actualizarNavActivo('rutinas'); // Prende la luz naranja del botón
+    actualizarNavActivo('rutinas'); 
 }
 
 async function abrirDetallePack(id, nombre) {
@@ -3606,7 +3418,6 @@ async function abrirDetallePack(id, nombre) {
     document.getElementById("detalle-nombre-pack").innerText = nombre; 
     cargarEjerciciosDePack();
     
-    // --> ESTO HACE QUE EL BOTÓN SIGA BRILLANDO CUANDO ENTRÁS AL PACK
     actualizarNavActivo('rutinas'); 
 }
 
@@ -3638,7 +3449,6 @@ async function cargarPacks() {
     } catch (e) { contenedor.innerHTML = "<p>Error al cargar packs.</p>"; }
 }
 
-// Memoria para saber qué pack estamos renombrando
 let packAEditarId = null;
 
 function abrirModalEditarPack(id, nombreActual) {
@@ -3661,7 +3471,7 @@ async function guardarEdicionPack() {
     }
 
     try {
-        // Le avisamos a Supabase que le cambie el nombre a este ID específico
+  
         const { error } = await clienteSupabase
             .from('packs_rutinas')
             .update({ nombre: nuevoNombre })
@@ -3670,9 +3480,8 @@ async function guardarEdicionPack() {
         if (error) throw error;
         
         cerrarModalEditarPack();
-        cargarPacks(); // Recargamos la lista para ver el nombre nuevo
+        cargarPacks(); 
         
-        // Si justo tenés abierto el detalle de ESE pack, también le actualizamos el título gigante arriba
         if (packActivoId === packAEditarId) {
             const tituloDetalle = document.getElementById("detalle-nombre-pack");
             if(tituloDetalle) tituloDetalle.innerText = nuevoNombre;
@@ -3746,9 +3555,8 @@ async function cargarEjerciciosDePack() {
     } catch(e) { console.error(e); }
 }
 
-// Abre la ventana para CREAR un ejercicio nuevo en el pack
 function abrirModalEjercicioPack() { 
-    ejercicioPackEditandoIndex = null; // Nos aseguramos de estar en modo "Nuevo"
+    ejercicioPackEditandoIndex = null; 
     document.getElementById("modal-ejercicio-pack").style.display = "flex"; 
     
     const selectZonaPack = document.getElementById("select-pack-ej-zona");
@@ -3772,10 +3580,9 @@ function abrirModalEjercicioPack() {
     inicializarModalSeries('pack', []);
 }
 
-// Abre la ventana para EDITAR un ejercicio que ya existe en el pack
 function abrirModalEditarEjercicioPack(index) {
-    ejercicioPackEditandoIndex = index; // Avisamos que estamos en modo Edición
-    const ej = packActivoEjercicios[index]; // Traemos todos los datos guardados
+    ejercicioPackEditandoIndex = index; 
+    const ej = packActivoEjercicios[index]; 
     
     document.getElementById("modal-ejercicio-pack").style.display = "flex"; 
     
@@ -3803,13 +3610,9 @@ function abrirModalEditarEjercicioPack(index) {
     inicializarModalSeries('pack', arraySeries);
 }
 
-// ==========================================
-// SISTEMA AVANZADO DE LISTA DE EJERCICIOS CON BUSCADOR E IMÁGENES
-// ==========================================
 let inputDestinoEjercicio = ""; 
-let ejerciciosModalTemporales = []; // Guarda los ejercicios actuales para el buscador
+let ejerciciosModalTemporales = []; 
 
-// Extrae todos los alias asociados a un ejercicio y los junta con " | "
 function obtenerAliasPipe(nombreOficial) {
     if (!nombreOficial) return "";
     const oficialNorm = normalizarTexto(nombreOficial.trim());
@@ -3828,7 +3631,6 @@ function obtenerAliasPipe(nombreOficial) {
     return aliasesEncontrados.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(" | ");
 }
 
-// Dibuja las tarjetas enriquecidas en el modal
 function renderizarListaEjerciciosModal(lista) {
     const contenedor = document.getElementById("contenedor-botones-ejercicios");
     contenedor.innerHTML = "";
@@ -3857,11 +3659,9 @@ function renderizarListaEjerciciosModal(lista) {
     });
 }
 
-// Filtro en tiempo real al escribir
 function filtrarListaEjerciciosModal() {
     const textoBusqueda = normalizarTexto(document.getElementById("buscador-modal-ejercicios").value);
     
-    // Filtra buscando coincidencias en el nombre oficial o en los alias
     const filtrados = ejerciciosModalTemporales.filter(ej => {
         const nombreNorm = normalizarTexto(ej);
         const aliasStrNorm = normalizarTexto(obtenerAliasPipe(ej));
@@ -3871,7 +3671,6 @@ function filtrarListaEjerciciosModal() {
     renderizarListaEjerciciosModal(filtrados);
 }
 
-// 1. Abrir modal para Rutina Normal
 function abrirModalListaEjercicios(idInputDestino, idSelectZona) {
     const zona = document.getElementById(idSelectZona).value;
     inputDestinoEjercicio = idInputDestino; 
@@ -3896,14 +3695,13 @@ function abrirModalListaEjercicios(idInputDestino, idSelectZona) {
         ejerciciosAMostrar.sort(); 
     }
     
-    ejerciciosModalTemporales = ejerciciosAMostrar; // Guardamos para el buscador
-    document.getElementById("buscador-modal-ejercicios").value = ""; // Vaciamos el buscador
+    ejerciciosModalTemporales = ejerciciosAMostrar; 
+    document.getElementById("buscador-modal-ejercicios").value = ""; 
     
     renderizarListaEjerciciosModal(ejerciciosAMostrar);
     document.getElementById("modal-lista-ejercicios").style.display = "flex";
 }
 
-// 2. Abrir modal para los Packs (Rutinas Predefinidas)
 function abrirModalListaEjerciciosPack(idInputDestino, idSelectZona) {
     const zona = document.getElementById(idSelectZona).value;
     inputDestinoEjercicio = idInputDestino;
@@ -3924,14 +3722,13 @@ function abrirModalListaEjerciciosPack(idInputDestino, idSelectZona) {
 
     ejerciciosDelPack.sort();
 
-    ejerciciosModalTemporales = ejerciciosDelPack; // Guardamos para el buscador
-    document.getElementById("buscador-modal-ejercicios").value = ""; // Vaciamos el buscador
+    ejerciciosModalTemporales = ejerciciosDelPack; 
+    document.getElementById("buscador-modal-ejercicios").value = ""; 
     
     renderizarListaEjerciciosModal(ejerciciosDelPack);
     document.getElementById("modal-lista-ejercicios").style.display = "flex";
 }
 
-// 3. Cuando se selecciona el ejercicio
 function seleccionarEjercicioDesdeLista(nombreEjercicio) {
     document.getElementById(inputDestinoEjercicio).value = nombreEjercicio;
     document.getElementById("modal-lista-ejercicios").style.display = "none";
@@ -3966,7 +3763,7 @@ async function importarPackAAlumno(packId) {
             alumno_id: alumnoSeleccionadoId, 
             dia_semana: diaSelec, 
             semana: semanaActiva,
-            categoria: categoriaSeleccionada, // LOS PACKS TAMBIÉN CAEN ADENTRO DE LA BARRA ACTIVA
+            categoria: categoriaSeleccionada, 
             zona_muscular: ej.zona,
             ejercicio_nombre: ej.nombre, series_reps: ej.series, descanso: ej.descanso, orden: 999 + index
         }));
@@ -3977,19 +3774,15 @@ async function importarPackAAlumno(packId) {
     } catch(e) { console.error(e); }
 }
 
-// Función para volver desde perfiles a la pantalla de inicio de roles
 function volverDesdePerfilesAInicio() {
     document.getElementById("pantalla-perfiles").style.display = "none";
     document.getElementById("pantalla-inicio").style.display = "flex";
 }
 
-// --- FORMATEO AUTOMÁTICO DE CUOTAS ---
 function formatearMiles(input) {
-    // 1. Borramos todo lo que no sea un número (para evitar que metan letras o símbolos raros)
     let valorStr = input.value.replace(/\D/g, "");
     
     if (valorStr !== "") {
-        // 2. Lo transformamos a número y le pedimos a JS que le ponga el formato argentino (con punto para los miles)
         input.value = parseInt(valorStr).toLocaleString('es-AR');
     } else {
         input.value = "";
@@ -3997,9 +3790,6 @@ function formatearMiles(input) {
 }
 
 
-// ==========================================
-// VENTANA DE NOTIFICACIONES (LA CAMPANITA)
-// ==========================================
 
 function abrirModalNotificaciones() {
     const contenedor = document.getElementById("lista-notificaciones");
@@ -4008,7 +3798,6 @@ function abrirModalNotificaciones() {
     if (!window.notificacionesGlobales || window.notificacionesGlobales.length === 0) {
         contenedor.innerHTML = "<p style='color: #aaa; text-align: center; margin-top: 20px;'>No hay vencimientos pendientes.</p>";
     } else {
-        // Ordenamos para que las nuevas aparezcan arriba de todo
         window.notificacionesGlobales.sort((a, b) => b.esNueva - a.esNueva);
 
         window.notificacionesGlobales.forEach(notif => {
@@ -4025,26 +3814,22 @@ function abrirModalNotificaciones() {
         });
     }
 
-    // Mostramos la ventana
     document.getElementById("modal-notificaciones").style.display = "flex";
 
-    // Al abrirla, marcamos TODAS automáticamente como leídas
     if (window.notificacionesGlobales && window.notificacionesGlobales.length > 0) {
         let leidasGuardadas = JSON.parse(localStorage.getItem('notifLeidas_' + profeActivoId)) || [];
         
         window.notificacionesGlobales.forEach(n => {
             if (!leidasGuardadas.includes(n.idNotif)) {
-                leidasGuardadas.push(n.idNotif); // Se guardan en la memoria del celular
+                leidasGuardadas.push(n.idNotif); 
             }
         });
         
         localStorage.setItem('notifLeidas_' + profeActivoId, JSON.stringify(leidasGuardadas));
 
-        // Borramos el puntito rojo al instante
         const badge = document.getElementById("badge-notificaciones");
         if (badge) badge.style.display = "none";
         
-        // Las actualizamos internamente para que no salgan como nuevas la próxima vez que abra el modal hoy
         window.notificacionesGlobales.forEach(n => n.esNueva = false);
     }
 }
@@ -4053,38 +3838,30 @@ function cerrarModalNotificaciones() {
     document.getElementById("modal-notificaciones").style.display = "none";
 }
 
-// ==========================================
-// CEREBRO GLOBAL DEL TEMA (CLARO/OSCURO)
-// ==========================================
-let esTemaOscuro = true; // La app arranca en oscuro por defecto
+let esTemaOscuro = true;
 
 function inicializarTema() {
-    // 1. Preguntamos a la memoria del celular qué eligió el usuario la última vez
     const temaGuardado = localStorage.getItem('temaGlobalGym');
     
     if (temaGuardado === 'claro') {
         esTemaOscuro = false;
     } else {
-        esTemaOscuro = true; // Si es la primera vez que entra, es oscuro
+        esTemaOscuro = true; 
     }
     
-    // 2. Aplicamos los colores a TODAS las pantallas
     aplicarTemaVisual();
 }
 
 function alternarTemaGlobal() {
-    // 1. Invertimos el estado (si era oscuro pasa a claro, y viceversa)
-    esTemaOscuro = !esTemaOscuro;
     
-    // 2. Lo guardamos en el celular para siempre
+    esTemaOscuro = !esTemaOscuro;
+
     localStorage.setItem('temaGlobalGym', esTemaOscuro ? 'oscuro' : 'claro');
     
-    // 3. Pintamos toda la app
     aplicarTemaVisual();
 }
 
 function aplicarTemaVisual() {
-    // A. Pantallas que "de fábrica" son OSCURAS (Inicio, Login, Perfiles)
     const pantallasOscuras = ['pantalla-inicio', 'pantalla-login', 'pantalla-perfiles'];
     pantallasOscuras.forEach(id => {
         const el = document.getElementById(id);
@@ -4094,7 +3871,6 @@ function aplicarTemaVisual() {
         }
     });
 
-    // B. Pantallas que "de fábrica" son CLARAS (Dashboard, Alumno, Rutinas, Packs, Admin)
     const pantallasClaras = ['pantalla-dashboard', 'pantalla-detalle-alumno', 'pantalla-rutinas', 'pantalla-detalle-pack', 'pantalla-admin'];
     pantallasClaras.forEach(id => {
         const el = document.getElementById(id);
@@ -4104,14 +3880,12 @@ function aplicarTemaVisual() {
         }
     });
 
-    // C. NUEVO: Le avisamos al cuerpo entero de la app para que los Modales se enteren
     if(esTemaOscuro) {
         document.body.classList.add('tema-oscuro');
     } else {
         document.body.classList.remove('tema-oscuro');
     }
 
-    // D. Sincronizar soles y lunas
     const soles = document.querySelectorAll('[id^="icono-sol"]');
     const lunas = document.querySelectorAll('[id^="icono-luna"]');
 
@@ -4124,31 +3898,20 @@ function aplicarTemaVisual() {
     }
 }
 
-// Conectamos los botones viejos al nuevo Cerebro Central
 function alternarTemaInicio() { alternarTemaGlobal(); }
 function alternarTemaLogin() { alternarTemaGlobal(); }
 function alternarTemaPerfiles() { alternarTemaGlobal(); }
 function alternarTemaDashboard() { alternarTemaGlobal(); }
 
-
-// ==========================================
-// CONTROL DEL BOTÓN "ATRÁS" DEL CELULAR
-// ==========================================
-
-// 1. Apenas arranca la app, creamos un "historial falso" para atrapar el primer clic
 window.history.pushState({ appAbierta: true }, "", "");
 
-// 2. Escuchamos cuando el usuario aprieta el botón físico de "Atrás"
 window.addEventListener('popstate', function (event) {
-    let interceptado = false; // Bandera para saber si cerramos algo
 
-    // A. CHEQUEO DE VISTAS INTERNAS (Ej: Viendo ejercicios y querer volver a las categorías)
     if (typeof vistaSliderActual !== 'undefined' && vistaSliderActual === 'ejercicios') {
         cerrarCategoria();
         interceptado = true;
     }
 
-    // B. CHEQUEO DE MODALES Y VENTANAS EMERGENTES (De mayor a menor prioridad)
     if (!interceptado) {
         const modales = [
             { id: "modal-confirmacion", cerrar: cerrarModalConfirmacion },
@@ -4178,16 +3941,14 @@ window.addEventListener('popstate', function (event) {
 
         for (let modal of modales) {
             const el = document.getElementById(modal.id);
-            // Si la ventanita existe y está visible en la pantalla
             if (el && (el.style.display === "flex" || el.style.display === "block")) {
                 modal.cerrar();
                 interceptado = true;
-                break; // Cortamos acá para que el botón cierre solo UNA cosa por vez
+                break; 
             }
         }
     }
 
-    // C. CHEQUEO DE PANTALLAS PRINCIPALES (Si no había modales para cerrar)
     if (!interceptado) {
         const esVisible = (id) => {
             const el = document.getElementById(id);
@@ -4216,7 +3977,6 @@ window.addEventListener('popstate', function (event) {
             volverDesdeAlumnoAInicio();
             interceptado = true;
         } else if (esVisible("pantalla-perfiles")) {
-            // Si no inició sesión, lo mandamos al inicio. Si inició sesión, Perfiles es la "raíz" y dejamos que salga.
             const sesion = localStorage.getItem('sesionGimnasio');
             if (!sesion) {
                 volverDesdePerfilesAInicio();
@@ -4225,20 +3985,13 @@ window.addEventListener('popstate', function (event) {
         }
     }
 
-    // 3. LA TRAMPA: Si atrapamos el botón y cerramos algo, volvemos a empujar el historial
-    // para que el usuario no se salga de la app en su próximo clic.
     if (interceptado) {
         window.history.pushState({ appAbierta: true }, "", "");
     } else {
-        // Si no interceptamos nada (ej: estaba en la pantalla principal de Inicio), 
-        // no ponemos la trampa y permitimos que el celular cierre la app de forma natural.
     }
 });
 
 
-// ==========================================
-// SISTEMA DE ASISTENCIA RÁPIDA (CHECK-IN)
-// ==========================================
 let checkinAlumnoId = null;
 
 async function abrirModalCheckin(alumnoId) {
@@ -4249,7 +4002,6 @@ async function abrirModalCheckin(alumnoId) {
     contenedorDias.innerHTML = "<p style='color:#888; font-size:0.8rem;'>Cargando días...</p>";
 
     try {
-        // 1. Buscamos rápidamente si el alumno le cambió los nombres a sus días (Ej: "Día de Pierna")
         const { data: alumno, error } = await clienteSupabase
             .from('alumnos')
             .select('nombres_dias')
@@ -4263,7 +4015,6 @@ async function abrirModalCheckin(alumnoId) {
             dias = alumno.nombres_dias;
         }
 
-        // 2. Dibujamos un botón para cada día
         contenedorDias.innerHTML = "";
         dias.forEach(diaTexto => {
             contenedorDias.innerHTML += `
@@ -4283,7 +4034,6 @@ function cerrarModalCheckin() {
     checkinAlumnoId = null;
 }
 
-// 3. El motor que guarda la asistencia y el día EN LA NUBE
 async function procesarCheckin(diaSeleccionado) {
     const idSeguro = checkinAlumnoId; 
     cerrarModalCheckin(); 
@@ -4334,7 +4084,6 @@ async function procesarCheckin(diaSeleccionado) {
             mensajeAlerta = `Se marcó el presente para "${diaSeleccionado}" (Sin rutina cargada).`;
         }
 
-        // ---> NUEVO: GUARDAMOS EL DÍA ESPECÍFICO EN SUPABASE <---
         const anioMes = `${tmpHoy.getFullYear()}-${tmpHoy.getMonth() + 1}`;
         const codigoDia = `${anioMes}_Sem_${semanaActiva}_${diaSeleccionado}`;
         
@@ -4351,7 +4100,6 @@ async function procesarCheckin(diaSeleccionado) {
         
         cargarAlumnos();
         
-        // Recargamos la vista para que pinte de verde
         if (alumnoSeleccionadoId === idSeguro && document.getElementById("pantalla-detalle-alumno").style.display === "block") {
             abrirGrillaAlumno(idSeguro);
         }
@@ -4363,7 +4111,6 @@ async function procesarCheckin(diaSeleccionado) {
     }
 }
 
-// 4. El motor para DESHACER la asistencia en LA NUBE
 function deshacerAsistencia(alumnoId) {
     pedirConfirmacion(
         "Deshacer Asistencia",
@@ -4380,7 +4127,6 @@ function deshacerAsistencia(alumnoId) {
                 let fechaAnterior = null;
                 if (historialViejo && historialViejo.length > 0) fechaAnterior = historialViejo[0].fecha;
 
-                // ---> NUEVO: BORRAMOS EL DÍA ESPECÍFICO EN SUPABASE <---
                 const anioMes = `${tmpHoy.getFullYear()}-${tmpHoy.getMonth() + 1}`;
                 if (window.asistenciasDiasAlumno) {
                     let dias = ["D1", "D2", "D3", "D4", "D5"];
@@ -4400,7 +4146,6 @@ function deshacerAsistencia(alumnoId) {
 
                 cargarAlumnos();
                 
-                // Recargamos la vista para que quite el verde
                 if (alumnoSeleccionadoId === alumnoId && document.getElementById("pantalla-detalle-alumno").style.display === "block") {
                     abrirGrillaAlumno(alumnoId);
                 }
@@ -4412,12 +4157,8 @@ function deshacerAsistencia(alumnoId) {
     );
 }
 
-// ==========================================
-// CLONAR SEMANA COMPLETA
-// ==========================================
 async function clonarSemanaCompleta(semanaOrigen, semanaDestino) {
     try {
-        // 1. Buscamos TODOS los ejercicios del alumno en la Semana 1 (de todos los días y barras)
         const { data: ejerciciosOrigen, error: errOrig } = await clienteSupabase
             .from('rutinas_planificadas')
             .select('*')
@@ -4431,11 +4172,10 @@ async function clonarSemanaCompleta(semanaOrigen, semanaDestino) {
             return;
         }
 
-        // 2. Creamos copias exactas, pero le cambiamos el número de semana
         const nuevasCopias = ejerciciosOrigen.map(ej => ({
             alumno_id: ej.alumno_id,
             dia_semana: ej.dia_semana,
-            semana: semanaDestino, // Le ponemos la semana nueva (ej: 2)
+            semana: semanaDestino, 
             categoria: ej.categoria,
             zona_muscular: ej.zona_muscular,
             ejercicio_nombre: ej.ejercicio_nombre,
@@ -4446,13 +4186,11 @@ async function clonarSemanaCompleta(semanaOrigen, semanaDestino) {
             orden: ej.orden
         }));
 
-        // 3. Insertamos todo de golpe en la base de datos
         const { error: errInsert } = await clienteSupabase.from('rutinas_planificadas').insert(nuevasCopias);
         if (errInsert) throw errInsert;
 
         mostrarAlerta("¡Semana Copiada!", `Se clonó la rutina entera a la Semana ${semanaDestino}. Ahora podés modificarla sin alterar el resto.`);
         
-        // 4. Refrescamos la pantalla para mostrar los ejercicios nuevos
         dibujarCategoriasAlumno(); 
         cargarEjerciciosCategoriaBD();
 
@@ -4464,43 +4202,30 @@ async function clonarSemanaCompleta(semanaOrigen, semanaDestino) {
 
 
 function actualizarNavActivo(pestaña) {
-    // Apagamos todas las pestañas primero
     document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('activo'));
     
-    // Encendemos solo la que nos interesa
     if (pestaña === 'alumnos') document.querySelectorAll('.tab-alumnos').forEach(btn => btn.classList.add('activo'));
     if (pestaña === 'rutinas') document.querySelectorAll('.tab-rutinas').forEach(btn => btn.classList.add('activo'));
     if (pestaña === 'informe') document.querySelectorAll('.tab-informe').forEach(btn => btn.classList.add('activo'));
 }
 
 function volverAlDashboardDesdeAdmin() {
-    // 1. Apagamos el panel de informe
     document.getElementById("pantalla-admin").style.display = "none";
     
-    // 2. Encendemos el Dashboard (el del profesor que está logueado)
     document.getElementById("pantalla-dashboard").style.display = "block";
     
-    // 3. Cargamos los alumnos específicos de este profesor
-    // (Como el ID ya está guardado en la variable 'profeActivoId', carga los suyos)
     cargarAlumnos();
-    
-    // 4. Actualizamos el menú inferior para que marque "Alumnos" como activo
+
     actualizarNavActivo('alumnos');
 }
 
 
-
-
-
-// ==========================================
-// SISTEMA DE INFORME EXCEL Y PLANILLAS
-// ==========================================
-let alumnosParaInformeActual = []; // Memoria de los alumnos que procesamos
-let porcentajeGymActualParaInforme = 30; // <-- NUEVO: Memoria del porcentaje
+let alumnosParaInformeActual = []; 
+let porcentajeGymActualParaInforme = 30; 
 
 function abrirModalInformeProfe() {
     document.getElementById("modal-informe-profe").style.display = "flex";
-    cambiarVistaInforme('actual'); // Siempre arranca en la tabla
+    cambiarVistaInforme('actual'); 
     cargarDatosParaInforme();
 }
 
@@ -4512,18 +4237,18 @@ function cambiarVistaInforme(vista) {
     const track = document.getElementById("track-informe");
     const btnActual = document.getElementById("tab-informe-actual");
     const btnHistorial = document.getElementById("tab-informe-historial");
-    const filtroOrden = document.getElementById("contenedor-filtros-informe"); // Capturamos el nuevo filtro
+    const filtroOrden = document.getElementById("contenedor-filtros-informe"); 
 
     if (vista === 'actual') {
         track.style.transform = 'translateX(0%)';
         btnActual.classList.add("activo");
         btnHistorial.classList.remove("activo");
-        if (filtroOrden) filtroOrden.style.display = "flex"; // Lo mostramos en la tabla
+        if (filtroOrden) filtroOrden.style.display = "flex"; 
     } else {
         track.style.transform = 'translateX(-50%)';
         btnHistorial.classList.add("activo");
         btnActual.classList.remove("activo");
-        if (filtroOrden) filtroOrden.style.display = "none"; // Lo ocultamos en el historial
+        if (filtroOrden) filtroOrden.style.display = "none"; 
         dibujarHistorialInformes(); 
     }
 }
@@ -4644,7 +4369,6 @@ async function cargarDatosParaInforme() {
             let cuota = a.cuota || 0;
             totalDinero += cuota;
             
-            // LA MAGIA DE LA SUMA: Usa el del alumno o recae en el del profe
             let porc = a.porcentaje_gym !== undefined && a.porcentaje_gym !== null ? a.porcentaje_gym : porcentajeGymActualParaInforme;
             parteGym += cuota * (porc / 100);
 
@@ -4690,9 +4414,6 @@ async function cargarDatosParaInforme() {
     }
 }
 
-// ==========================================
-// 1. GUARDAR HISTORIAL GLOBAL (ADMIN) EN LA NUBE
-// ==========================================
 async function guardarHistorialAdmin(fechaString, contenidoDelExcel) {
     try {
         const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
@@ -4705,7 +4426,7 @@ async function guardarHistorialAdmin(fechaString, contenidoDelExcel) {
             datos: contenidoDelExcel
         }]);
         
-        dibujarHistorialAdmin(); // Refresca la vista
+        dibujarHistorialAdmin(); 
     } catch (e) { console.error("Error al guardar historial admin en nube:", e); }
 }
 
@@ -4714,10 +4435,9 @@ async function dibujarHistorialAdmin() {
     contenedor.innerHTML = "<p style='text-align:center; color:#555;'>Cargando historial de la nube...</p>";
 
     try {
-        // Traemos los últimos 15 informes ordenados por el más reciente
         const { data: historial, error } = await clienteSupabase
             .from('historial_informes')
-            .select('id, fecha, hora') // Traemos solo los títulos para que cargue súper rápido
+            .select('id, fecha, hora')
             .eq('tipo', 'global')
             .order('id', { ascending: false })
             .limit(15);
@@ -4751,9 +4471,6 @@ async function dibujarHistorialAdmin() {
     } catch (e) { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar el historial.</p>"; }
 }
 
-// ==========================================
-// 2. GUARDAR HISTORIAL INDIVIDUAL EN LA NUBE
-// ==========================================
 async function guardarEnHistorial(fechaString, contenidoDelExcel) {
     try {
         const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
@@ -4812,12 +4529,8 @@ async function dibujarHistorialInformes() {
     } catch (e) { contenedor.innerHTML = "<p style='text-align:center; color:#e74c3c;'>Error al cargar el historial.</p>"; }
 }
 
-// ==========================================
-// 3. DESCARGAR EL ARCHIVO DESDE LA NUBE
-// ==========================================
 async function volverADescargarExcelDeNube(idRegistro, tipo) {
     try {
-        // Traemos la "data pesada" (el Excel) solo cuando el profe aprieta "Descargar"
         const { data: registro, error } = await clienteSupabase
             .from('historial_informes')
             .select('fecha, datos')
@@ -4854,9 +4567,6 @@ async function volverADescargarExcelDeNube(idRegistro, tipo) {
     }
 }
 
-// ==========================================
-// GENERADOR DE ARCHIVO EXCEL REAL (.xlsx) - RESUMEN LADO A LADO
-// ==========================================
 function descargarExcelProfe() {
     if (!alumnosParaInformeActual || alumnosParaInformeActual.length === 0) {
         mostrarAlerta("Sin datos", "No hay alumnos para generar el informe.");
@@ -4959,42 +4669,27 @@ function descargarExcelProfe() {
     mostrarAlerta("¡Descarga Exitosa!", "El informe se descargó correctamente con los porcentajes reales.");
 }
 
-// ==========================================
-// DETECTOR AUTOMÁTICO DE CONEXIÓN A INTERNET
-// ==========================================
-
-// 1. Cuando el celular pierde la conexión (Wi-Fi o Datos)
 window.addEventListener('offline', () => {
     document.getElementById('modal-offline').style.display = 'flex';
     
-    // Si el celular soporta vibración, tira tres latidos de alerta
     if (navigator.vibrate) {
         navigator.vibrate([50, 50, 50]); 
     }
 });
 
-// 2. Cuando el celular recupera la conexión
 window.addEventListener('online', () => {
-    // Cerramos el cartel rojo automáticamente
     document.getElementById('modal-offline').style.display = 'none';
-    
-    // Y le avisamos con tu alerta inteligente (la del pulgar verde) que todo volvió a la normalidad
     mostrarAlerta("¡Conexión Exitosa!", "Ya tenés internet de nuevo. Volviste a estar conectado a la base de datos.");
 });
 
-// ==========================================
-// SISTEMA DE CHIPS (FILTROS) EDITABLES
-// ==========================================
 let chipsActuales = [];
 let sortableChips = null; 
 
-// 1. CARGAR CHIPS DESDE LA NUBE
 async function cargarChips() {
     const contenedor = document.getElementById("contenedor-chips-dinamicos");
     if (contenedor) contenedor.innerHTML = "<p style='color:#888; font-size:0.8rem; margin-left:15px;'>Cargando filtros...</p>";
 
     try {
-        // Le preguntamos a Supabase cuáles son los chips de este profesor
         const { data: profe, error } = await clienteSupabase
             .from('profesores')
             .select('chips_filtros')
@@ -5003,11 +4698,9 @@ async function cargarChips() {
 
         if (error) throw error;
 
-        // Si el profe ya había guardado chips en la nube, los usamos
         if (profe && profe.chips_filtros && profe.chips_filtros.length > 0) {
             chipsActuales = profe.chips_filtros;
         } else {
-            // Si es un profe nuevo y la columna está vacía, le damos estos por defecto
             chipsActuales = [
                 "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación", 
                 "Hyrox", "Crossfit", "Cuota al día", "Vencida", "Con rutina", "Libre"
@@ -5017,7 +4710,6 @@ async function cargarChips() {
 
     } catch (e) {
         console.error("Error al cargar chips de la nube:", e);
-        // Si falla el internet, cargamos los de defecto para que no se rompa la app
         chipsActuales = [
             "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación", 
             "Hyrox", "Crossfit", "Cuota al día", "Vencida", "Con rutina", "Libre"
@@ -5026,7 +4718,6 @@ async function cargarChips() {
     }
 }
 
-// 2. VENTANA DE EDICIÓN CON EL MOTOR DE ARRASTRE CORREGIDO
 function abrirModalEditarChips() {
     document.getElementById("modal-editar-chips").style.display = "flex";
     const contenedor = document.getElementById("lista-chips-editables");
@@ -5041,13 +4732,12 @@ function abrirModalEditarChips() {
     }
     
     sortableChips = new Sortable(contenedor, {
-        handle: '.handle-arrastre', // <--- Solo arrastra tocando el ícono, libera el teclado
+        handle: '.handle-arrastre', 
         animation: 200, 
         ghostClass: "tarjeta-indicador-caida", 
     });
 }
 
-// 3. FILA DEL CHIP CON EL ÍCONO "AGARRABLE"
 function agregarChipFila(valor = "") {
     const contenedor = document.getElementById("lista-chips-editables");
     
@@ -5073,7 +4763,6 @@ function agregarChipFila(valor = "") {
     setTimeout(() => { contenedor.scrollTop = contenedor.scrollHeight; }, 10);
 }
 
-// 4. GUARDAR CHIPS (EN PANTALLA Y EN SUPABASE)
 async function guardarEdicionChips() {
     const inputs = document.querySelectorAll(".input-chip-edit");
     let nuevosChips = [];
@@ -5085,7 +4774,6 @@ async function guardarEdicionChips() {
     
     chipsActuales = nuevosChips;
     
-    // Cerramos y dibujamos rápido para no hacer esperar al profe
     document.getElementById("modal-editar-chips").style.display = "none";
     dibujarChipsPrincipales();
     
@@ -5096,7 +4784,6 @@ async function guardarEdicionChips() {
         if (typeof cargarAlumnos === "function") cargarAlumnos();
     }
 
-    // MANDAMOS LOS DATOS A SUPABASE DE FONDO (Silent Save)
     try {
         await clienteSupabase.from('profesores')
             .update({ chips_filtros: chipsActuales })
@@ -5110,17 +4797,14 @@ function dibujarChipsPrincipales() {
     const contenedor = document.getElementById("contenedor-chips-dinamicos");
     if (!contenedor) return;
     
-    // 1. EL LÁPIZ NARANJA (Siempre primero, nunca se borra)
     let html = `
         <button class="chip" style="padding: 0 12px; border-color: #f39c12; color: #f39c12; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="abrirModalEditarChips()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         </button>
     `;
-    
-    // 2. BOTÓN "TODOS"
+
     html += `<button class="chip activo" onclick="filtrarPorChip(this, 'Todos')">Todos</button>`;
     
-    // 3. LOS CHIPS PERSONALIZADOS
     chipsActuales.forEach(chip => {
         html += `<button class="chip" onclick="filtrarPorChip(this, '${chip}')">${chip}</button>`;
     });
@@ -5128,12 +4812,8 @@ function dibujarChipsPrincipales() {
     contenedor.innerHTML = html;
 }
 
-
-// --- FUNCIONES PARA SERIES DINÁMICAS ---
-
 function agregarFilaSerie(idContenedor) {
     const contenedor = document.getElementById(idContenedor);
-    // Cuenta cuántas filas hay y le suma 1 para hacer la secuencia automática inicial
     const totalFilas = contenedor.querySelectorAll('.fila-serie').length + 1;
     
     const nuevaFila = document.createElement('div');
@@ -5151,14 +4831,11 @@ function agregarFilaSerie(idContenedor) {
 }
 
 function eliminarFilaSerie(botonEliminar) {
-    // Busca en qué contenedor (pack o alumno) estamos trabajando
     const contenedor = botonEliminar.closest('div[id^="contenedor-filas-series"]');
     
-    // Evitamos borrar la última fila que queda
     if (contenedor.querySelectorAll('.fila-serie').length > 1) {
         const fila = botonEliminar.closest('.fila-serie');
         fila.remove();
-        // NOTA: Ya no llamamos a reenumerar, para respetar si el profe puso un número a mano.
     } else {
         alert("El ejercicio debe tener al menos 1 serie.");
     }
@@ -5172,7 +4849,6 @@ function cerrarModalTerminos() {
     document.getElementById("modal-terminos").style.display = "none";
 }
 
-// Animación para abrir/cerrar un bloque
 function toggleSubbloque(idCuerpo, elementoHeader) {
     const cuerpo = document.getElementById(idCuerpo);
     const flecha = elementoHeader.querySelector('.flecha-subbloque');
@@ -5186,7 +4862,6 @@ function toggleSubbloque(idCuerpo, elementoHeader) {
     }
 }
 
-// Ventana emergente "Los que ya tenés"
 async function abrirListaSubbloques() {
     inputDestinoEjercicio = 'input-ej-subbloque';
     const contenedor = document.getElementById("contenedor-botones-ejercicios");
@@ -5208,7 +4883,6 @@ async function abrirListaSubbloques() {
                 const btn = document.createElement("button");
                 btn.style.cssText = "display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; border-radius: 10px; font-size: 1.05rem; background: #2c3e50; color: #fff; border: 1px solid #34495e; cursor: pointer; transition: 0.2s; word-break: break-word; line-height: 1.2;";
                 btn.innerText = sb;
-                // Reutilizamos tu función perfecta que inyecta el texto
                 btn.onclick = () => seleccionarEjercicioDesdeLista(sb); 
                 contenedor.appendChild(btn);
             });
@@ -5222,7 +4896,7 @@ async function abrirListaSubbloques() {
 
 function toggleNotasEjercicio(idCuerpo, elementoHeader) {
     const cuerpo = document.getElementById(idCuerpo);
-    const flecha = elementoHeader.querySelector('svg:last-child'); // Atrapa la flechita de la derecha
+    const flecha = elementoHeader.querySelector('svg:last-child');
 
     if (cuerpo.style.display === "none") {
         cuerpo.style.display = "block";
@@ -5235,15 +4909,11 @@ function toggleNotasEjercicio(idCuerpo, elementoHeader) {
 
 
 
-// ==========================================
-// CEREBRO DE SERIES (LÓGICA HÍBRIDA)
-// ==========================================
 function inicializarModalSeries(tipo, arraySeries) {
     const idContenedor = tipo === 'pack' ? 'contenedor-filas-series-pack' : 'contenedor-filas-series';
     const contenedor = document.getElementById(idContenedor);
     contenedor.innerHTML = "";
-    
-    // Si no hay series, arranca con una sola caja vacía
+
     if (!arraySeries || arraySeries.length === 0) {
         contenedor.innerHTML = `
             <div class="fila-serie">
@@ -5259,7 +4929,6 @@ function inicializarModalSeries(tipo, arraySeries) {
         return;
     }
 
-    // Evaluamos si las series son exactamente iguales
     let sonIguales = true;
     const s1 = arraySeries[0];
     for(let i=1; i<arraySeries.length; i++) {
@@ -5268,7 +4937,6 @@ function inicializarModalSeries(tipo, arraySeries) {
         }
     }
 
-    // Si son idénticas, las aplastamos en 1 solo renglón para no saturar al profe
     if (sonIguales && arraySeries.length > 1) {
         contenedor.innerHTML = `
             <div class="fila-serie">
@@ -5282,7 +4950,6 @@ function inicializarModalSeries(tipo, arraySeries) {
             </div>
         `;
     } else {
-        // Si son distintas, se despliegan todas para que vea qué hizo en cada una
         arraySeries.forEach(s => {
             contenedor.innerHTML += `
                 <div class="fila-serie">
@@ -5298,12 +4965,10 @@ function inicializarModalSeries(tipo, arraySeries) {
         });
     }
 
-    // ---> NUEVO: RESTAURAR EL BOTÓN SEGÚN SI ESTÁ UNIFICADO O NO
     const idBoton = tipo === 'pack' ? 'btn-toggle-series-pack' : 'btn-toggle-series-rutina';
     const boton = document.getElementById(idBoton);
     if (boton) {
         if (sonIguales) {
-            // Modo Naranja (Unificado)
             boton.setAttribute('data-modo', 'unificado');
             boton.style.background = 'rgba(243, 156, 18, 0.1)';
             boton.style.color = '#f39c12';
@@ -5313,7 +4978,6 @@ function inicializarModalSeries(tipo, arraySeries) {
                 Modificar individualmente cada serie
             `;
         } else {
-            // Modo Gris (Desglosado)
             boton.setAttribute('data-modo', 'desglosado');
             boton.style.background = '#2c2c2c';
             boton.style.color = '#aaaaaa';
@@ -5333,11 +4997,9 @@ function toggleSeries(tipo) {
     const boton = document.getElementById(idBoton);
     const filas = contenedor.querySelectorAll('.fila-serie');
     
-    // Leemos en qué estado está el botón
     const modoActual = boton.getAttribute('data-modo') || 'unificado';
 
     if (modoActual === 'unificado') {
-        // --- ACCIÓN: DESGLOSAR (Separar series) ---
         if (filas.length === 1) {
             const primerFila = filas[0];
             const cantidad = parseInt(primerFila.querySelector('.input-serie-numero').value) || 1;
@@ -5362,9 +5024,8 @@ function toggleSeries(tipo) {
                     `;
                 }
                 
-                // Transformamos el botón a GRIS y cambiamos el texto
                 boton.setAttribute('data-modo', 'desglosado');
-                boton.style.background = '#2c2c2c'; // Gris oscuro
+                boton.style.background = '#2c2c2c'; 
                 boton.style.color = '#aaaaaa';
                 boton.style.borderColor = '#444444';
                 boton.innerHTML = `
@@ -5376,16 +5037,13 @@ function toggleSeries(tipo) {
             }
         }
     } else {
-        // --- ACCIÓN: UNIFICAR (Volver a juntar) ---
         if (filas.length > 0) {
-            // Tomamos los datos de la primera fila y sumamos cuántas hay en total
             const primerFila = filas[0];
             const cantidadTotal = filas.length; 
             const fuerza = primerFila.querySelector('.input-serie-fuerza').value;
             const reps = primerFila.querySelector('.input-serie-reps').value;
             const rir = primerFila.querySelector('.input-serie-rir').value;
 
-            // Aplastamos todo de nuevo en 1 sola fila multiplicadora
             contenedor.innerHTML = `
                 <div class="fila-serie">
                     <input type="number" class="input-serie-numero input-modal" value="${cantidadTotal}" style="text-align: center; padding: 8px 2px;">
@@ -5399,7 +5057,6 @@ function toggleSeries(tipo) {
             `;
         }
 
-        // Restauramos el botón a su color NARANJA original
         boton.setAttribute('data-modo', 'unificado');
         boton.style.background = 'rgba(243, 156, 18, 0.1)';
         boton.style.color = '#f39c12';
@@ -5418,7 +5075,6 @@ function extraerSeriesDelModal(tipo) {
     let arraySeries = [];
     
     if (filas.length === 1) {
-        // Si hay una sola fila, lee el número. Si dice "5", genera 5 series iguales en segundo plano
         const fila = filas[0];
         let cant = parseInt(fila.querySelector('.input-serie-numero').value) || 1;
         let fuerzaVal = fila.querySelector('.input-serie-fuerza').value || "0";
@@ -5429,7 +5085,6 @@ function extraerSeriesDelModal(tipo) {
             arraySeries.push({ numero: i, fuerza: fuerzaVal, reps: repsVal, rir: rirVal });
         }
     } else {
-        // Si hay varias filas, lee lo que el profe haya modificado individualmente
         filas.forEach((fila, index) => {
             let numSerie = fila.querySelector('.input-serie-numero').value || (index + 1);
             let fuerzaVal = fila.querySelector('.input-serie-fuerza').value || "0";
@@ -5441,16 +5096,12 @@ function extraerSeriesDelModal(tipo) {
     return JSON.stringify(arraySeries);
 }
 
-// -----------------------------------------------------------
-// DIBUJO INTELIGENTE DE LAS SERIES EN LA TARJETA
-// -----------------------------------------------------------
 function generarHtmlSeries(seriesRepsJson, idUnico) {
     let seriesObj = [];
     try { if (seriesRepsJson && typeof seriesRepsJson === 'string') seriesObj = JSON.parse(seriesRepsJson); } catch(e) {}
     
     if (seriesObj.length === 0) return `<span style="word-break: break-word;">-</span>`;
     
-    // Evaluamos si son idénticas para decidir qué mostrar
     let sonIguales = true;
     const s1 = seriesObj[0];
     for(let i=1; i<seriesObj.length; i++) {
@@ -5481,20 +5132,12 @@ function generarHtmlSeries(seriesRepsJson, idUnico) {
 function sumarSerieSimple(tipo) {
     const prefijoInput = tipo === 'pack' ? 'input-pack-simple' : 'input-simple';
     const inputCant = document.getElementById(prefijoInput + '-cant');
-    // Le suma 1 al valor que tenga en la cajita
     inputCant.value = (parseInt(inputCant.value) || 0) + 1;
 }
 
-
-// ==========================================
-// SISTEMA DE CAMBIO DE CONTRASEÑA
-// ==========================================
-
 function abrirModalCambiarPassword() {
-    // Cerramos el modal de editar perfil para que no se superpongan
     document.getElementById("modal-editar-profe").style.display = "none";
     
-    // Vaciamos las cajas por seguridad
     document.getElementById("input-nueva-pass").value = "";
     document.getElementById("input-confirmar-pass").value = "";
     
@@ -5524,13 +5167,11 @@ async function guardarNuevaPassword() {
         return;
     }
 
-    // Efecto visual de carga
     const btn = document.getElementById("btn-guardar-pass");
     const textoOriginal = btn.innerText;
     btn.innerText = "Guardando...";
 
     try {
-        // MAGIA: Como el profe ya inició sesión, Supabase sabe exactamente de quién es el cambio
         const { data, error } = await clienteSupabase.auth.updateUser({
             password: nuevaPass
         });
@@ -5549,40 +5190,30 @@ async function guardarNuevaPassword() {
     }
 }
 
-
-// ==========================================
-// SISTEMA DE BOTTOM SHEET (VISTA Y EDICIÓN DE EJERCICIOS)
-// ==========================================
-
-let ejerciciosActualesCache = []; // Guardamos los ejercicios al cargar la pantalla
-let ejercicioBSActivo = null; // El ejercicio que estamos viendo ahora
+let ejerciciosActualesCache = []; 
+let ejercicioBSActivo = null; 
 let isDraggingBS = false;
 let startYBS = 0;
 let currentYBS = 0;
 
-// Buscar alias para mostrarlos debajo de la foto
 function obtenerListaAliasString(nombreOficial) {
     if (!nombreOficial) return "";
     const oficialNorm = normalizarTexto(nombreOficial.trim());
     
-    // 1. Descubrimos cuál es el nombre "padre" (canónico)
     const nombreCanonico = aliasEjercicios[oficialNorm] || oficialNorm;
     
     let nombresRelacionados = [];
 
-    // 2. Si el título no es el nombre padre, sumamos el nombre padre a la lista de alias
     if (nombreCanonico !== oficialNorm) {
         nombresRelacionados.push(nombreCanonico);
     }
 
-    // 3. Buscamos TODOS los alias hermanos que apunten al mismo padre
     for (const [alias, canonico] of Object.entries(aliasEjercicios)) {
         if (canonico === nombreCanonico && alias !== oficialNorm && alias !== nombreCanonico) {
             nombresRelacionados.push(alias);
         }
     }
 
-    // 4. Los ponemos bonitos (Primera letra mayúscula)
     nombresRelacionados = nombresRelacionados.map(nombre => 
         nombre.charAt(0).toUpperCase() + nombre.slice(1)
     );
@@ -5593,25 +5224,20 @@ function obtenerListaAliasString(nombreOficial) {
 }
 
 function abrirBottomSheetEjercicio(idEjercicio) {
-    // Buscamos el ejercicio en la memoria caché convirtiendo ambos a String para evitar fallos
     ejercicioBSActivo = ejerciciosActualesCache.find(ej => String(ej.id) === String(idEjercicio));
     if (!ejercicioBSActivo) return;
 
     const bsContent = document.getElementById("bottom-sheet-content");
     
-    // --- MAGIA 1: Reseteamos cualquier movimiento previo antes de abrir ---
     bsContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
     bsContent.style.transform = ''; 
 
-    // 1. Limpiamos y preparamos el modal
     document.getElementById("bs-botones-edicion").style.display = "none";
     document.getElementById("bs-btn-editar").style.display = "flex";
     
-    // 2. Título y Alias
     document.getElementById("bs-titulo").innerText = ejercicioBSActivo.ejercicio_nombre;
     document.getElementById("bs-alias").innerText = obtenerListaAliasString(ejercicioBSActivo.ejercicio_nombre);
 
-    // 3. Imagen (Reutilizamos la animación gigante)
     const clave = normalizarTexto(ejercicioBSActivo.ejercicio_nombre.trim());
     const nombreOficial = aliasEjercicios[clave] || clave;
     const frames = mapaAnimaciones[nombreOficial];
@@ -5623,20 +5249,17 @@ function abrirBottomSheetEjercicio(idEjercicio) {
         imgWrapper.innerHTML = `<div style="width: 100%; height: 100%; background: #e0e0e0; display:flex; justify-content:center; align-items:center; color:#888;">Sin imagen</div>`;
     }
 
-    // 4. Llenamos los datos (Descanso y Notas)
     const inputDescanso = document.getElementById("bs-input-descanso");
     const inputNotas = document.getElementById("bs-input-notas");
     
     inputDescanso.value = ejercicioBSActivo.descanso || "Sin descanso";
     inputNotas.value = ejercicioBSActivo.notas || "Sin notas";
     
-    // Aseguramos que arranquen en modo "Lectura"
     [inputDescanso, inputNotas].forEach(input => {
         input.readOnly = true;
         input.classList.remove("bs-input-modo-edicion");
     });
 
-    // 5. Llenamos las Series
     const contenedorSeries = document.getElementById("bs-contenedor-series");
     contenedorSeries.innerHTML = "";
     
@@ -5658,10 +5281,8 @@ function abrirBottomSheetEjercicio(idEjercicio) {
         });
     }
 
-    // 6. Mostramos el modal
     const overlay = document.getElementById("bottom-sheet-overlay");
     overlay.style.display = "flex";
-    // Pequeño delay para que la clase de animación haga efecto
     setTimeout(() => overlay.classList.add("activo"), 10);
 }
 
@@ -5673,17 +5294,14 @@ function cerrarBottomSheet() {
     
     setTimeout(() => { 
         overlay.style.display = "none"; 
-        // --- MAGIA 2: Al terminar de ocultarse, borramos el "empuje" del dedo ---
         bsContent.style.transform = ''; 
-    }, 300); // Espera a que baje antes de ocultarlo
+    }, 300); 
 }
 
 function activarEdicionBS() {
-    // Escondemos el lápiz y mostramos los botones de guardar/cancelar
     document.getElementById("bs-btn-editar").style.display = "none";
     document.getElementById("bs-botones-edicion").style.display = "flex";
 
-    // Activamos todos los inputs para que se puedan editar
     document.querySelectorAll('.bs-input-edit').forEach(input => {
         input.readOnly = false;
         input.classList.add("bs-input-modo-edicion");
@@ -5691,16 +5309,13 @@ function activarEdicionBS() {
 }
 
 function cancelarEdicionBS() {
-    // Si cancela, volvemos a cargar los datos originales
     abrirBottomSheetEjercicio(ejercicioBSActivo.id); 
 }
 
 async function guardarEdicionBS() {
-    // Juntamos los datos nuevos de los inputs
     const nuevoDescanso = document.getElementById("bs-input-descanso").value;
     const nuevasNotas = document.getElementById("bs-input-notas").value;
     
-    // Armamos el JSON de las series con los valores nuevos
     let nuevasSeries = [];
     const filasSeries = document.querySelectorAll("#bs-contenedor-series .fila-serie");
     filasSeries.forEach((fila, index) => {
@@ -5723,7 +5338,7 @@ async function guardarEdicionBS() {
         if (error) throw error;
         
         cerrarBottomSheet();
-        cargarEjerciciosCategoriaBD(); // Refresca la lista de fondo
+        cargarEjerciciosCategoriaBD(); 
         mostrarAlerta("Éxito", "Los cambios se guardaron correctamente.");
 
     } catch (e) {
@@ -5731,21 +5346,19 @@ async function guardarEdicionBS() {
     }
 }
 
-// LOGICA PARA EL GESTO DE DESLIZAR HACIA ABAJO (SCROLL DOWN)
 const bsDragArea = document.getElementById('bs-drag-area');
 const bsContent = document.getElementById('bottom-sheet-content');
 
 bsDragArea.addEventListener('touchstart', (e) => {
     startYBS = e.touches[0].clientY;
     isDraggingBS = true;
-    bsContent.style.transition = 'none'; // Sacamos la animación para que siga el dedo
+    bsContent.style.transition = 'none';
 }, {passive: true});
 
 bsDragArea.addEventListener('touchmove', (e) => {
     if (!isDraggingBS) return;
     currentYBS = e.touches[0].clientY;
     const dif = currentYBS - startYBS;
-    // Solo permite moverlo hacia abajo
     if (dif > 0) {
         bsContent.style.transform = `translateY(${dif}px)`;
     }
@@ -5758,27 +5371,20 @@ bsDragArea.addEventListener('touchend', () => {
     const dif = currentYBS - startYBS;
     bsContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
     
-    // Si lo arrastró más de 100px para abajo, lo cerramos
     if (dif > 100) {
-        // --- MAGIA 3: Lo empujamos visualmente hasta abajo de todo ---
         bsContent.style.transform = `translateY(100%)`; 
         cerrarBottomSheet();
     } else {
-        // Si no, vuelve a rebotar hacia arriba a su posición original intacta
         bsContent.style.transform = ''; 
     }
 });
 
-// VISOR FULLSCREEN DE IMÁGENES
 function abrirImagenFullscreen() {
     const visor = document.getElementById("visor-fullscreen");
     const contenedorImg = document.getElementById("fullscreen-img-container");
     
-    // Le copiamos la misma imagen/animación que tiene la tarjeta activa
     contenedorImg.innerHTML = document.getElementById("bs-imagen-wrapper").innerHTML;
     
-    // LA SOLUCIÓN: Obligamos al contenedor a ser un cuadrado gigante (aspect-ratio: 1/1)
-    // para que la imagen adentro no colapse a 0 píxeles de altura.
     contenedorImg.style.aspectRatio = "1 / 1";
     contenedorImg.style.width = "100%";
     
@@ -5789,30 +5395,67 @@ function cerrarImagenFullscreen() {
     document.getElementById("visor-fullscreen").style.display = "none";
 }
 
-// NUEVO: ABRIR LA IMAGEN EN GRANDE DIRECTO DESDE CUALQUIER LISTA
 function abrirImagenFullscreenDirecto(elementoImg, event) {
-    // 1. FUNDAMENTAL: Frena el clic acá para que la tarjeta no abra el Bottom Sheet de fondo
     if (event) event.stopPropagation();
 
     const visor = document.getElementById("visor-fullscreen");
     const contenedorImg = document.getElementById("fullscreen-img-container");
     
-    // 2. Vaciamos el contenedor gigante
     contenedorImg.innerHTML = "";
     
-    // 3. Clonamos exactamente la imagen que el profe tocó
     const clon = elementoImg.cloneNode(true);
     
-    // 4. Le sacamos el onclick al clon para que no haga bucles raros y lo estiramos
     clon.removeAttribute("onclick");
     clon.style.width = "100%";
     clon.style.height = "100%";
-    clon.style.borderRadius = "16px"; // Le damos un bordecito lindo para cuando se vea grande
+    clon.style.borderRadius = "16px"; 
 
-    // 5. Lo metemos en la pantalla y la mostramos
     contenedorImg.appendChild(clon);
     contenedorImg.style.aspectRatio = "1 / 1";
     contenedorImg.style.width = "100%";
     
     visor.style.display = "flex";
 }
+
+document.addEventListener('input', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        
+        let valorOriginal = e.target.value;
+        const idInput = e.target.id || '';
+        const esCampoRutina = idInput.includes('-ej-') || 
+                              idInput.includes('bs-input-') || 
+                              idInput.includes('-serie-');
+
+        if (e.target.type === 'text' || e.target.tagName === 'TEXTAREA') {
+            
+            if (!idInput.includes('foto') && e.target.type !== 'email') {
+                
+                if (esCampoRutina) {
+                    const tieneSimbolosRutina = /[<>{}]/g.test(valorOriginal);
+                    
+                    if (tieneSimbolosRutina) {
+                        mostrarAlerta("Símbolo no permitido", "En los textos de las rutinas no se permiten los símbolos: < > { }");
+                        let valorLimpio = valorOriginal.replace(/[<>{}]/g, '');
+                        e.target.value = valorLimpio;
+                    }
+                } else {
+                    const tieneSimbolos = /[<>{}`=]/g.test(valorOriginal); 
+                    const tieneHttp = /http/i.test(valorOriginal);     
+
+                    if (tieneSimbolos || tieneHttp) {
+                        mostrarAlerta("Símbolo no permitido", "Por seguridad no se permiten enlaces web ni usar los símbolos: < > { } ` =");
+                        let valorLimpio = valorOriginal.replace(/[<>{}`=]/g, '').replace(/http/gi, '');
+                        e.target.value = valorLimpio;
+                    }
+                }
+            }
+        }
+
+        if (e.target.type === 'number') {
+            if (parseFloat(valorOriginal) < 0) {
+                mostrarAlerta("Valor inválido", "No se permiten ingresar números negativos.");
+                e.target.value = Math.abs(valorOriginal);
+            }
+        }
+    }
+});
