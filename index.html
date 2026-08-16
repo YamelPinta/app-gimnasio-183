@@ -18,7 +18,6 @@
     <link rel="apple-touch-icon" href="./imagenes/icono-192.png">
     <link rel="icon" href="./imagenes/icono-192.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- NUEVO MOTOR PARA CREAR EXCEL REAL (.xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -32,21 +31,18 @@
             </button>
 
             <div class="logo-container-inicio">
-                <!-- Logo para modo oscuro -->
                 <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="img-logo-inicio logo-modo-oscuro-inicio">
-                <!-- Logo para modo claro -->
+    
                 <img src="imagenes/LOGOFULLCOLOR.png" alt="18.3 Clubhouse" class="img-logo-inicio logo-modo-claro-inicio">
             </div>
 
             <div class="contenedor-botones-rol">
                 <div class="tarjeta-rol" onclick="irPantallaAlumno()">
-                    <!-- Le sacamos el style fijo y le ponemos la clase fondo-alumno -->
                     <div class="fondo-tarjeta-rol fondo-alumno"></div>
                     
                     <div class="contenido-rol">
-                        <!-- Ícono blanco (Modo Oscuro) -->
                         <img src="imagenes/ICONO ALUMNO.png" class="icono-rol icono-rol-blanco" style="width: 65px; margin-left: 0px; margin-right: 12px;">
-                        <!-- Ícono negro (Modo Claro) -->
+             
                         <img src="imagenes/ICONO ALUMNO NEGRO.png" class="icono-rol icono-rol-negro" style="width: 65px; margin-left: 0px; margin-right: 12px;">
                         
                         <div class="textos-rol">
@@ -59,13 +55,11 @@
                 </div>
 
                 <div class="tarjeta-rol tarjeta-profe" onclick="irPantallaLoginProfe()">
-                    <!-- Le sacamos el style fijo y le ponemos la clase fondo-profe -->
                     <div class="fondo-tarjeta-rol fondo-profe"></div>
                     
                     <div class="contenido-rol">
-                        <!-- Ícono blanco (Modo Oscuro) -->
                         <img src="imagenes/ICONO PROFE.png" class="icono-rol icono-rol-blanco" style="width: 55px; margin-left: 0px; margin-right: 12px;">
-                        <!-- Ícono negro (Modo Claro) -->
+                       
                         <img src="imagenes/ICONO PROFESOR NEGRO.png" class="icono-rol icono-rol-negro" style="width: 55px; margin-left: 0px; margin-right: 12px;">
                         
                         <div class="textos-rol">
@@ -93,10 +87,8 @@
                 <img src="imagenes/LOGOFULLCOLOR.png" alt="18.3 Clubhouse" class="logo-visual logo-modo-claro-login">
                 
                 <div class="contenedor-texto-visual">
-                    <!-- Título Fijo Principal -->
                     <h1 id="titulo-principal" class="titulo-visual">APP PARA PROFESORES</h1>
 
-                    <!-- Textos secundarios unificados con el mismo estilo -->
                     <p id="saludo-dinamico" class="subtitulo-visual" style="margin-top: 15px; margin-bottom: 5px; font-size: 15px;">Hola, Profe</p>
                     <p id="subtitulo-dinamico" class="subtitulo-visual" style="margin-bottom: 0;">Gestioná alumnos, cuotas y rutinas personalizadas.</p>
                 </div>
@@ -110,7 +102,6 @@
                     </span>
                 </div>
 
-                <!-- CAJA NUEVA: CONFIRMAR CONTRASEÑA (Oculta por defecto) -->
                 <div id="caja-confirmar-pass" class="grupo-input-visual" style="display: none; margin-top: 10px;">
                     <input type="password" id="login-confirmar-password" placeholder="Repetir contraseña">
                     <span class="contenedor-ojo-visual" onclick="alternarVisibilidadPass('login-confirmar-password')">
@@ -144,8 +135,6 @@
 
             <div id="grilla-profesores" class="grilla-perfiles-moderna" style="margin-bottom: 60px;"></div>
 
-
-            <!-- BOTÓN VOLVER ATRÁS (SE MUEVE CON EL SCROLL) -->
             <button class="btn-flotante-atras" onclick="volverDesdePerfilesAInicio()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -162,13 +151,11 @@
                 <img src="imagenes/LOGOACENTO.png" alt="Logo" class="logo-dash logo-modo-oscuro-dash">
 
                 <div class="iconos-derecha-header">
-                    <!-- Botón de Tema (Sol/Luna) -->
                     <svg id="icono-luna-dash" class="icono-header" onclick="alternarTemaDashboard()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                     <svg id="icono-sol-dash" class="icono-header" onclick="alternarTemaDashboard()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display: none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                     
-                    <!-- Íconos originales -->
                     <svg class="icono-header" onclick="editarProfe()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                    <!-- Campanita con sistema de notificaciones -->
+                  
                     <div class="contenedor-campanita" onclick="abrirModalNotificaciones()">
                         <svg class="icono-header" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                         <div id="badge-notificaciones" class="badge-notificacion" style="display: none;"></div>
@@ -187,7 +174,6 @@
                 </button>
             </div>
 
-            <!-- BOTÓN ALUMNO (Para todos los profes) -->
             <div class="contenedor-agregar-alumno">
                 <button class="btn-agregar-moderno" onclick="abrirModalAlumno()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -195,10 +181,8 @@
                 </button>
             </div>
 
-            <!-- BOTÓN PROFESOR (Exclusivo Administradores, forzado abajo) -->
             <div class="contenedor-agregar-alumno" style="margin-top: -5px;">
                 
-                <!-- Este es el escudo "mata-brillos" -->
                 <style>
                     .sin-resplandor { 
                         box-shadow: none !important; 
@@ -216,17 +200,14 @@
                 </button>
             </div>
 
-            <!-- BUSCADOR Y TACHITO ALINEADOS -->
             <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; padding: 5px; overflow: visible;">
                 
-                <!-- Barra de Búsqueda -->
                 <div class="contenedor-buscador" style="margin-bottom: 0; flex-grow: 1;">
                     <svg class="icono-buscar" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input type="text" id="buscador-alumnos" placeholder="Buscar alumno" onkeyup="filtrarAlumnos()">
                     <svg class="icono-filtros" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
                 </div>
 
-                <!-- Botón Tachito -->
                 <button id="btn-activar-borrado" class="btn-tachito-modo" onclick="activarModoBorrado()" style="flex-shrink: 0;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
@@ -234,14 +215,12 @@
             </div>
 
             <div class="contenedor-chips" id="contenedor-chips-dinamicos">
-                <!-- Los botones se dibujan automáticamente desde JavaScript -->
             </div>
 
             
 
             <div id="lista-alumnos" class="lista-alumnos-moderna"></div>
 
-            <!-- BOTÓN DE CERRAR SESIÓN (AL FINAL DE LA LISTA) -->
             <div style="display: flex; justify-content: center; padding: 20px 0 90px 0;">
                 <button onclick="cerrarSesion()" style="display: flex; align-items: center; gap: 8px; background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); color: #e74c3c; padding: 12px 24px; border-radius: 12px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: 0.2s;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 
@@ -271,9 +250,8 @@
 
         <div id="pantalla-detalle-alumno" class="pantalla-fondo-claro" style="display: none;">
             <div class="header-logo-centrado">
-                <!-- Logo oscuro para modo claro -->
                 <img src="imagenes/logo.png" alt="18.3 Clubhouse" class="logo-top logo-modo-claro-top">
-                <!-- Logo blanco para modo oscuro -->
+           
                 <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="logo-top logo-modo-oscuro-top">
             </div>
 
@@ -304,26 +282,22 @@
                 </button>
             </div>
 
-            <!-- NUEVO CONTENEDOR: CHIPS DE SEMANAS Y DÍAS (Vacíos, listos para BD) -->
             <div class="contenedor-filtros-rutina" id="contenedor-filtros-semanas-dias">
-                <!-- Se inyectarán los chips reales desde JS -->
+   
                 <div class="scroll-horizontal-chips" id="chips-semanas"></div>
                 <div class="scroll-horizontal-chips" id="chips-dias"></div>
             </div>
 
-            <!-- VIEWPORT DEL SLIDER (Oculta lo que desborda) -->
             <div class="viewport-slider">
                 <div id="track-slider-rutinas" class="track-slider">
                     
-                    <!-- VISTA 1: BARRAS DE CATEGORÍAS -->
                     <div class="vista-slider" id="vista-categorias">
-                        <!-- Las barras reales se inyectan acá desde JavaScript -->
+                
                         <div id="lista-categorias-rutina" class="contenedor-ejercicios">
                             
                         </div>
                     </div>
 
-                    <!-- VISTA 2: LISTA DE EJERCICIOS (Desliza desde la derecha) -->
                     <div class="vista-slider" id="vista-ejercicios">
                         <div class="header-categoria-activa" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                             <div class="icono-categoria" style="width: 35px; height: 35px;"><svg id="icono-vista-activa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><circle cx="12" cy="12" r="10"></circle></svg></div>
@@ -331,7 +305,6 @@
                         </div>
                         
                         <div id="lista-ejercicios-detalle" class="contenedor-ejercicios">
-                            <!-- Los ejercicios reales se inyectan acá en el futuro -->
                         </div>
                         
                         <button class="btn-volver-categoria" onclick="cerrarCategoria()">
@@ -343,8 +316,6 @@
                 </div>
             </div>
 
-            <!-- EL BOTÓN FLOTANTE AHORA ES INTELIGENTE -->
-            <!-- EL BOTÓN FLOTANTE AHORA ES INTELIGENTE Y AGRUPADO -->
             <div class="contenedor-fab">
                 <button class="btn-fab-amarillo" onclick="accionBotonFabInteligente()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="26" height="26">
@@ -352,7 +323,6 @@
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                 </button>
-                <!-- BOTÓN VOLVER ATRÁS FIJO -->
                 <button class="btn-flotante-atras" onclick="volverAlDashboard()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -383,7 +353,6 @@
 
         <div id="pantalla-rutinas" class="pantalla-dashboard-moderna" style="display: none;">
             <div class="header-dashboard">
-                <!-- Aprovechamos las clases que ya existían para el dashboard -->
                 <img src="imagenes/logo.png" alt="Logo" class="logo-dash logo-modo-claro-dash">
                 <img src="imagenes/LOGOACENTO.png" alt="Logo" class="logo-dash logo-modo-oscuro-dash">
             </div>
@@ -421,9 +390,8 @@
 
         <div id="pantalla-detalle-pack" class="pantalla-fondo-claro" style="display: none;">
             <div class="header-logo-centrado">
-                <!-- Logo oscuro para modo claro -->
                 <img src="imagenes/logo.png" alt="18.3 Clubhouse" class="logo-top logo-modo-claro-top">
-                <!-- Logo blanco para modo oscuro -->
+
                 <img src="imagenes/LOGOACENTO.png" alt="18.3 Clubhouse" class="logo-top logo-modo-oscuro-top">
             </div>
             
@@ -437,7 +405,6 @@
 
             <div id="lista-ejercicios-pack" class="contenedor-ejercicios"></div>
             
-            <!-- Botones flotantes (FAB) correctos -->
             <div class="contenedor-fab">
                 <button class="btn-fab-amarillo" onclick="abrirModalEjercicioPack()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="26" height="26">
@@ -453,7 +420,6 @@
                 </button>
             </div>
 
-            <!-- Menú Inferior Estándar (El mismo de todas las pantallas) -->
             <nav class="bottom-nav">
                 <button class="nav-item" onclick="volverAPerfiles()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -485,7 +451,6 @@
                 <p>Visión global del gimnasio</p>
             </div>
 
-            <!-- Botón flotante atrás (Redondo) -->
             <div class="contenedor-fab">
                 <button class="btn-flotante-atras" onclick="volverAlDashboardDesdeAdmin()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24">
@@ -495,28 +460,23 @@
                 </button>
             </div>
 
-            <!-- Pestañas para deslizar -->
             <div class="tabs-informe" style="margin: 0 20px;">
                 <button id="tab-admin-actual" class="tab-btn activo" onclick="cambiarVistaAdmin('actual')">Planilla Actual</button>
                 <button id="tab-admin-historial" class="tab-btn" onclick="cambiarVistaAdmin('historial')">Historial</button>
             </div>
 
-            <!-- Viewport Slider para Admin -->
             <div class="viewport-slider" style="margin-top: 10px;">
                 <div id="track-admin" class="track-slider">
                     
-                    <!-- VISTA 1: PLANILLA (COLUMNAS DE PROFESORES) -->
                     <div class="vista-slider" style="display: flex; flex-direction: column; overflow-x: hidden; padding-bottom: 10px;">
 
-                        <!-- GRAN TOTAL -->
                         <div style="margin: 0 20px 15px 20px; text-align: center; background: #2c3e50; padding: 15px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                             <h3 style="margin:0; font-size: 0.9rem; color: #bdc3c7; text-transform: uppercase;">Recaudación Total (30% Gym)</h3>
                             <strong id="monto-gran-total" style="font-size: 2.2rem; color: #2ecc71;">$0</strong>
                         </div>
 
-                        <!-- CONTENEDOR DE COLUMNAS HORIZONTALES -->
                         <div id="contenedor-admin-columnas" style="display: flex; overflow-x: auto; gap: 15px; padding: 0 20px 15px 20px; align-items: flex-start; scroll-snap-type: x mandatory;">
-                            <!-- Columnas inyectadas por JS -->
+
                         </div>
 
                         <div style="padding: 0 20px;">
@@ -527,11 +487,10 @@
                         </div>
                     </div>
 
-                    <!-- VISTA 2: HISTORIAL -->
                     <div class="vista-slider" style="display: flex; flex-direction: column; overflow-x: hidden; padding: 0 20px 10px 20px;">
                         <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px; text-align: center; flex-shrink: 0;">Registro de planillas globales descargadas.</p>
                         <div id="lista-historial-admin" style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; padding-bottom: 20px;">
-                            <!-- Se llena con JS -->
+
                         </div>
                     </div>
                 </div>
@@ -562,7 +521,6 @@
             <button class="btn-guardar" onclick="volverDesdeAlumnoAInicio()">Volver al Inicio</button>
         </div>
 
-        <!-- MODAL AÑADIR ALUMNO -->
         <div id="modal-alumno" class="modal-overlay" style="display: none;">
             <div class="modal-contenido">
                 <h3>Añadir Alumno</h3>
@@ -573,7 +531,6 @@
                     <label class="label-modal">DNI:</label>
                     <input type="number" id="input-alumno-dni" class="input-modal" placeholder="Ej: 35123456">
                 </div>
-                <!-- NUEVO CAMPO: MODALIDAD -->
                 <div class="campo-detalle">
                     <label class="label-modal">Modalidad:</label>
                     <select id="select-alumno-tipo" class="input-modal">
@@ -620,7 +577,6 @@
             </div>
         </div>
 
-        <!-- MODAL EDITAR ALUMNO -->
         <div id="modal-editar-alumno" class="modal-overlay" style="display: none;">
             <div class="modal-contenido">
                 <h3>Editar Alumno</h3>
@@ -632,7 +588,6 @@
                     <label class="label-modal">DNI:</label>
                     <input type="number" id="input-edit-alumno-dni" class="input-modal">
                 </div>
-                <!-- NUEVO CAMPO: MODALIDAD -->
                 <div class="campo-detalle">
                     <label class="label-modal">Modalidad:</label>
                     <select id="select-edit-alumno-tipo" class="input-modal">
@@ -754,7 +709,6 @@
             </div>
         </div>
 
-        <!-- MODAL CAMBIAR CONTRASEÑA -->
         <div id="modal-cambiar-password" class="modal-overlay" style="display: none; z-index: 9999;">
             <div class="modal-contenido">
                 <h3 style="margin-bottom: 15px; color: #f39c12;">Cambiar Contraseña</h3>
@@ -803,7 +757,6 @@
                         <option value="Core">Core / Abdominales</option>
                     </select>
                 </div>
-                <!-- NUEVO CAMPO: SUB-BLOQUE -->
                 <div class="campo-detalle">
                     <label class="label-modal">Sub-bloque (Opcional):</label>
                     <div style="display: flex; gap: 8px;">
@@ -818,13 +771,13 @@
                     <label class="label-modal">Ejercicio:</label>
                     <div style="display: flex; gap: 8px;">
                         <input type="text" id="input-ej-nombre" class="input-modal" placeholder="Escribí o buscá en la lista..." style="flex: 1; margin: 0;">
-                        <!-- BOTÓN QUE ABRE LA VENTANA DE LA LISTA -->
+             
                         <button type="button" class="btn-guardar" onclick="abrirModalListaEjercicios('input-ej-nombre', 'select-ej-zona')" style="padding: 0 15px; margin: 0; background: #ff9900;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
                     </div>
                 </div>
-                <!-- SISTEMA DE SERIES DINÁMICAS INTELIGENTE -->
+           
                 <div class="campo-detalle" style="margin-top: 15px;">
                     <div class="encabezado-series">
                         <span>Serie</span>
@@ -881,7 +834,6 @@
                 </div>
             </div>
         </div>
-        <!-- MODAL EDITAR NOMBRE DEL PACK -->
         <div id="modal-editar-pack" class="modal-overlay" style="display: none; z-index: 4000;">
             <div class="modal-contenido">
                 <h3>Renombrar Rutina</h3>
@@ -903,13 +855,12 @@
                     <label class="label-modal">Ejercicio:</label>
                     <div style="display: flex; gap: 8px;">
                         <input type="text" id="input-pack-ej-nombre" class="input-modal" placeholder="Escribí o buscá en la lista..." style="flex: 1; margin: 0;">
-                        <!-- BOTÓN QUE ABRE LA VENTANA DE LA LISTA -->
+                 
                         <button type="button" class="btn-guardar" onclick="abrirModalListaEjerciciosPack('input-pack-ej-nombre', 'select-pack-ej-zona')" style="padding: 0 15px; margin: 0; background: #ff9900;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
                     </div>
                 </div>
-                <!-- SISTEMA DE SERIES DINÁMICAS INTELIGENTE PACK -->
                 <div class="campo-detalle" style="margin-top: 15px;">
                     <div class="encabezado-series">
                         <span>Serie</span>
@@ -987,7 +938,6 @@
 
         <div id="modal-alerta" class="modal-overlay" style="display: none; z-index: 9999;">
             <div class="modal-contenido" style="text-align: center; max-width: 300px;">
-                <!-- NUEVO: Contenedor vacío donde se inyecta el ícono dinámico -->
                 <div id="contenedor-icono-alerta" style="display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
                 </div>
                 
@@ -997,7 +947,6 @@
             </div>
         </div>
 
-        <!-- MODAL DE RENDIMIENTO AVANZADO -->
         <div id="modal-rendimiento" class="modal-overlay" style="display: none; z-index: 4000;">
             <div class="modal-contenido modal-dashboard-rendimiento">
                 
@@ -1006,7 +955,6 @@
                     <button onclick="cerrarModalRendimiento()" style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
                 </div>
                 
-                <!-- Filtros de fecha -->
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                     <select id="select-rend-mes" class="input-modal" style="flex: 2;" onchange="cargarRendimiento()">
                         <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
@@ -1016,7 +964,6 @@
                     </select>
                 </div>
 
-                <!-- Tarjetas de Métricas (KPIs) -->
                 <div class="grid-kpis-rendimiento">
                     <div class="kpi-card">
                         <span class="kpi-titulo">Esfuerzo Promedio</span>
@@ -1030,22 +977,19 @@
                     </div>
                 </div>
 
-                <!-- Gráfico Lineal: Evolución -->
                 <div class="contenedor-grafico-rendimiento">
                     <h4>Evolución del Esfuerzo (RPE)</h4>
                     <canvas id="grafico-rendimiento" width="400" height="200"></canvas>
                 </div>
 
-                <!-- Gráfico Radar: Distribución Muscular -->
                 <div class="contenedor-grafico-rendimiento">
                     <h4>Enfoque Muscular de la Rutina</h4>
                     <canvas id="grafico-radar-musculos" width="400" height="240"></canvas>
                 </div>
 
-                <!-- Comentarios y Evaluaciones -->
                 <h4 style="color: white; margin-top: 15px; font-size: 1.1rem;">Historial de Evaluaciones</h4>
                 <div id="lista-comentarios-rend" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; max-height: 250px; overflow-y: auto; padding-right: 5px;">
-                    <!-- Se llena con JS -->
+         
                 </div>
 
                 <div class="campo-detalle" style="margin-bottom: 0;">
@@ -1056,7 +1000,6 @@
             </div>
         </div>
 
-        <!-- MODAL AÑADIR NUEVA BARRA / CATEGORÍA -->
         <div id="modal-categoria" class="modal-overlay" style="display: none; z-index: 4000;">
             <div class="modal-contenido">
                 <h3>Añadir Categoría</h3>
@@ -1070,7 +1013,6 @@
             </div>
         </div>
 
-        <!-- MODAL OPCIONES DE BARRA (Tres puntitos) -->
         <div id="modal-opciones-categoria" class="modal-overlay" style="display: none; z-index: 4000;">
             <div class="modal-contenido">
                 <h3 id="titulo-opciones-cat">Opciones</h3>
@@ -1080,13 +1022,11 @@
             </div>
         </div>
 
-        <!-- MODAL EDITAR NOMBRES DE LOS DÍAS -->
         <div id="modal-editar-dias" class="modal-overlay" style="display: none; z-index: 4000;">
             <div class="modal-contenido">
                 <h3>Editar Días de Rutina</h3>
                 <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Personalizá los nombres, sumá días o borrá los que el alumno no use (se borrarán sus ejercicios).</p>
                 
-                <!-- Acá JS va a inyectar las cajitas con el tachito -->
                 <div id="contenedor-inputs-dias" style="display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto;">
                 </div>
 
@@ -1102,7 +1042,6 @@
             </div>
         </div>
 
-        <!-- MODAL RENOMBRAR BARRA HERMOSO -->
         <div id="modal-renombrar-categoria" class="modal-overlay" style="display: none; z-index: 4000;">
             <div class="modal-contenido">
                 <h3>Renombrar Categoría</h3>
@@ -1116,35 +1055,32 @@
             </div>
         </div>
 
-        <!-- MODAL DE NOTIFICACIONES -->
         <div id="modal-notificaciones" class="modal-overlay" style="display: none; z-index: 5000;">
             <div class="modal-contenido" style="max-height: 80vh; display: flex; flex-direction: column;">
                 <h3 style="margin-bottom: 5px;">Notificaciones</h3>
                 <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Alertas de cuotas y vencimientos</p>
                 
                 <div id="lista-notificaciones" style="overflow-y: auto; flex-grow: 1; padding-right: 5px; display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Se inyectan solas desde JS -->
+         
                 </div>
                 
                 <button class="btn-guardar" onclick="cerrarModalNotificaciones()" style="margin-top: 15px; width: 100%;">Cerrar</button>
             </div>
         </div>
 
-        <!-- MODAL CHECK-IN RÁPIDO (ASISTENCIA) -->
         <div id="modal-checkin" class="modal-overlay" style="display: none; z-index: 6000;">
             <div class="modal-contenido" style="text-align: center; max-width: 320px;">
                 <h3 style="margin-bottom: 5px; color: #f39c12;">Registrar Asistencia</h3>
                 <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">¿Qué rutina hizo el alumno hoy?</p>
                 
                 <div id="lista-dias-checkin" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
-                    <!-- Los botones de los días se cargan solos desde JS -->
+
                 </div>
                 
                 <button class="btn-cancelar" onclick="cerrarModalCheckin()" style="width: 100%;">Cancelar</button>
             </div>
         </div>
 
-        <!-- MODAL INFORME EXCEL DEL PROFESOR -->
         <div id="modal-informe-profe" class="modal-overlay" style="display: none; z-index: 6500;">
             <div class="modal-contenido modal-informe-grande">
                 
@@ -1153,13 +1089,11 @@
                     <button onclick="cerrarModalInformeProfe()" style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
                 </div>
 
-                <!-- Pestañas para deslizar -->
                 <div class="tabs-informe">
                     <button id="tab-informe-actual" class="tab-btn activo" onclick="cambiarVistaInforme('actual')">Planilla Actual</button>
                     <button id="tab-informe-historial" class="tab-btn" onclick="cambiarVistaInforme('historial')">Historial</button>
                 </div>
 
-                <!-- NUEVO: Selector de Ordenamiento -->
                 <div id="contenedor-filtros-informe" style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
                     <span style="font-size: 0.85rem; color: #aaa;">Ordenar por:</span>
                     <select id="select-orden-informe" class="input-modal" style="width: auto; padding: 6px 10px; font-size: 0.85rem; background-color: rgba(255,255,255,0.05);" onchange="cargarDatosParaInforme()">
@@ -1169,23 +1103,18 @@
                     </select>
                 </div>
 
-                <!-- Contenedor del Slider -->
                 <div class="viewport-slider" style="flex-grow: 1; margin-top: 10px; height: 0; min-height: 0;">
                     <div id="track-informe" class="track-slider" style="height: 100%;">
                         
-                        <!-- VISTA 1: PLANILLA ACTUAL -->
                         <div class="vista-slider" style="display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
                             
-                            <!-- Hacemos que la tabla no se aplaste y permita scrollear hacia los costados si es ancha -->
                             <div class="contenedor-tabla-excel" style="flex-shrink: 0; overflow-x: auto; overflow-y: hidden; margin-bottom: 15px;">
                                 <table id="tabla-informe-alumnos" class="tabla-excel">
-                                    <!-- Se llena con JS -->
+                                  
                                 </table>
                             </div>
                             
-                            <!-- Resumen / KPIs -->
                             <div id="resumen-informe-kpis" class="resumen-kpis-grid" style="flex-shrink: 0;">
-                                <!-- Se llena con JS -->
                             </div>
 
                             <button class="btn-guardar" onclick="descargarExcelProfe()" style="width: 100%; margin-top: 15px; margin-bottom: 20px; display: flex; justify-content: center; gap: 8px; flex-shrink: 0;">
@@ -1194,12 +1123,10 @@
                             </button>
                         </div>
 
-                        <!-- VISTA 2: HISTORIAL DE DESCARGAS -->
                         <div class="vista-slider" style="display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
                             <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px; text-align: center; flex-shrink: 0;">Registro de planillas descargadas previamente.</p>
                             
                             <div id="lista-historial-informes" style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; padding-bottom: 20px;">
-                                <!-- Se llena con JS -->
                             </div>
                         </div>
 
@@ -1209,11 +1136,9 @@
             </div>
         </div>
 
-        <!-- MODAL SIN CONEXIÓN A INTERNET -->
         <div id="modal-offline" class="modal-overlay" style="display: none; z-index: 9999;">
             <div class="modal-contenido" style="text-align: center; max-width: 300px;">
                 <div style="display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto;">
-                    <!-- Ícono de Wi-Fi cortado con la animación latiendo que ya tenías -->
                     <svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" class="anim-sin-conexion">
                         <line x1="1" y1="1" x2="23" y2="23"></line>
                         <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
@@ -1226,23 +1151,19 @@
                 </div>
                 <h3 style="margin-bottom: 8px; color: #ffffff; font-size: 1.4rem;">Sin Internet</h3>
                 <p style="font-size: 0.95rem; color: #e4e4e4; margin-bottom: 20px; line-height: 1.5;">Parece que te quedaste sin señal. No podrás guardar o modificar datos hasta que vuelva la conexión.</p>
-                <!-- Botón rojo en lugar de naranja para indicar precaución -->
                 <button class="btn-guardar btn-rojo" onclick="document.getElementById('modal-offline').style.display='none'" style="width: 100%; font-size: 1.05rem; padding: 12px;">Entendido</button>
             </div>
         </div>
 
-        <!-- NUEVO: MODAL SELECTOR EMERGENTE DE EJERCICIOS CON BUSCADOR -->
-        <div id="modal-lista-ejercicios" class="modal-overlay" style="display: none; z-index: 99999;">
+       <div id="modal-lista-ejercicios" class="modal-overlay" style="display: none; z-index: 99999;">
             <div class="modal-contenido" style="max-height: 85vh; height: 85vh; display: flex; flex-direction: column; padding: 20px;">
                 <h3 style="margin-bottom: 10px; text-align: center; color: #fff; flex-shrink: 0;">Elegí un ejercicio</h3>
                 
-                <!-- Buscador Inteligente Corregido -->
                 <div style="display: flex; align-items: center; flex-grow: 0; flex-shrink: 0; margin-bottom: 15px; border-radius: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); padding: 10px 15px;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" width="20" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input type="text" id="buscador-modal-ejercicios" placeholder="Buscar nombre o alias..." onkeyup="filtrarListaEjerciciosModal()" style="flex-grow: 1; border: none; outline: none; background: transparent; color: white; margin-left: 10px; font-size: 0.95rem;">
                 </div>
 
-                <!-- Lista de resultados -->
                 <div id="contenedor-botones-ejercicios" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; padding-right: 5px; gap: 8px;">
                 </div>
                 
@@ -1250,13 +1171,11 @@
             </div>
         </div>
 
-        <!-- MODAL EDITAR CHIPS DE FILTRO -->
         <div id="modal-editar-chips" class="modal-overlay" style="display: none; z-index: 5000;">
             <div class="modal-contenido" style="max-height: 80vh; display: flex; flex-direction: column;">
                 <h3 style="margin-bottom: 10px;">Editar Filtros</h3>
                 <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Creá, editá o borrá las etiquetas de búsqueda rápida.</p>
                 
-                <!-- Contenedor donde JS inyectará los inputs uno debajo del otro -->
                 <div id="lista-chips-editables" style="overflow-y: auto; flex-grow: 1; padding-right: 5px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; max-height: 300px;">
                 </div>
 
@@ -1272,7 +1191,6 @@
             </div>
         </div>
 
-        <!-- MODAL DE TÉRMINOS Y CONDICIONES -->
         <div id="modal-terminos" class="modal-overlay" style="display: none; z-index: 99999;">
             <div class="modal-contenido modal-terminos-texto" style="max-height: 85vh; padding: 20px;">
                 <h3 style="margin-bottom: 15px; color: #f39c12; font-size: 1.2rem; text-align: center;">Términos y Políticas</h3>
@@ -1301,7 +1219,6 @@
             </div>
         </div>
 
-        <!-- MODAL EDITAR PORCENTAJE GYM -->
         <div id="modal-porcentaje" class="modal-overlay" style="display: none; z-index: 6000;">
             <div class="modal-contenido" style="text-align: center; max-width: 320px;">
                 <h3 id="titulo-modal-porcentaje" style="margin-bottom: 5px; color: #3498db;">Editar Porcentaje</h3>
@@ -1319,45 +1236,37 @@
             </div>
         </div>
 
-        <!-- VISOR FULLSCREEN PARA LA IMAGEN -->
         <div id="visor-fullscreen" class="modal-overlay" style="display: none; z-index: 999999; background: rgba(0,0,0,0.95); flex-direction: column; justify-content: center; align-items: center;">
             <button onclick="cerrarImagenFullscreen()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 2.5rem; cursor: pointer; z-index: 10;">&times;</button>
             <div id="fullscreen-img-container" style="width: 95%; max-width: 500px; height: auto;"></div>
         </div>
 
-        <!-- BOTTOM SHEET (VENTANA EMERGENTE DESDE ABAJO) -->
         <div id="bottom-sheet-overlay" class="bs-overlay" style="display: none;" onclick="cerrarBottomSheet()">
             <div id="bottom-sheet-content" class="bs-content" onclick="event.stopPropagation()">
                 
-                <!-- ÁREA DE ARRASTRE (La rayita superior) -->
-                <div id="bs-drag-area" class="bs-drag-area">
+                 <div id="bs-drag-area" class="bs-drag-area">
                     <div class="bs-drag-handle"></div>
                 </div>
 
-                <!-- ENCABEZADO CON LÁPIZ -->
                 <div style="display: flex; justify-content: flex-end; padding: 0 20px; margin-top: -10px;">
                     <button id="bs-btn-editar" onclick="activarEdicionBS()" style="background: rgba(243, 156, 18, 0.15); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; color: #f39c12; cursor: pointer; transition: 0.2s;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                     </button>
                 </div>
 
-                <!-- CUERPO SCROLLEABLE -->
                 <div class="bs-scroll-body" style="padding: 10px 20px 30px 20px; overflow-y: auto; max-height: calc(80vh - 60px);">
                     
-                    <!-- IMAGEN -->
                     <div id="bs-imagen-wrapper" onclick="abrirImagenFullscreen()" style="width: 100%; height: 220px; border-radius: 12px; overflow: hidden; background: #fff; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                        <!-- Se inyecta la animación acá -->
+  
                     </div>
 
-                    <!-- TÍTULO Y ALIAS -->
                     <h2 id="bs-titulo" style="color: white; margin-top: 15px; font-size: 1.6rem; font-family: 'Oswald', sans-serif; line-height: 1.2;">-</h2>
                     <p id="bs-alias" style="color: #f39c12; font-size: 0.85rem; margin-bottom: 20px; font-style: italic; font-weight: 500;">-</p>
 
-                    <!-- FORMULARIO DE DATOS -->
                     <div class="campo-detalle">
                         <label class="label-modal">Series, Repeticiones y Peso:</label>
                         <div id="bs-contenedor-series" style="display: flex; flex-direction: column; gap: 8px;">
-                            <!-- Las series se inyectan acá -->
+                  
                         </div>
                     </div>
 
@@ -1371,7 +1280,6 @@
                         <textarea id="bs-input-notas" class="input-modal bs-input-edit" rows="3" style="resize: none;" readonly></textarea>
                     </div>
 
-                    <!-- BOTONES ACEPTAR / CANCELAR (Ocultos por defecto) -->
                     <div id="bs-botones-edicion" style="display: none; gap: 10px; margin-top: 25px;">
                         <button class="btn-cancelar" onclick="cancelarEdicionBS()" style="flex: 1; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;">Cancelar</button>
                         <button class="btn-guardar" onclick="guardarEdicionBS()" style="flex: 1;">Guardar Cambios</button>
