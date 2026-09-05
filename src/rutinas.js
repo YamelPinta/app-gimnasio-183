@@ -1570,13 +1570,13 @@ async function dibujarCategoriasAlumno() {
             let iconoHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
 
             if (cat.toUpperCase() === "MOVILIDAD") {
-                iconoHTML = `<img src="imagenes/MOVILIDAD.webp" class="img-cat-rutina" alt="Movilidad">`;
+                iconoHTML = `<img src="./imagenes/MOVILIDAD.webp" class="img-cat-rutina" alt="Movilidad">`;
             }
             if (cat.toUpperCase() === "ENTRADA EN CALOR") {
-                iconoHTML = `<img src="imagenes/ENTRADAENCALOR.webp" class="img-cat-rutina" alt="Entrada en calor">`;
+                iconoHTML = `<img src="./imagenes/ENTRADAENCALOR.webp" class="img-cat-rutina" alt="Entrada en calor">`;
             }
             if (cat.toUpperCase() === "ENTRENAMIENTO") {
-                iconoHTML = `<img src="imagenes/ENTRENAMIENTO.webp" class="img-cat-rutina" alt="Entrenamiento">`;
+                iconoHTML = `<img src="./imagenes/ENTRENAMIENTO.webp" class="img-cat-rutina" alt="Entrenamiento">`;
             }
 
             htmlFinal += UI_TarjetaCategoria(cat, cantidad, iconoHTML);

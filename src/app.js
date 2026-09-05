@@ -466,10 +466,10 @@ function renderizarListaAlumnos(alumnosFiltrados) {
     hoy.setHours(0, 0, 0, 0); 
 
     const mapaActividades = {
-        "Musculación": "imagenes/MUSCULACION.webp", "Tela": "imagenes/TELA.webp",
-        "Funcional": "imagenes/REHABILITACION.webp", "Calistenia": "imagenes/CALISTENIA.webp",
-        "Readaptación": "imagenes/ADAPTACION.webp", "Hyrox": "imagenes/HYROX.webp",
-        "Crossfit": "imagenes/CROSSFIT.webp",
+        "Musculación": "./imagenes/MUSCULACION.webp", "Tela": "./imagenes/TELA.webp",
+        "Funcional": "./imagenes/REHABILITACION.webp", "Calistenia": "./imagenes/CALISTENIA.webp",
+        "Readaptación": "./imagenes/ADAPTACION.webp", "Hyrox": "./imagenes/HYROX.webp",
+        "Crossfit": "./imagenes/CROSSFIT.webp",
     };
 
     const template = document.getElementById('tmpl-tarjeta-alumno');
@@ -500,7 +500,7 @@ function renderizarListaAlumnos(alumnosFiltrados) {
         }
 
         const actividadReal = alumno.actividad || "Musculación";
-        const imagenAsignada = mapaActividades[actividadReal] || "imagenes/MUSCULACION.webp";
+        const imagenAsignada = mapaActividades[actividadReal] || "./imagenes/MUSCULACION.webp";
         const textoBotonPago = estaAlDia ? "Pagado" : "Marcar Pago";
         const claseBotonPago = estaAlDia ? "btn-pago-realizado" : "btn-pago-pendiente";
         const cuotaTexto = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "-";
