@@ -1,3 +1,6 @@
+import './style.css';
+
+
 // Limpiador automático de cachés de la versión anterior
 if ('caches' in window) {
     caches.keys().then(nombres => {

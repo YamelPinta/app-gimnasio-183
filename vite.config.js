@@ -2,19 +2,18 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/app-gimnasio-183/', // Fundamental para que funcione en GitHub Pages
+  base: '/app-gimnasio-183/', 
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'script',
       filename: 'sw.js',
-      manifest: false, // Vite no toca tu manifest.json manual de la carpeta public
+      manifest: false, 
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-        navigateFallback: '/index.html', // Carga la app aunque no haya internet
+        navigateFallback: '/app-gimnasio-183/index.html', 
         runtimeCaching: [
           {
-            // Atrapa las imágenes de Supabase Storage sin importar el ?token=
             urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {
@@ -26,7 +25,6 @@ export default defineConfig({
             }
           },
           {
-            // Atrapa imágenes dinámicas locales
             urlPattern: /\.(?:png|jpg|jpeg|svg|webp)(?:\?.*)?$/i,
             handler: 'StaleWhileRevalidate',
             options: {
