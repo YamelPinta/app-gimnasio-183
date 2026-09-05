@@ -1524,7 +1524,7 @@ function hablar(texto) {
         utterance.lang = 'es-AR'; 
     }
     
-    utterance.rate = 1.3; 
+    utterance.rate = 1.1; 
     utterance.volume = volumenReloj; 
     window.speechSynthesis.speak(utterance);
 }

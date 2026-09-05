@@ -1,6 +1,7 @@
 let datosAdminActualParaExcel = null;
 let porcentajeEditando = { tipo: null, id: null, nombre: null };
-
+let alumnosParaInformeActual = []; 
+let porcentajeGymActualParaInforme = 30;
 
 function abrirPantallaInforme() {
 
