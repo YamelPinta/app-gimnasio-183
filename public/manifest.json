@@ -1,0 +1,23 @@
+{
+  "name": "Gimnasio ClubHouse 18.3",
+  "short_name": "ClubHouse",
+  "description": "App de gestión de alumnos y rutinas",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1e1e1e",
+  "theme_color": "#f39c12",
+  "icons": [
+    {
+      "src": "./imagenes/icono-192.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./imagenes/icono-512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}
