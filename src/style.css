@@ -216,7 +216,7 @@ svg[onclick]:active {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -5180,224 +5180,6 @@ body .timer-display-wrapper-simple {
   }
 }
 
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto {
-  width: 102%;
-  max-width: 102%;
-  height: 102%;
-  max-height: 102%;
-  top: -1%;
-
-  box-sizing: border-box;
-  border: none;
-  padding: 15px 40px 40px 40px;
-
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 40px;
-  row-gap: 12px;
-
-  align-content: start;
-  align-items: start;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-
-  z-index: var(--z-menu-lateral);
-}
-
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho {
-  display: block;
-  width: 102%;
-  max-width: 102%;
-  height: 100%;
-  max-height: 100%;
-  top: -1%;
-
-  box-sizing: border-box;
-  border: none;
-  padding: 20px 40px 80px 40px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  z-index: var(--z-menu-lateral);
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #overlay-menu-derecho[style*="block"]~#menu-lateral-derecho {
-  right: -1% !important;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto>div:nth-child(1) {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  margin-bottom: 0px;
-  padding-bottom: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto>div:nth-child(2) {
-  grid-column: 1;
-  grid-row: 2;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto>div:nth-child(3) {
-  grid-column: 1;
-  grid-row: 3;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto>div:nth-child(4) {
-  grid-column: 2;
-  grid-row: 2;
-  margin-top: 0;
-  margin-bottom: 15px;
-  min-width: 0;
-  align-self: start;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto>div:nth-child(5) {
-  grid-column: 2;
-  grid-row: 3;
-  margin-bottom: 0;
-  border: none;
-  background: transparent;
-  padding-top: 0;
-  min-width: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto>div:nth-child(1)>button {
-  position: absolute;
-  top: 25px;
-  right: 35px;
-  z-index: 100;
-}
-
-body #pantalla-reloj.pantalla-reloj-apaisada .input-reloj-config:not(.input-ej-profe-dinamico) {
-  padding: 8px 5px;
-  font-size: 1.4rem;
-  border-radius: 10px;
-  height: auto;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .btn-modalidad-reloj {
-  padding: 10px 5px;
-  font-size: 0.8rem;
-  margin-bottom: 5px;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .label-reloj-config {
-  margin-bottom: 4px;
-  font-size: 0.75rem;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #lista-relojes-guardados {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #lista-relojes-guardados>div {
-  min-width: 0;
-  flex: none;
-}
-
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto>button.btn-iniciar-glow {
-  grid-column: 1 / -1;
-  grid-row: 5;
-  margin-top: 15px;
-  margin-bottom: 20px;
-  padding: 14px;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #overlay-menu-derecho[style*="none"]~#menu-lateral-derecho {
-  right: -150vw !important;
-  width: 320px !important;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto:not(.abierto) {
-  left: -120%;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto.abierto {
-  left: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(1) {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding-top: 10px;
-  padding-bottom: 15px;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2) {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 40px;
-  row-gap: 0px;
-  padding-top: 10px;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2)>div:nth-child(1) {
-  grid-column: 1;
-  grid-row: 1;
-  margin-top: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2)>p:nth-child(2) {
-  grid-column: 1;
-  grid-row: 2;
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2)>div#contenedor-volumen {
-  grid-column: 1;
-  grid-row: 3;
-  border-bottom: none;
-  margin-top: 25px;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2)>div:nth-child(4) {
-  grid-column: 2;
-  grid-row: 1;
-  margin-top: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2)>p:nth-child(5) {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2)>div#contenedor-selector-voz {
-  grid-column: 2;
-  grid-row: 3;
-  border-bottom: none;
-  margin-top: 15px;
-  padding-bottom: 0;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2)>div:nth-child(7) {
-  grid-column: 2;
-  grid-row: 4;
-  margin-top: 15px;
-}
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2)>p:nth-child(8) {
-  grid-column: 2;
-  grid-row: 5;
-}
-
-
-#pantalla-reloj.pantalla-reloj-apaisada #menu-lateral-derecho>div:nth-child(2) {
-  height: auto !important;
-  min-height: min-content !important;
-}
-
 .sortable-ghost {
   opacity: 0.5 !important;
   background-color: transparent !important;
@@ -6287,4 +6069,9 @@ body .pantalla-fondo-claro.modo-oscuro .chip-rutina span {
 body:not(.tema-oscuro) .btn-actualizar-app {
     background-color: var(--color-marca);
     color: var(--color-negro-100);
+}
+
+#pantalla-reloj.pantalla-reloj-apaisada [onclick="abrirMenuReloj()"],
+#pantalla-reloj.pantalla-reloj-apaisada [onclick="abrirMenuDerecho()"] {
+  display: none;
 }
