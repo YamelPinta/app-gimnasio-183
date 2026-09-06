@@ -1333,6 +1333,25 @@ async function forzarActualizacion() {
     }, 1500); // Le damos 1.5 segs para que el usuario llegue a leer la alerta
 }
 
+// --- ACTUALIZACIÓN AUTOMÁTICA SILENCIOSA ---
+if ('serviceWorker' in navigator) {
+    // 1. Cada vez que el profe saca la app de segundo plano (la vuelve a abrir)
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then(registro => {
+                // Le pedimos al celular que vaya a GitHub a ver si hay código nuevo
+                registro.update();
+            });
+        }
+    });
+
+    // 2. Si encontró código nuevo y lo descargó, recargamos la pantalla automáticamente
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log("¡Nueva versión detectada! Recargando...");
+        window.location.reload();
+    });
+}
+
 // Lo hacemos global para poder llamarlo desde el HTML
 window.forzarActualizacion = forzarActualizacion;
 

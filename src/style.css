@@ -6251,3 +6251,37 @@ body .pantalla-fondo-claro.modo-oscuro .chip-rutina span {
 #pantalla-reloj.pantalla-reloj-apaisada ~ #modal-lista-ejercicios .item-lista-ejercicio h4 {
     font-size: 0.95rem !important;
 }
+
+
+.btn-actualizar-app {
+    background-color: var(--color-blanco);
+    color: var(--color-negro-100);
+    border: none;
+    border-radius: 50%;
+    width: 32px; 
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.btn-actualizar-app svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.5;
+}
+
+.btn-actualizar-app:active {
+    transform: scale(0.85);
+}
+
+body:not(.tema-oscuro) .btn-actualizar-app {
+    background-color: var(--color-negro-100);
+    color: var(--color-blanco);
+}
