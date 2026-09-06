@@ -438,7 +438,7 @@ svg[onclick]:active {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   background-image: url("/imagenes/FONDONEGRO.webp");
   background-size: cover;
   background-position: center;
@@ -696,7 +696,7 @@ body .login-visual {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   background-image: url("/imagenes/FONDONEGRO.webp");
   background-size: cover;
   background-position: center;
@@ -923,7 +923,7 @@ body .login-visual {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
   background-image: url("/imagenes/FONDONEGROTODO.webp");
   background-size: cover;
@@ -2926,7 +2926,7 @@ body .tabla-separador-cat {
   .pantalla-dashboard-moderna::before,
   .pantalla-fondo-claro.modo-oscuro::before {
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     top: 0;
     left: 0;
   }
