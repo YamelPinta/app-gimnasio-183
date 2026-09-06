@@ -1,6 +1,5 @@
 import './style.css';
 
-
 // Limpiador automático de cachés de la versión anterior
 if ('caches' in window) {
     caches.keys().then(nombres => {
@@ -1176,9 +1175,6 @@ function deshacerAsistencia(alumnoId) {
     );
 }
 
-
-let alumnosParaInformeActual = []; 
-let porcentajeGymActualParaInforme = 30; 
 
 async function cargarChips() {
     const contenedor = document.getElementById("contenedor-chips-dinamicos");

@@ -1124,7 +1124,10 @@ function abrirBottomSheetEjercicio(idEjercicio) {
     const imgWrapper = document.getElementById("bs-imagen-wrapper");
 
     if (frames) {
-        imgWrapper.innerHTML = `<div class="anim-dinamica" style="width: 100%; height: 100%; border-radius: 0; background-size: contain; background-repeat: no-repeat; --img-1: url('${frames[0]}'); --img-2: url('${frames[1]}');"></div>`;
+        const base = import.meta.env.BASE_URL;
+        const img1 = base + frames[0].replace(/^\.\/?/, '');
+        const img2 = base + frames[1].replace(/^\.\/?/, '');
+        imgWrapper.innerHTML = `<div class="anim-dinamica" style="width: 100%; height: 100%; border-radius: 0; background-size: contain; background-repeat: no-repeat; --img-1: url('${img1}'); --img-2: url('${img2}');"></div>`;
     } else {
         imgWrapper.innerHTML = `<div style="width: 100%; height: 100%; background: #e0e0e0; display:flex; justify-content:center; align-items:center; color:#888;">Sin imagen</div>`;
     }

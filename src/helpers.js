@@ -88,13 +88,18 @@ function obtenerAnimacionHTML(nombreEj) {
     if (!nombreEj) return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;
     
     const clave = normalizarTexto(nombreEj.trim());
-
     const nombreOficial = aliasEjercicios[clave] || clave;
-
     const frames = mapaAnimaciones[nombreOficial];
 
     if (frames) {
-        return `<div class="anim-dinamica" style="--img-1: url('${frames[0]}'); --img-2: url('${frames[1]}'); cursor: zoom-in;" onclick="abrirImagenFullscreenDirecto(this, event)"></div>`;
+        // Vite nos da la ruta base exacta ('/app-gimnasio-183/')
+        const base = import.meta.env.BASE_URL;
+        
+        // Limpiamos los puntitos iniciales y le pegamos la base de Vite
+        const img1 = base + frames[0].replace(/^\.\/?/, '');
+        const img2 = base + frames[1].replace(/^\.\/?/, '');
+        
+        return `<div class="anim-dinamica" style="--img-1: url('${img1}'); --img-2: url('${img2}'); cursor: zoom-in;" onclick="abrirImagenFullscreenDirecto(this, event)"></div>`;
     }
 
     return `<div style="width: 40px; height: 40px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0;"></div>`;

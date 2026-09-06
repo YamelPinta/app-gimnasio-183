@@ -1335,7 +1335,10 @@ function actualizarAnimacionTopReloj(nombreEjercicio, nombreFase) {
             }
 
             if (frames) {
-                divAnim.innerHTML = `<div class="anim-dinamica w-100 h-100 radius-0 bg-cover bg-no-repeat" style="--img-1: url(\'${frames[0]}\'); --img-2: url(\'${frames[1]}\');"></div>`;
+                const base = import.meta.env.BASE_URL;
+                const img1 = base + frames[0].replace(/^\.\/?/, '');
+                const img2 = base + frames[1].replace(/^\.\/?/, '');
+                divAnim.innerHTML = `<div class="anim-dinamica w-100 h-100 radius-0 bg-cover bg-no-repeat" style="--img-1: url('${img1}'); --img-2: url('${img2}');"></div>`;
             } else {
                 divAnim.innerHTML = `<div class="anim-placeholder">SIN<br>FOTO</div>`;
             }
