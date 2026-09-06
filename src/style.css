@@ -6075,3 +6075,10 @@ body:not(.tema-oscuro) .btn-actualizar-app {
 #pantalla-reloj.pantalla-reloj-apaisada [onclick="abrirMenuDerecho()"] {
   display: none;
 }
+
+
+#pantalla-reloj.pantalla-reloj-apaisada .menu-lateral-oculto {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 350px !important; 
+}
