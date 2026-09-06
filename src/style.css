@@ -478,6 +478,7 @@ svg[onclick]:active {
 
 .img-logo-inicio {
   width: 230px;
+  aspect-ratio: 230 / 114.5;
   filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.8));
 }
 
