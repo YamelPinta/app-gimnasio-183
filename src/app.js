@@ -1,5 +1,6 @@
 import './style.css';
 
+
 // Limpiador automático de cachés de la versión anterior
 if ('caches' in window) {
     caches.keys().then(nombres => {
@@ -1303,6 +1304,37 @@ function dibujarChipsPrincipales() {
     contenedor.innerHTML = html;
 }
 
+// --- FUNCIÓN PARA FORZAR ACTUALIZACIÓN DE LA APP ---
+async function forzarActualizacion() {
+    mostrarAlerta("Actualizando...", "Limpiando la memoria para descargar la última versión. Aguardá unos segundos...");
+    
+    setTimeout(async () => {
+        try {
+            // 1. Desregistrar todos los Service Workers (la PWA instalada)
+            if ('serviceWorker' in navigator) {
+                const registros = await navigator.serviceWorker.getRegistrations();
+                for (let registro of registros) {
+                    await registro.unregister();
+                }
+            }
+            // 2. Borrar absolutamente todos los cachés guardados
+            if ('caches' in window) {
+                const nombresCaches = await caches.keys();
+                for (let nombre of nombresCaches) {
+                    await caches.delete(nombre);
+                }
+            }
+            // 3. Recargar la página forzadamente evadiendo la memoria
+            window.location.reload(true);
+        } catch (error) {
+            console.error("Error al limpiar:", error);
+            window.location.reload(true);
+        }
+    }, 1500); // Le damos 1.5 segs para que el usuario llegue a leer la alerta
+}
+
+// Lo hacemos global para poder llamarlo desde el HTML
+window.forzarActualizacion = forzarActualizacion;
 
 
 

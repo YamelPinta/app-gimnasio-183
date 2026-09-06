@@ -1517,7 +1517,12 @@ function cambiarTipoVoz() {
 function hablar(texto) {
     if (!vozRelojActivada || !('speechSynthesis' in window)) return;
     
-    window.speechSynthesis.cancel();
+    // Solo cancelamos el audio si el texto es largo (cambios de fase).
+    // Si es un número del conteo (ej: "3", "2", "1"), dejamos fluir el audio para que no se trabe en móviles.
+    if (texto.length > 2) {
+        window.speechSynthesis.cancel();
+    }
+    
     const utterance = new SpeechSynthesisUtterance(texto);
     
     if (vozSeleccionadaURI && vocesDisponibles.length > 0) {
