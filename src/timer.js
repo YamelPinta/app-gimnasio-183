@@ -18,9 +18,14 @@ function guardarEstadoReloj() {
 
     let nombreEj = "Entrenamiento Avanzado";
     const tituloReloj = document.getElementById('titulo-reloj-avanzado');
-    if (tituloReloj && tituloReloj.innerText) {
-        nombreEj = tituloReloj.innerText;
+    // Usamos textContent para que lo lea aunque la pantalla esté oculta
+    if (tituloReloj && tituloReloj.textContent.trim() !== "") {
+        nombreEj = tituloReloj.textContent.trim();
     }
+
+    // Los guardamos en el estado para no perderlos
+    AppState.relojNombreAlumno = nombreAlum;
+    AppState.relojNombreEjercicio = nombreEj;
 
     localStorage.setItem('relojGlobalData', JSON.stringify({
         relojActivoId: AppState.relojActivoId, 
@@ -220,11 +225,20 @@ function actualizarDisplayReloj() {
     } else if (faseActual.nombre === 'DESCANSO') {
         textoRondaFase = "Recuperación";
     } else {
-        // Lógica universal para los entrenamientos (EMOM, AMRAP, TABATA, TIMECAP)
-        if (faseActual.rondaActual && faseActual.rondasTotales) {
+        // Lógica especial para AMRAP y TIMECAP (muestran la meta de rondas)
+        if (faseActual.tipo === 'amrap' || faseActual.tipo === 'timecap') {
+            let texto = `Rondas: ${faseActual.rondasTotales || 1}`;
+            
+            if (faseActual.ciclosTotales && faseActual.ciclosTotales > 1) {
+                texto += ` | Ciclo ${faseActual.cicloActual}/${faseActual.ciclosTotales}`;
+            }
+            
+            textoRondaFase = texto;
+        } 
+        // Lógica normal para EMOM y TABATA (muestran ronda actual / total)
+        else if (faseActual.rondaActual && faseActual.rondasTotales) {
             let texto = `Ronda ${faseActual.rondaActual}/${faseActual.rondasTotales}`;
             
-            // Si el ejercicio tiene más de 1 ciclo configurado, lo sumamos al lado
             if (faseActual.ciclosTotales && faseActual.ciclosTotales > 1) {
                 texto += ` | Ciclo ${faseActual.cicloActual}/${faseActual.ciclosTotales}`;
             }
@@ -275,8 +289,9 @@ function dispararFinEntrenamientoAlumno(nombreGuardado, ejercicioGuardado) {
     let tipoEntrenamiento = ejercicioGuardado || "Entrenamiento Avanzado";
     if (!ejercicioGuardado) {
         const tituloReloj = document.getElementById('titulo-reloj-avanzado');
-        if (tituloReloj && tituloReloj.innerText) {
-            tipoEntrenamiento = tituloReloj.innerText; 
+        // Nuevamente, usando textContent
+        if (tituloReloj && tituloReloj.textContent.trim() !== "") {
+            tipoEntrenamiento = tituloReloj.textContent.trim(); 
         }
     }
     
@@ -750,55 +765,81 @@ function seleccionarModalidadReloj(btn, tipo) {
 function prepararRelojProfe() {
     if (typeof guardarConfigRelojProfe === 'function') guardarConfigRelojProfe();
     const prep = parsearTiempoAsegundos(document.getElementById('input-profe-prep').value);
-    let trabajo = parsearTiempoAsegundos(document.getElementById('input-profe-trabajo').value);
+    let trabajoOriginal = parsearTiempoAsegundos(document.getElementById('input-profe-trabajo').value);
     const desc = parsearTiempoAsegundos(document.getElementById('input-profe-descanso').value);
     let rondas = parseInt(document.getElementById('input-profe-rondas').value) || 1;
     let ciclos = parseInt(document.getElementById('input-profe-ciclos').value) || 1;
 
-    if (trabajo <= 0) {
+    if (trabajoOriginal <= 0) {
         mostrarAlerta("Error", "El tiempo de trabajo no puede ser 0.");
         return;
     }
 
     const modalidad = document.querySelector('.btn-modalidad-reloj.activo')?.innerText.toUpperCase() || 'EMOM';
-
+    
+    let trabajo = trabajoOriginal;
+    let intervaloSegs = 60;
+    
     if (modalidad === 'EMOM') {
-        // --- MODIFICACIÓN DEL INTERVALO PARA EMOM ---
-        let intervaloSegs = 60; // Valor por defecto
         const inputIntervalo = document.getElementById('input-profe-intervalo');
-        
         if (inputIntervalo) {
             intervaloSegs = parsearTiempoAsegundos(inputIntervalo.value);
             if (intervaloSegs <= 0) intervaloSegs = 60; 
         }
-
-        // Dividimos el tiempo total por el tiempo de cada bloque
-        rondas = Math.ceil(trabajo / intervaloSegs);
-        
-        // El tiempo de trabajo de cada fase ya no es "60" fijo, es tu intervalo
+        rondas = Math.ceil(trabajoOriginal / intervaloSegs);
         if (trabajo >= intervaloSegs) trabajo = intervaloSegs; 
-        
         ciclos = 1; 
-        // ---------------------------------------------
     }
 
     const habilitarEjercicios = document.getElementById('check-habilitar-ejercicios')?.checked;
+    let ejerciciosArray = [];
+    if (habilitarEjercicios) {
+        document.querySelectorAll('.input-ej-profe-dinamico').forEach(input => {
+            if (input.value.trim() !== "") ejerciciosArray.push(input.value.trim());
+        });
+    }
 
     ProfeTimer.fases = [];
     if (prep > 0) ProfeTimer.fases.push({ nombre: 'PREPARACIÓN', segundos: prep, ejercicio: '¡Preparate!', modalidad: modalidad });
 
-    for (let c = 1; c <= ciclos; c++) {
-        for (let i = 1; i <= rondas; i++) {
-            let nombreEj = "";
-            if (habilitarEjercicios) {
-                const inputEj = document.getElementById(`input-ej-profe-${i}`);
-                if (inputEj && inputEj.value.trim() !== "") nombreEj = inputEj.value.trim();
-            }
+    if (modalidad === 'TABATA' || modalidad === 'EMOM') {
+        for (let c = 1; c <= ciclos; c++) {
+            for (let i = 1; i <= rondas; i++) {
+                let nombreEj = "";
+                if (ejerciciosArray.length > 0) {
+                    nombreEj = ejerciciosArray[(i - 1) % ejerciciosArray.length];
+                }
 
-            ProfeTimer.fases.push({ nombre: 'ENTRENAMIENTO', segundos: trabajo, ronda: i, rondasTotales: rondas, ciclo: c, ciclosTotales: ciclos, ejercicio: nombreEj, modalidad: modalidad });
+                let duracionBloque = trabajo;
+                // Ajuste exacto para el último bloque de EMOM si es asimétrico
+                if (modalidad === 'EMOM' && i === rondas && (trabajoOriginal % intervaloSegs !== 0)) {
+                    duracionBloque = trabajoOriginal % intervaloSegs;
+                }
+
+                ProfeTimer.fases.push({ nombre: 'ENTRENAMIENTO', segundos: duracionBloque, ronda: i, rondasTotales: rondas, ciclo: c, ciclosTotales: ciclos, ejercicio: nombreEj, modalidad: modalidad });
+                
+                if ((i < rondas || c < ciclos) && desc > 0) {
+                    ProfeTimer.fases.push({ nombre: 'DESCANSO', segundos: desc, ejercicio: nombreEj ? `(Descanso) ${nombreEj}` : 'RECUPERACIÓN', modalidad: modalidad });
+                }
+            }
+        }
+    } else {
+        // AMRAP, TIMECAP, CRONÓMETRO: Tiempo corrido, sin dividir por rondas.
+        let nombreEjLista = ejerciciosArray.join(" | "); 
+        for (let c = 1; c <= ciclos; c++) {
+            ProfeTimer.fases.push({ 
+                nombre: 'ENTRENAMIENTO', 
+                segundos: trabajoOriginal, 
+                ronda: null, 
+                rondasTotales: rondas, // Solo para la UI (texto: "Rondas: 3")
+                ciclo: c, 
+                ciclosTotales: ciclos, 
+                ejercicio: nombreEjLista, 
+                modalidad: modalidad 
+            });
             
-            if (desc > 0) {
-                ProfeTimer.fases.push({ nombre: 'DESCANSO', segundos: desc, ejercicio: nombreEj ? `(Descanso) ${nombreEj}` : 'RECUPERACIÓN', modalidad: modalidad });
+            if (c < ciclos && desc > 0) {
+                ProfeTimer.fases.push({ nombre: 'DESCANSO', segundos: desc, ejercicio: 'RECUPERACIÓN', modalidad: modalidad });
             }
         }
     }
@@ -858,13 +899,15 @@ function actualizarDisplayProfe() {
 
         for (let i = 0; i < ProfeTimer.fases.length; i++) {
             let f = ProfeTimer.fases[i];
-            if (f.nombre !== 'PREPARACIÓN') {
+            // Ahora SÓLO suma el tiempo real de trabajo, ignorando descansos
+            if (f.nombre === 'ENTRENAMIENTO') { 
                 workoutTotal += f.segundos;
                 
                 if (i < ProfeTimer.indiceFase) {
                     workoutTranscurrido += f.segundos;
                 } else if (i === ProfeTimer.indiceFase) {
-                    workoutTranscurrido += (f.segundos - ProfeTimer.tiempoRestante);
+                    let tiempoFaseSeguro = Math.max(0, Math.min(f.segundos, ProfeTimer.tiempoRestante));
+                    workoutTranscurrido += (f.segundos - tiempoFaseSeguro);
                 }
             }
         }
@@ -885,49 +928,77 @@ function actualizarDisplayProfe() {
     const divRondas = document.getElementById('display-rondas-lateral');
     const divCiclos = document.getElementById('display-ciclos-lateral');
 
-    if (fase.ronda) {
+    // Ahora verificamos si existe la meta (rondasTotales) en vez de la ronda actual
+    if (fase.rondasTotales) {
         if (divRondas) {
             divRondas.style.opacity = '1';
-            document.getElementById('valor-ronda-actual').innerText = fase.ronda;
-            document.getElementById('valor-ronda-total').innerText = `/${fase.rondasTotales}`;
+            if (fase.ronda) {
+                // Lógica normal para TABATA y EMOM (ej: 1 / 8)
+                document.getElementById('valor-ronda-actual').innerText = fase.ronda;
+                document.getElementById('valor-ronda-total').innerText = `/${fase.rondasTotales}`;
+            } else {
+                // Lógica para AMRAP y TIMECAP (Muestra la meta en grande, ej: 3)
+                document.getElementById('valor-ronda-actual').innerText = fase.rondasTotales;
+                document.getElementById('valor-ronda-total').innerText = "";
+            }
         }
         if (divCiclos) {
             divCiclos.style.opacity = '1';
+            // Los ciclos funcionan igual para todos
             document.getElementById('valor-ciclo-actual').innerText = fase.ciclo;
             document.getElementById('valor-ciclo-total').innerText = `/${fase.ciclosTotales}`;
         }
     } else {
+        // Ocultar durante PREPARACIÓN o DESCANSO
         if (divRondas) divRondas.style.opacity = '0';
         if (divCiclos) divCiclos.style.opacity = '0';
     }
     
     const tituloReloj = document.getElementById('titulo-ejercicio-profe');
+    let ejercicioAnimacion = fase.ejercicio; // Por defecto
+
     if (tituloReloj) {
         let textoParaMostrar = "";
         
         if (fase.nombre === 'ENTRENAMIENTO') {
             if (fase.ejercicio && fase.ejercicio.trim() !== "") {
-                textoParaMostrar = fase.ejercicio.toUpperCase();
+                // Si detecta la barra " | ", es un circuito (AMRAP/TIMECAP)
+                if (fase.ejercicio.includes(" | ")) {
+                    const listaEjs = fase.ejercicio.split(" | ");
+                    const transcurridoFase = fase.segundos - ProfeTimer.tiempoRestante;
+                    // El índice cambia cada 4 segundos
+                    const index = Math.floor(transcurridoFase / 4) % listaEjs.length;
+                    
+                    ejercicioAnimacion = listaEjs[index];
+                    // Mostramos "1/3 - EJERCICIO"
+                    textoParaMostrar = `${index + 1}/${listaEjs.length} - ${ejercicioAnimacion.toUpperCase()}`;
+                } else {
+                    textoParaMostrar = fase.ejercicio.toUpperCase();
+                }
             } else {
                 textoParaMostrar = document.querySelector('.btn-modalidad-reloj.activo')?.innerText || 'CRONÓMETRO';
             }
         } 
         
-        tituloReloj.innerText = textoParaMostrar;
+        // Evitamos que el DOM se repinte 4 veces por segundo si el texto es igual
+        if (tituloReloj.innerText !== textoParaMostrar) {
+            tituloReloj.innerText = textoParaMostrar;
 
-        const cantidadLetras = textoParaMostrar.length;
-        if (cantidadLetras > 32) {
-            tituloReloj.style.fontSize = "0.75rem";
-        } else if (cantidadLetras > 24) {
-            tituloReloj.style.fontSize = "0.9rem";
-        } else if (cantidadLetras > 17) {
-            tituloReloj.style.fontSize = "1.05rem";
-        } else {
-            tituloReloj.style.fontSize = "1.3rem";
+            const cantidadLetras = textoParaMostrar.length;
+            if (cantidadLetras > 32) {
+                tituloReloj.style.fontSize = "0.75rem";
+            } else if (cantidadLetras > 24) {
+                tituloReloj.style.fontSize = "0.9rem";
+            } else if (cantidadLetras > 17) {
+                tituloReloj.style.fontSize = "1.05rem";
+            } else {
+                tituloReloj.style.fontSize = "1.3rem";
+            }
         }
     }
     
-    actualizarAnimacionTopReloj(fase.ejercicio, fase.nombre);
+    // Le pasamos a la animación el ejercicio individual rotado (o el original si no es circuito)
+    actualizarAnimacionTopReloj(ejercicioAnimacion, fase.nombre);
 
     const pantalla = document.getElementById('pantalla-reloj');
     pantalla.classList.remove('fase-preparacion', 'fase-entrenamiento', 'fase-descanso');
@@ -1125,12 +1196,13 @@ function restaurarRelojProfeCompleto() {
             const check = document.getElementById('check-habilitar-ejercicios');
             if (check) {
                 check.checked = config.ejerciciosHabilitados || false;
-                toggleEjerciciosProfe(); 
                 if (config.ejerciciosHabilitados && config.ejercicios) {
-                    config.ejercicios.forEach((ej, i) => {
-                        const input = document.getElementById(`input-ej-profe-${i+1}`);
-                        if (input) input.value = ej;
-                    });
+                    document.getElementById('contenedor-inputs-ejercicios-profe').style.display = 'flex';
+                    if (typeof generarInputsEjerciciosProfe === 'function') {
+                        generarInputsEjerciciosProfe(config.ejercicios); 
+                    }
+                } else {
+                    document.getElementById('contenedor-inputs-ejercicios-profe').style.display = 'none';
                 }
             }
         } catch(e) { console.warn("Error leyendo configRelojProfe del caché:", e); }
@@ -1323,12 +1395,13 @@ function aplicarRelojGuardado(index) {
     const check = document.getElementById('check-habilitar-ejercicios');
     if (check) {
         check.checked = reloj.ejerciciosHabilitados || false;
-        toggleEjerciciosProfe(); 
         if (reloj.ejerciciosHabilitados && reloj.ejercicios) {
-            reloj.ejercicios.forEach((ej, i) => {
-                const input = document.getElementById(`input-ej-profe-${i+1}`);
-                if (input) input.value = ej;
-            });
+            document.getElementById('contenedor-inputs-ejercicios-profe').style.display = 'flex';
+            if (typeof generarInputsEjerciciosProfe === 'function') {
+                generarInputsEjerciciosProfe(reloj.ejercicios); 
+            }
+        } else {
+            document.getElementById('contenedor-inputs-ejercicios-profe').style.display = 'none';
         }
     }
     
@@ -1397,7 +1470,7 @@ function toggleAnimacionRelojProfe() {
     
     ultimoEjercicioDibujado = null; 
     if (ProfeTimer && ProfeTimer.fases.length > 0) {
-        actualizarAnimacionTopReloj(ProfeTimer.fases[ProfeTimer.indiceFase].ejercicio, ProfeTimer.fases[ProfeTimer.indiceFase].nombre);
+        actualizarDisplayProfe(); 
     }
 }
 
@@ -1609,7 +1682,12 @@ function anunciarFaseActual() {
     } else if (fase.nombre === 'ENTRENAMIENTO') {
         frase = "A entrenar";
         if (fase.ejercicio && fase.ejercicio.trim() !== "" && fase.ejercicio.toUpperCase() !== "RECUPERACIÓN" && fase.ejercicio.toUpperCase() !== "¡PREPARATE!") {
-            frase += ". Toca " + fase.ejercicio;
+            // Si es un circuito, que no lea todos los nombres seguidos
+            if (fase.ejercicio.includes(" | ")) {
+                frase += ". Toca el circuito.";
+            } else {
+                frase += ". Toca " + fase.ejercicio;
+            }
         }
     }
     if (frase !== "") hablar(frase);

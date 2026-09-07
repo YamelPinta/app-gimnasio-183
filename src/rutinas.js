@@ -216,18 +216,19 @@ function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, su
         toggleAvanzadas();
 
         let prepSegs = 0, entrenoSegs = 0, descSegs = 0;
-        let intSegs = 60, pausaSegs = 10, rondasTotales = 8; 
+        let intSegs = 60, pausaSegs = 10, rondasTotales = 8, ciclosTotales = 1; 
 
         if (descanso && (descanso.includes('_SEG:'))) {
             const partes = descanso.split('|');
             partes.forEach(p => {
-                if (p.startsWith('PREP_SEG:')) prepSegs = parseInt(p.split(':')[1]) || 0;
-                if (p.startsWith('EMOM_SEG:') || p.startsWith('AMRAP_SEG:') || p.startsWith('TIMECAP_SEG:') || p.startsWith('TABATA_SEG:')) entrenoSegs = parseInt(p.split(':')[1]) || 0;
-                if (p.startsWith('INT_SEG:')) intSegs = parseInt(p.split(':')[1]) || 60;
-                if (p.startsWith('WORK_SEG:')) intSegs = parseInt(p.split(':')[1]) || 20; 
-                if (p.startsWith('REST_SEG:')) pausaSegs = parseInt(p.split(':')[1]) || 10;
-                if (p.startsWith('RNDS:')) rondasTotales = parseInt(p.split(':')[1]) || 8;
-                if (p.startsWith('DESC_SEG:')) descSegs = parseInt(p.split(':')[1]) || 0;
+                if (p.startsWith('PREP_SEG:')) { let val = parseInt(p.split(':')[1]); prepSegs = isNaN(val) ? 0 : val; }
+                if (p.startsWith('EMOM_SEG:') || p.startsWith('AMRAP_SEG:') || p.startsWith('TIMECAP_SEG:') || p.startsWith('TABATA_SEG:')) { let val = parseInt(p.split(':')[1]); entrenoSegs = isNaN(val) ? 0 : val; }
+                if (p.startsWith('INT_SEG:')) { let val = parseInt(p.split(':')[1]); intSegs = isNaN(val) ? 60 : val; }
+                if (p.startsWith('WORK_SEG:')) { let val = parseInt(p.split(':')[1]); intSegs = isNaN(val) ? 20 : val; }
+                if (p.startsWith('REST_SEG:')) { let val = parseInt(p.split(':')[1]); pausaSegs = isNaN(val) ? 10 : val; }
+                if (p.startsWith('RNDS:')) { let val = parseInt(p.split(':')[1]); rondasTotales = isNaN(val) ? 8 : val; }
+                if (p.startsWith('CYCLES:')) { let val = parseInt(p.split(':')[1]); ciclosTotales = isNaN(val) ? 1 : val; }
+                if (p.startsWith('DESC_SEG:')) { let val = parseInt(p.split(':')[1]); descSegs = isNaN(val) ? 0 : val; }
             });
         }
 
@@ -259,8 +260,13 @@ function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, su
             document.getElementById('input-tabata-trabajo').value = formatearTiempo(intSegs); 
             document.getElementById('input-tabata-pausa').value = formatearTiempo(pausaSegs);
             document.getElementById('input-tabata-rondas').value = rondasTotales;
+            document.getElementById('input-tabata-ciclos').value = ciclosTotales; // <--- Acá lo agregamos
         } else {
             document.getElementById(`input-${tipoModal}-minutos`).value = formatearTiempo(entrenoSegs);
+            const inputRondas = document.getElementById(`input-${tipoModal}-rondas`);
+            if (inputRondas) inputRondas.value = rondasTotales;
+            const inputCiclos = document.getElementById(`input-${tipoModal}-ciclos`);
+            if (inputCiclos) inputCiclos.value = ciclosTotales; // <--- Y acá también para AMRAP/TIMECAP
         }
 
         if (tipoModal === 'emom') {
@@ -504,13 +510,13 @@ async function cargarEjerciciosCategoriaBD() {
 
                     const partes = emomEncontrado.descanso.split('|');
                     partes.forEach(p => {
-                        if (p.startsWith('PREP_SEG:')) prepSegs = parseInt(p.split(':')[1]) || 0;
-                        if (p.startsWith('DESC_SEG:')) descSegs = parseInt(p.split(':')[1]) || 0;
-                        if (p.startsWith('INT_SEG:')) intSegs = parseInt(p.split(':')[1]) || 60;
-                        if (p.startsWith('WORK_SEG:')) intSegs = parseInt(p.split(':')[1]) || 20;
-                        if (p.startsWith('REST_SEG:')) pausaSegs = parseInt(p.split(':')[1]) || 10;
-                        if (p.startsWith('RNDS:')) rondasTotales = parseInt(p.split(':')[1]) || 1;
-                        if (p.startsWith('CYCLES:')) ciclosTotales = parseInt(p.split(':')[1]) || 1;
+                        if (p.startsWith('PREP_SEG:')) { let val = parseInt(p.split(':')[1]); prepSegs = isNaN(val) ? 0 : val; }
+                        if (p.startsWith('DESC_SEG:')) { let val = parseInt(p.split(':')[1]); descSegs = isNaN(val) ? 0 : val; }
+                        if (p.startsWith('INT_SEG:')) { let val = parseInt(p.split(':')[1]); intSegs = isNaN(val) ? 60 : val; }
+                        if (p.startsWith('WORK_SEG:')) { let val = parseInt(p.split(':')[1]); intSegs = isNaN(val) ? 20 : val; }
+                        if (p.startsWith('REST_SEG:')) { let val = parseInt(p.split(':')[1]); pausaSegs = isNaN(val) ? 10 : val; }
+                        if (p.startsWith('RNDS:')) { let val = parseInt(p.split(':')[1]); rondasTotales = isNaN(val) ? 1 : val; }
+                        if (p.startsWith('CYCLES:')) { let val = parseInt(p.split(':')[1]); ciclosTotales = isNaN(val) ? 1 : val; }
                     });
 
                     if (tipoEjercicio === 'emom') {
@@ -541,7 +547,7 @@ async function cargarEjerciciosCategoriaBD() {
                         for (let i = 1; i <= rondasTotales; i++) {
                             AppState.relojFases.push({ 
                                 nombre: 'ENTRENAMIENTO', 
-                                segundos: intSegs,  // <--- ACÁ ESTABA EL ERROR: decía "trabajoSegs". Debe ser "intSegs"
+                                segundos: intSegs,
                                 tipo: 'tabata', 
                                 intervalo: intSegs, 
                                 rondaActual: i, 
@@ -554,7 +560,6 @@ async function cargarEjerciciosCategoriaBD() {
                             }
                         }
                     }
-                    if (descSegs > 0) AppState.relojFases.push({ nombre: 'DESCANSO', segundos: descSegs, tipo: 'descanso' });
                 } else if (tipoEjercicio === 'emom') {
                     let totalBloques = Math.ceil(trabajoSegs / intSegs);
                     for (let c = 1; c <= ciclosTotales; c++) {
@@ -585,28 +590,24 @@ async function cargarEjerciciosCategoriaBD() {
                         }
                     }
                 } else {
-                    // AMRAP / Time Cap con soporte de múltiples rondas y ciclos
+                    // AMRAP / Time Cap: Es un bloque de tiempo continuo. Las rondas son solo un objetivo escrito.
                     for (let c = 1; c <= ciclosTotales; c++) {
-                        for (let i = 1; i <= rondasTotales; i++) {
-                            let duracionRonda = Math.floor(trabajoSegs / rondasTotales);
-                            
-                            AppState.relojFases.push({ 
-                                nombre: 'ENTRENAMIENTO', 
-                                segundos: duracionRonda, 
-                                tipo: tipoEjercicio, 
-                                rondaActual: i, 
-                                rondasTotales: rondasTotales,
-                                cicloActual: c,
-                                ciclosTotales: ciclosTotales
-                            });
+                        AppState.relojFases.push({ 
+                            nombre: 'ENTRENAMIENTO', 
+                            segundos: trabajoSegs, 
+                            tipo: tipoEjercicio, 
+                            rondasTotales: rondasTotales, // Solo se pasa para mostrarlo en el texto
+                            cicloActual: c,
+                            ciclosTotales: ciclosTotales
+                        });
 
-                            if (descSegs > 0 && (i < rondasTotales || c < ciclosTotales)) {
-                                AppState.relojFases.push({ 
-                                    nombre: 'DESCANSO', 
-                                    segundos: descSegs, 
-                                    tipo: 'descanso' 
-                                });
-                            }
+                        // El descanso se aplica entre ciclos, no entre rondas
+                        if (descSegs > 0 && c < ciclosTotales) {
+                            AppState.relojFases.push({ 
+                                nombre: 'DESCANSO', 
+                                segundos: descSegs, 
+                                tipo: 'descanso' 
+                            });
                         }
                     }
                 }
@@ -1500,7 +1501,8 @@ async function guardarCircuitoAvanzado(tipo) {
         
         if (trabajo <= 0) { mostrarAlerta("Faltan datos", "El tiempo de trabajo no puede ser 0."); return; }
         
-        tiempoSeg = (trabajo + pausa) * rondas;
+        // Guardamos estrictamente el tiempo de trabajo neto en la base de datos
+        tiempoSeg = trabajo * rondas * ciclos;
         txtTiempo = `${rondas} RNDS`;
         codigoFases = `PREP_SEG:${prepSeg}|TABATA_SEG:${tiempoSeg}|WORK_SEG:${trabajo}|REST_SEG:${pausa}|RNDS:${rondas}|CYCLES:${ciclos}|DESC_SEG:${descansoSeg}`;
     } else {
@@ -1560,8 +1562,8 @@ async function guardarCircuitoAvanzado(tipo) {
     let totalSegsDisplay = tiempoSeg;
     if (tipo === 'tabata') {
         const trabajo = parsearTiempoAsegundos(document.getElementById('input-tabata-trabajo').value);
-        const pausa = parsearTiempoAsegundos(document.getElementById('input-tabata-pausa').value);
-        totalSegsDisplay = (trabajo + pausa) * rondas * ciclos;
+        // Excluimos la pausa del cálculo visual para el nombre
+        totalSegsDisplay = trabajo * rondas * ciclos;
     }
     
     let tiempoTextoLindo = fLindo(totalSegsDisplay);
@@ -2578,63 +2580,92 @@ function toggleEjerciciosProfe() {
     }
 }
 
-function generarInputsEjerciciosProfe() {
+function generarInputsEjerciciosProfe(restaurandoEjercicios = null) {
     const check = document.getElementById('check-habilitar-ejercicios');
     if (!check || !check.checked) return;
 
     const modalidad = document.querySelector('.btn-modalidad-reloj.activo')?.innerText.toUpperCase() || 'EMOM';
-    const rondas = parseInt(document.getElementById('input-profe-rondas').value) || 1;
-    const trabajoSegs = parsearTiempoAsegundos(document.getElementById('input-profe-trabajo').value);
-
-    // --- LÓGICA NUEVA PARA EL INTERVALO ---
-    let intervaloSegs = 60; // 1 minuto por defecto
-    const inputIntervalo = document.getElementById('input-profe-intervalo');
-    if (inputIntervalo && modalidad === 'EMOM') {
-        intervaloSegs = parsearTiempoAsegundos(inputIntervalo.value);
-        if (intervaloSegs <= 0) intervaloSegs = 60; // Prevenir división por cero
-    }
-
-    // Calculamos los bloques dividiendo el tiempo total por el intervalo
-    const cantidadBloques = Math.ceil(trabajoSegs / intervaloSegs) || 1;
-    // --------------------------------------
-
-    let cantidad = 1;
-    let etiquetaBase = 'Rnd';
-
-    if (modalidad === 'EMOM') {
-        cantidad = cantidadBloques;
-        // Si el intervalo es mayor a 60s dice "Bloque", sino "Min"
-        etiquetaBase = intervaloSegs > 60 ? 'Bloque' : 'Min';
-    } else {
-        cantidad = rondas;
-    }
-
     const contenedor = document.getElementById('contenedor-inputs-ejercicios-profe');
 
-    let valoresPrevios = [];
-    contenedor.querySelectorAll('.input-ej-profe-dinamico').forEach(input => {
-        valoresPrevios.push(input.value);
-    });
+    if (modalidad === 'EMOM') {
+        // Lógica Fija para EMOM (Basada en bloques)
+        const trabajoSegs = parsearTiempoAsegundos(document.getElementById('input-profe-trabajo')?.value || "01:00");
+        let intervaloSegs = 60;
+        const inputIntervalo = document.getElementById('input-profe-intervalo');
+        if (inputIntervalo) {
+            intervaloSegs = parsearTiempoAsegundos(inputIntervalo.value);
+            if (intervaloSegs <= 0) intervaloSegs = 60;
+        }
+        
+        const cantidadBloques = Math.ceil(trabajoSegs / intervaloSegs) || 1;
+        const etiquetaBase = intervaloSegs > 60 ? 'Bloque' : 'Min';
 
-    let html = '';
-    for (let i = 1; i <= cantidad; i++) {
-        let valor = valoresPrevios[i - 1] || '';
-        html += `
-            <div class="d-flex align-center gap-8">
-                <span class="text-warning fw-600 fs-75 w-45 flex-shrink-0">${etiquetaBase} ${i}:</span>
-                
-                <div class="d-flex gap-6 flex-1 min-w-0">
-                    <input class="input-reloj-config input-ej-profe-dinamico flex-1 fs-90 p-8 text-left min-w-0 m-0" type="text" id="input-ej-profe-${i}" value="${valor}" placeholder="Ej: Burpees...">
-                    
-                    <!-- BOTÓN LIMPIO PARA EL RELOJ -->
-                    <button class="btn-guardar p-0-12 m-0 bg-ff9900 radius-10 d-flex justify-center align-center flex-shrink-0" type="button" onclick="abrirListaEjerciciosReloj('input-ej-profe-${i}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
+        let valoresPrevios = restaurandoEjercicios || [];
+        if (!restaurandoEjercicios) {
+            contenedor.querySelectorAll('.input-ej-profe-dinamico').forEach(input => valoresPrevios.push(input.value));
+        }
+
+        let html = '';
+        for (let i = 1; i <= cantidadBloques; i++) {
+            let valor = valoresPrevios[i - 1] || '';
+            html += `
+                <div class="d-flex align-center gap-8 mb-8">
+                    <span class="text-warning fw-600 fs-75 w-45 flex-shrink-0">${etiquetaBase} ${i}:</span>
+                    <div class="d-flex gap-6 flex-1 min-w-0">
+                        <input class="input-reloj-config input-ej-profe-dinamico flex-1 fs-90 p-8 text-left min-w-0 m-0" type="text" id="input-ej-profe-${i}" value="${valor}" placeholder="Ej: Burpees...">
+                        <button class="btn-guardar p-0-12 m-0 bg-ff9900 radius-10 d-flex justify-center align-center flex-shrink-0" type="button" onclick="abrirListaEjerciciosReloj('input-ej-profe-${i}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
+        contenedor.innerHTML = html;
+        
+    } else {
+        // Lógica Dinámica para TABATA, AMRAP, TIMECAP (Con botón + Añadir)
+        let valoresPrevios = restaurandoEjercicios || [];
+        if (!restaurandoEjercicios) {
+            contenedor.querySelectorAll('.input-ej-profe-dinamico').forEach(input => {
+                if (input.value.trim() !== '') valoresPrevios.push(input.value);
+            });
+        }
+        
+        if (valoresPrevios.length === 0) valoresPrevios = [""];
+
+        let html = `<div id="lista-ej-profe-dinamica" class="d-flex flex-column gap-8 mb-8">`;
+        valoresPrevios.forEach((valor, i) => {
+            html += crearFilaDinamicaProfe(Date.now() + i, valor);
+        });
+        html += `</div>
+                 <button class="btn-agregar-serie" type="button" onclick="agregarFilaEjercicioProfe()">+ Añadir Ejercicio</button>`;
+        
+        contenedor.innerHTML = html;
     }
-    contenedor.innerHTML = html;
+}
+
+function crearFilaDinamicaProfe(idUnico, valor = "") {
+    const inputId = `input-ej-profe-${idUnico}`;
+    return `
+        <div class="d-flex align-center gap-8 fila-ej-profe">
+            <button type="button" onclick="this.closest('.fila-ej-profe').remove()" class="bg-none border-none text-danger cursor-pointer px-5 flex-shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+            <div class="d-flex gap-6 flex-1 min-w-0">
+                <input class="input-reloj-config input-ej-profe-dinamico flex-1 fs-90 p-8 text-left min-w-0 m-0" type="text" id="${inputId}" value="${valor}" placeholder="Ej: Burpees...">
+                <button class="btn-guardar p-0-12 m-0 bg-ff9900 radius-10 d-flex justify-center align-center flex-shrink-0" type="button" onclick="abrirListaEjerciciosReloj('${inputId}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function agregarFilaEjercicioProfe() {
+    const lista = document.getElementById('lista-ej-profe-dinamica');
+    if (lista) {
+        lista.insertAdjacentHTML('beforeend', crearFilaDinamicaProfe(Date.now()));
+    }
 }
 
 function abrirListaEjerciciosReloj(idInputDestino) {
@@ -2696,15 +2727,16 @@ function actualizarTextosDinamicosTiempos() {
     let tabR = parseInt(document.getElementById('input-tabata-rondas')?.value) || 1;
     let tabC = parseInt(document.getElementById('input-tabata-ciclos')?.value) || 1;
     let spanTab = document.getElementById('span-tabata-tiempo-dinamico');
-    if (spanTab) spanTab.innerText = "- " + fLindo((tabW + tabP) * tabR * tabC);
+    // Multiplicamos solo el tiempo de trabajo
+    if (spanTab) spanTab.innerText = "- " + fLindo(tabW * tabR * tabC);
 }
 
 
 
 
 
-
-
+window.crearFilaDinamicaProfe = crearFilaDinamicaProfe;
+window.agregarFilaEjercicioProfe = agregarFilaEjercicioProfe;
 window.actualizarTextosDinamicosTiempos = actualizarTextosDinamicosTiempos;
 window.abrirListaEjerciciosReloj = abrirListaEjerciciosReloj;
 window.abrirModalEjercicio = abrirModalEjercicio;
