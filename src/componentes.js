@@ -1,9 +1,23 @@
 
 
 function UI_TarjetaEjercicio(ej) {
-    const esEspecial = (ej.descanso && ej.descanso.includes('EMOM_SEG:')) || 
-                       (ej.ejercicio_nombre && ej.ejercicio_nombre.toUpperCase().startsWith('EMOM')) || 
-                       (ej.ejercicio_nombre && ej.ejercicio_nombre.toUpperCase().startsWith('AMRAP'));
+    
+    const esEspecial = (ej.descanso && (
+        ej.descanso.includes('EMOM_SEG:') || 
+        ej.descanso.includes('AMRAP_SEG:') || 
+        ej.descanso.includes('TABATA_SEG:') || 
+        ej.descanso.includes('TIMECAP_SEG:')
+    )) || (ej.ejercicio_nombre && (
+        ej.ejercicio_nombre.toUpperCase().startsWith('EMOM') || 
+        ej.ejercicio_nombre.toUpperCase().startsWith('AMRAP') ||
+        ej.ejercicio_nombre.toUpperCase().startsWith('TABATA') ||
+        ej.ejercicio_nombre.toUpperCase().startsWith('TIMECAP')
+    )) || (ej.nombre && (
+        ej.nombre.toUpperCase().startsWith('EMOM') || 
+        ej.nombre.toUpperCase().startsWith('AMRAP') ||
+        ej.nombre.toUpperCase().startsWith('TABATA') ||
+        ej.nombre.toUpperCase().startsWith('TIMECAP')
+    ));
 
     const descansoText = esEspecial 
         ? `<span>${formatearDescansoVisual(ej.descanso)}</span>` 
@@ -74,10 +88,24 @@ function UI_Subbloque(idAcordeon, nombreSub, cantidadEjercicios, htmlEjercicios)
 
 
 function UI_TarjetaEjercicioPack(ej) {
-    const esEspecial = (ej.descanso && ej.descanso.includes('EMOM_SEG:')) || 
-                       (ej.nombre && ej.nombre.toUpperCase().startsWith('EMOM')) || 
-                       (ej.nombre && ej.nombre.toUpperCase().startsWith('AMRAP'));
 
+    const esEspecial = (ej.descanso && (
+        ej.descanso.includes('EMOM_SEG:') || 
+        ej.descanso.includes('AMRAP_SEG:') || 
+        ej.descanso.includes('TABATA_SEG:') || 
+        ej.descanso.includes('TIMECAP_SEG:')
+    )) || (ej.ejercicio_nombre && (
+        ej.ejercicio_nombre.toUpperCase().startsWith('EMOM') || 
+        ej.ejercicio_nombre.toUpperCase().startsWith('AMRAP') ||
+        ej.ejercicio_nombre.toUpperCase().startsWith('TABATA') ||
+        ej.ejercicio_nombre.toUpperCase().startsWith('TIMECAP')
+    )) || (ej.nombre && (
+        ej.nombre.toUpperCase().startsWith('EMOM') || 
+        ej.nombre.toUpperCase().startsWith('AMRAP') ||
+        ej.nombre.toUpperCase().startsWith('TABATA') ||
+        ej.nombre.toUpperCase().startsWith('TIMECAP')
+    ));
+    
     const descansoText = esEspecial 
         ? `<span>${formatearDescansoVisual(ej.descanso)}</span>` 
         : `<span>Descanso: ${formatearDescansoVisual(ej.descanso)}</span>`;

@@ -73,39 +73,63 @@ function abrirModalEjercicio(contexto = 'rutina') {
 }
 
 function resetearFormulariosEjercicio() {
-    const limpiarValor = (id) => {
+    // Nueva función que permite setear un valor por defecto si no le pasamos nada
+    const setValor = (id, valorDefecto = "") => {
         const el = document.getElementById(id);
-        if (el) el.value = "";
+        if (el) el.value = valorDefecto;
     };
 
-    limpiarValor("input-ej-nombre");
-    limpiarValor("input-ej-descanso");
-    limpiarValor("input-ej-subbloque");
-    limpiarValor("input-ej-notas");
+    setValor("input-ej-nombre");
+    setValor("input-ej-descanso");
+    setValor("input-ej-subbloque");
+    setValor("input-ej-notas");
 
-    limpiarValor("input-emom-nombre");
-    limpiarValor("input-emom-prep");
-    limpiarValor("input-emom-minutos");
-    limpiarValor("input-emom-descanso");
-    limpiarValor("input-emom-subbloque");
-    limpiarValor("input-emom-notas");
+    // EMOM
+    setValor("input-emom-nombre");
+    setValor("input-emom-prep", "00:00");
+    setValor("input-emom-minutos", "00:00");
+    setValor("input-emom-descanso", "00:00");
+    setValor("input-emom-intervalo", "00:00");
+    setValor("input-emom-subbloque");
+    setValor("input-emom-notas");
     const contenedorEmom = document.getElementById("contenedor-minutos-emom");
     if (contenedorEmom) contenedorEmom.innerHTML = "";
 
-    limpiarValor("input-amrap-nombre");
-    limpiarValor("input-amrap-prep");
-    limpiarValor("input-amrap-minutos");
-    limpiarValor("input-amrap-descanso");
-    limpiarValor("input-amrap-subbloque");
-    limpiarValor("input-amrap-notas");
+    // AMRAP
+    setValor("input-amrap-nombre");
+    setValor("input-amrap-prep", "00:00");
+    setValor("input-amrap-minutos", "00:00");
+    setValor("input-amrap-descanso", "00:00");
+    setValor("input-amrap-rondas", "1");
+    setValor("input-amrap-ciclos", "1");
+    setValor("input-amrap-subbloque");
+    setValor("input-amrap-notas");
     const contenedorAmrap = document.getElementById("contenedor-ejercicios-amrap");
     if (contenedorAmrap) {
         contenedorAmrap.innerHTML = "";
         agregarFilaAvanzada('amrap'); 
     }
 
-    limpiarValor("input-tabata-nombre"); limpiarValor("input-tabata-prep"); limpiarValor("input-tabata-trabajo"); limpiarValor("input-tabata-pausa"); limpiarValor("input-tabata-rondas"); limpiarValor("input-tabata-descanso"); limpiarValor("input-tabata-subbloque"); limpiarValor("input-tabata-notas");
-    limpiarValor("input-timecap-nombre"); limpiarValor("input-timecap-prep"); limpiarValor("input-timecap-minutos"); limpiarValor("input-timecap-descanso"); limpiarValor("input-timecap-subbloque"); limpiarValor("input-timecap-notas");
+    // TABATA
+    setValor("input-tabata-nombre"); 
+    setValor("input-tabata-prep", "00:00"); 
+    setValor("input-tabata-trabajo", "00:00"); 
+    setValor("input-tabata-pausa", "00:00"); 
+    setValor("input-tabata-rondas", "3"); 
+    setValor("input-tabata-descanso", "00:00"); 
+    setValor("input-tabata-ciclos", "1");
+    setValor("input-tabata-subbloque"); 
+    setValor("input-tabata-notas");
+    
+    // TIME CAP
+    setValor("input-timecap-nombre"); 
+    setValor("input-timecap-prep", "00:00"); 
+    setValor("input-timecap-minutos", "00:00"); 
+    setValor("input-timecap-descanso", "00:00"); 
+    setValor("input-timecap-rondas", "1");
+    setValor("input-timecap-ciclos", "1");
+    setValor("input-timecap-subbloque"); 
+    setValor("input-timecap-notas");
     
     if (document.getElementById("contenedor-ejercicios-tabata")) document.getElementById("contenedor-ejercicios-tabata").innerHTML = "";
     if (document.getElementById("contenedor-ejercicios-timecap")) document.getElementById("contenedor-ejercicios-timecap").innerHTML = "";
@@ -126,6 +150,8 @@ function resetearFormulariosEjercicio() {
         checkAvanzado.checked = false;
         toggleAvanzadas();
     }
+
+    setTimeout(() => { if(typeof actualizarTextosDinamicosTiempos === 'function') actualizarTextosDinamicosTiempos(); }, 100);
 }
 
 function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, subBloque, notas, contexto = 'rutina') {
@@ -213,7 +239,18 @@ function abrirModalEditar(id, zona, nombre, seriesRepsJson, fuerza, descanso, su
         abrirConfiguracionAvanzada(tipoModal);
 
         const inputNombre = document.getElementById(`input-${tipoModal}-nombre`);
-        if (inputNombre) inputNombre.value = nombre;
+        if (inputNombre) {
+            let nombreInput = nombre || "";
+            // Le sacamos la parte final "- X min" o "- X seg" al desvestirlo
+            const sufijoRegex = /\s*-\s*\d+(:\d+)?\s*(min|seg)$/i;
+            nombreInput = nombreInput.replace(sufijoRegex, '').trim();
+            
+            // Si el nombre desvestido es el básico, lo dejamos vacío para que actúe el placeholder
+            if (['EMOM', 'AMRAP', 'TABATA', 'TIMECAP', 'TIME CAP'].includes(nombreInput.toUpperCase())) {
+                nombreInput = "";
+            }
+            inputNombre.value = nombreInput;
+        }
 
         document.getElementById(`input-${tipoModal}-prep`).value = formatearTiempo(prepSegs);
         document.getElementById(`input-${tipoModal}-descanso`).value = formatearTiempo(descSegs);
@@ -416,7 +453,12 @@ async function cargarEjerciciosCategoriaBD() {
         AppState.ejerciciosActualesCache = ejercicios;
 
         let avanzados = ejercicios.filter(ej =>
-            (ej.descanso && ej.descanso.includes('EMOM_SEG:')) ||
+            (ej.descanso && (
+                ej.descanso.includes('EMOM_SEG:') || 
+                ej.descanso.includes('AMRAP_SEG:') || 
+                ej.descanso.includes('TIMECAP_SEG:') || 
+                ej.descanso.includes('TABATA_SEG:')
+            )) ||
             (ej.ejercicio_nombre && (
                 ej.ejercicio_nombre.toUpperCase().startsWith("EMOM") ||
                 ej.ejercicio_nombre.toUpperCase().startsWith("AMRAP") ||
@@ -446,57 +488,48 @@ async function cargarEjerciciosCategoriaBD() {
                 AppState.relojEstado = 'detenido';
 
                 let prepSegs = 0; let descSegs = 0; let trabajoSegs = 0; let intSegs = 60;
-                let pausaSegs = 10; let rondasTotales = 8;
+                let pausaSegs = 10; let rondasTotales = 1; let ciclosTotales = 1;
                 let tipoEjercicio = 'emom'; 
 
                 if (emomEncontrado.descanso) {
                     if (emomEncontrado.descanso.includes('AMRAP_SEG:')) {
                         tipoEjercicio = 'amrap';
-                        const partes = emomEncontrado.descanso.split('|');
-                        partes.forEach(p => {
-                            if (p.startsWith('PREP_SEG:')) prepSegs = parseInt(p.split(':')[1]) || 0;
-                            if (p.startsWith('AMRAP_SEG:')) trabajoSegs = parseInt(p.split(':')[1]) || 0;
-                            if (p.startsWith('DESC_SEG:')) descSegs = parseInt(p.split(':')[1]) || 0;
-                        });
                     } else if (emomEncontrado.descanso.includes('TIMECAP_SEG:')) {
                         tipoEjercicio = 'timecap';
-                        const partes = emomEncontrado.descanso.split('|');
-                        partes.forEach(p => {
-                            if (p.startsWith('PREP_SEG:')) prepSegs = parseInt(p.split(':')[1]) || 0;
-                            if (p.startsWith('TIMECAP_SEG:')) trabajoSegs = parseInt(p.split(':')[1]) || 0;
-                            if (p.startsWith('DESC_SEG:')) descSegs = parseInt(p.split(':')[1]) || 0;
-                        });
                     } else if (emomEncontrado.descanso.includes('TABATA_SEG:')) {
                         tipoEjercicio = 'tabata';
-                        const partes = emomEncontrado.descanso.split('|');
-                        partes.forEach(p => {
-                            if (p.startsWith('PREP_SEG:')) prepSegs = parseInt(p.split(':')[1]) || 0;
-                            if (p.startsWith('WORK_SEG:')) trabajoSegs = parseInt(p.split(':')[1]) || 20;
-                            if (p.startsWith('REST_SEG:')) pausaSegs = parseInt(p.split(':')[1]) || 10;
-                            if (p.startsWith('RNDS:')) rondasTotales = parseInt(p.split(':')[1]) || 8;
-                            if (p.startsWith('DESC_SEG:')) descSegs = parseInt(p.split(':')[1]) || 0;
-                        });
                     } else if (emomEncontrado.descanso.includes('EMOM_SEG:')) {
                         tipoEjercicio = 'emom';
-                        const partes = emomEncontrado.descanso.split('|');
-                        partes.forEach(p => {
-                            if (p.startsWith('PREP_SEG:')) prepSegs = parseInt(p.split(':')[1]) || 0;
-                            if (p.startsWith('EMOM_SEG:')) trabajoSegs = parseInt(p.split(':')[1]) || 0;
-                            if (p.startsWith('INT_SEG:')) intSegs = parseInt(p.split(':')[1]) || 60;
-                            if (p.startsWith('DESC_SEG:')) descSegs = parseInt(p.split(':')[1]) || 0;
-                        });
-                    } else {
-                        let emomMins = 0;
-                        const match = emomEncontrado.ejercicio_nombre.match(/\d+/);
-                        if (match) emomMins = parseInt(match[0]);
-                        if (emomEncontrado.descanso.includes('PREP:')) {
-                            const partes = emomEncontrado.descanso.split('|');
-                            partes.forEach(p => {
-                                if (p.startsWith('PREP:')) prepSegs = parseInt(p.split(':')[1]) * 60;
-                                if (p.startsWith('DESC:')) descSegs = parseInt(p.split(':')[1]) * 60;
-                            });
+                    }
+
+                    const partes = emomEncontrado.descanso.split('|');
+                    partes.forEach(p => {
+                        if (p.startsWith('PREP_SEG:')) prepSegs = parseInt(p.split(':')[1]) || 0;
+                        if (p.startsWith('DESC_SEG:')) descSegs = parseInt(p.split(':')[1]) || 0;
+                        if (p.startsWith('INT_SEG:')) intSegs = parseInt(p.split(':')[1]) || 60;
+                        if (p.startsWith('WORK_SEG:')) intSegs = parseInt(p.split(':')[1]) || 20;
+                        if (p.startsWith('REST_SEG:')) pausaSegs = parseInt(p.split(':')[1]) || 10;
+                        if (p.startsWith('RNDS:')) rondasTotales = parseInt(p.split(':')[1]) || 1;
+                        if (p.startsWith('CYCLES:')) ciclosTotales = parseInt(p.split(':')[1]) || 1;
+                    });
+
+                    if (tipoEjercicio === 'emom') {
+                        try {
+                            let seriesJson = JSON.parse(emomEncontrado.series_reps);
+                            if (Array.isArray(seriesJson)) {
+                                trabajoSegs = seriesJson.length * intSegs;
+                            } else {
+                                partes.forEach(p => { if (p.startsWith('EMOM_SEG:')) trabajoSegs = parseInt(p.split(':')[1]) || 0; });
+                            }
+                        } catch(e) {
+                            partes.forEach(p => { if (p.startsWith('EMOM_SEG:')) trabajoSegs = parseInt(p.split(':')[1]) || 0; });
                         }
-                        trabajoSegs = emomMins * 60;
+                    } else {
+                        partes.forEach(p => {
+                            if (p.startsWith('AMRAP_SEG:') || p.startsWith('TIMECAP_SEG:') || p.startsWith('TABATA_SEG:')) {
+                                trabajoSegs = parseInt(p.split(':')[1]) || 0;
+                            }
+                        });
                     }
                 }
 
@@ -504,14 +537,78 @@ async function cargarEjerciciosCategoriaBD() {
                 if (prepSegs > 0) AppState.relojFases.push({ nombre: 'PREPARACIÓN', segundos: prepSegs, tipo: 'prep' });
 
                 if (tipoEjercicio === 'tabata') {
-                    for (let i = 1; i <= rondasTotales; i++) {
-                        AppState.relojFases.push({ nombre: 'ENTRENAMIENTO', segundos: trabajoSegs, tipo: 'tabata', intervalo: trabajoSegs, rondaActual: i, rondasTotales: rondasTotales });
-                        if (i < rondasTotales && pausaSegs > 0) {
-                            AppState.relojFases.push({ nombre: 'DESCANSO', segundos: pausaSegs, tipo: 'tabata_rest' });
+                    for (let c = 1; c <= ciclosTotales; c++) {
+                        for (let i = 1; i <= rondasTotales; i++) {
+                            AppState.relojFases.push({ 
+                                nombre: 'ENTRENAMIENTO', 
+                                segundos: intSegs,  // <--- ACÁ ESTABA EL ERROR: decía "trabajoSegs". Debe ser "intSegs"
+                                tipo: 'tabata', 
+                                intervalo: intSegs, 
+                                rondaActual: i, 
+                                rondasTotales: rondasTotales,
+                                cicloActual: c,
+                                ciclosTotales: ciclosTotales
+                            });
+                            if ((i < rondasTotales || c < ciclosTotales) && pausaSegs > 0) {
+                                AppState.relojFases.push({ nombre: 'DESCANSO', segundos: pausaSegs, tipo: 'tabata_rest' });
+                            }
+                        }
+                    }
+                    if (descSegs > 0) AppState.relojFases.push({ nombre: 'DESCANSO', segundos: descSegs, tipo: 'descanso' });
+                } else if (tipoEjercicio === 'emom') {
+                    let totalBloques = Math.ceil(trabajoSegs / intSegs);
+                    for (let c = 1; c <= ciclosTotales; c++) {
+                        for (let i = 1; i <= totalBloques; i++) {
+                            let duracionBloque = intSegs;
+                            if (i === totalBloques && trabajoSegs % intSegs !== 0) {
+                                duracionBloque = trabajoSegs % intSegs;
+                            }
+                            AppState.relojFases.push({ 
+                                nombre: 'ENTRENAMIENTO', 
+                                segundos: duracionBloque, 
+                                tipo: 'emom', 
+                                intervalo: intSegs, 
+                                rondaActual: i, 
+                                rondasTotales: totalBloques,
+                                cicloActual: c,
+                                ciclosTotales: ciclosTotales
+                            });
+
+                            // Inserta el descanso ENTRE ronda y ronda (ignora al terminar la última)
+                            if (descSegs > 0 && (i < totalBloques || c < ciclosTotales)) {
+                                AppState.relojFases.push({ 
+                                    nombre: 'DESCANSO', 
+                                    segundos: descSegs, 
+                                    tipo: 'descanso' 
+                                });
+                            }
                         }
                     }
                 } else {
-                    AppState.relojFases.push({ nombre: 'ENTRENAMIENTO', segundos: trabajoSegs, tipo: tipoEjercicio, intervalo: intSegs });
+                    // AMRAP / Time Cap con soporte de múltiples rondas y ciclos
+                    for (let c = 1; c <= ciclosTotales; c++) {
+                        for (let i = 1; i <= rondasTotales; i++) {
+                            let duracionRonda = Math.floor(trabajoSegs / rondasTotales);
+                            
+                            AppState.relojFases.push({ 
+                                nombre: 'ENTRENAMIENTO', 
+                                segundos: duracionRonda, 
+                                tipo: tipoEjercicio, 
+                                rondaActual: i, 
+                                rondasTotales: rondasTotales,
+                                cicloActual: c,
+                                ciclosTotales: ciclosTotales
+                            });
+
+                            if (descSegs > 0 && (i < rondasTotales || c < ciclosTotales)) {
+                                AppState.relojFases.push({ 
+                                    nombre: 'DESCANSO', 
+                                    segundos: descSegs, 
+                                    tipo: 'descanso' 
+                                });
+                            }
+                        }
+                    }
                 }
 
                 if (descSegs > 0) AppState.relojFases.push({ nombre: 'DESCANSO', segundos: descSegs, tipo: 'descanso' });
@@ -800,8 +897,8 @@ function generarHtmlSeries(seriesRepsJson, idUnico) {
 
     if (seriesObj.length === 0) return `<span style="word-break: break-word;">-</span>`;
 
-    let esAmrap = false;
-    let esEmom = false;
+    // Ahora separamos las modalidades como corresponde
+    let esAmrap = false, esTimecap = false, esTabata = false, esEmom = false;
     let intervaloSegundos = 60; 
     let tiempoTotalSegundos = 0;
 
@@ -810,9 +907,11 @@ function generarHtmlSeries(seriesRepsJson, idUnico) {
         const nombreSeguro = (ej.ejercicio_nombre || ej.nombre || "").toUpperCase();
         const descSeguro = (ej.descanso || "").toUpperCase();
 
-        if (nombreSeguro.includes('AMRAP') || descSeguro.includes('AMRAP') || nombreSeguro.includes('TIMECAP') || descSeguro.includes('TIMECAP_SEG:') || nombreSeguro.includes('TABATA') || descSeguro.includes('TABATA_SEG:')) {
-            esAmrap = true;
-        } else if (nombreSeguro.includes('EMOM') || descSeguro.includes('EMOM')) {
+        // Leemos inteligentemente qué modalidad es
+        if (descSeguro.includes('AMRAP_SEG:') || nombreSeguro.startsWith('AMRAP')) esAmrap = true;
+        else if (descSeguro.includes('TIMECAP_SEG:') || nombreSeguro.startsWith('TIMECAP')) esTimecap = true;
+        else if (descSeguro.includes('TABATA_SEG:') || nombreSeguro.startsWith('TABATA')) esTabata = true;
+        else if (descSeguro.includes('EMOM_SEG:') || nombreSeguro.startsWith('EMOM')) {
             esEmom = true;
             if (descSeguro.includes('EMOM_SEG:')) {
                 const partes = descSeguro.split('|');
@@ -832,13 +931,20 @@ function generarHtmlSeries(seriesRepsJson, idUnico) {
         let etiquetaFila = "";
         let minutosPorBloque = Math.floor(intervaloSegundos / 60);
 
+        // Aquí asignamos el texto correcto según la modalidad
         if (esAmrap) {
             tituloDesplegable = `Ver circuito del AMRAP`;
+            etiquetaFila = `Ej`;
+        } else if (esTimecap) {
+            tituloDesplegable = `Ver circuito del TIME CAP`;
+            etiquetaFila = `Ej`;
+        } else if (esTabata) {
+            tituloDesplegable = `Ver ejercicios del TABATA`;
             etiquetaFila = `Ej`;
         } else {
             if (intervaloSegundos > 60) {
                 const textoBloques = seriesObj.length === 1 ? 'bloque' : 'bloques';
-                tituloDesplegable = `Ver ${seriesObj.length} ${textoBloques} de ${minutosPorBloque} minutos del EMOM`;
+                tituloDesplegable = `Ver ${seriesObj.length} ${textoBloques} de ${minutosPorBloque} min del EMOM`;
                 etiquetaFila = `Bloque`;
             } else {
                 const textoMinutos = seriesObj.length === 1 ? 'minuto' : 'minutos';
@@ -860,7 +966,8 @@ function generarHtmlSeries(seriesRepsJson, idUnico) {
             let txtReps = (s.reps && s.reps !== "-") ? `${s.reps}r` : "-";
             
             let etiquetaFinal = `${etiquetaFila} ${s.numero}`;
-            if (!esAmrap && index === seriesObj.length - 1 && restoSegundos !== 0) {
+            // Solo para el EMOM mostramos la etiqueta "(Resto)"
+            if (esEmom && index === seriesObj.length - 1 && restoSegundos !== 0) {
                 etiquetaFinal = `${etiquetaFila} ${s.numero} <span style="font-size: 0.75em; font-weight: normal; opacity: 0.85;">(Resto)</span>`;
             }
 
@@ -1383,17 +1490,19 @@ async function guardarCircuitoAvanzado(tipo) {
     let codigoFases = "";
     let txtTiempo = "";
 
+    // Obtenemos los valores de Rondas y Ciclos de forma dinámica
+    let rondas = parseInt(document.getElementById(`input-${prefijo}-rondas`)?.value) || 1;
+    let ciclos = parseInt(document.getElementById(`input-${prefijo}-ciclos`)?.value) || 1;
 
     if (tipo === 'tabata') {
         const trabajo = parsearTiempoAsegundos(document.getElementById('input-tabata-trabajo').value);
         const pausa = parsearTiempoAsegundos(document.getElementById('input-tabata-pausa').value);
-        const rondas = parseInt(document.getElementById('input-tabata-rondas').value) || 8;
         
         if (trabajo <= 0) { mostrarAlerta("Faltan datos", "El tiempo de trabajo no puede ser 0."); return; }
         
         tiempoSeg = (trabajo + pausa) * rondas;
         txtTiempo = `${rondas} RNDS`;
-        codigoFases = `PREP_SEG:${prepSeg}|TABATA_SEG:${tiempoSeg}|WORK_SEG:${trabajo}|REST_SEG:${pausa}|RNDS:${rondas}|DESC_SEG:${descansoSeg}`;
+        codigoFases = `PREP_SEG:${prepSeg}|TABATA_SEG:${tiempoSeg}|WORK_SEG:${trabajo}|REST_SEG:${pausa}|RNDS:${rondas}|CYCLES:${ciclos}|DESC_SEG:${descansoSeg}`;
     } else {
         tiempoSeg = parsearTiempoAsegundos(document.getElementById(`input-${prefijo}-minutos`).value);
         if (tiempoSeg <= 0) { mostrarAlerta("Faltan datos", "El tiempo total no puede ser cero."); return; }
@@ -1404,12 +1513,11 @@ async function guardarCircuitoAvanzado(tipo) {
         if (tipo === 'emom') {
             const inputInt = document.getElementById('input-emom-intervalo');
             const intervaloSeg = inputInt ? parsearTiempoAsegundos(inputInt.value) : 60;
-            codigoFases = `PREP_SEG:${prepSeg}|${tagTiempo}:${tiempoSeg}|INT_SEG:${intervaloSeg}|DESC_SEG:${descansoSeg}`;
+            codigoFases = `PREP_SEG:${prepSeg}|${tagTiempo}:${tiempoSeg}|INT_SEG:${intervaloSeg}|RNDS:${rondas}|CYCLES:${ciclos}|DESC_SEG:${descansoSeg}`;
         } else {
-            codigoFases = `PREP_SEG:${prepSeg}|${tagTiempo}:${tiempoSeg}|DESC_SEG:${descansoSeg}`;
+            codigoFases = `PREP_SEG:${prepSeg}|${tagTiempo}:${tiempoSeg}|RNDS:${rondas}|CYCLES:${ciclos}|DESC_SEG:${descansoSeg}`;
         }
     }
-
 
     let arraySeries = [];
     const selectorCajas = tipo === 'emom' ? '#contenedor-minutos-emom .caja-minuto-emom' : `#contenedor-ejercicios-${prefijo} .fila-${prefijo}`;
@@ -1441,10 +1549,28 @@ async function guardarCircuitoAvanzado(tipo) {
     let notasProfe = document.getElementById(`input-${prefijo}-notas`).value.trim();
     const seriesRepsTexto = JSON.stringify(arraySeries);
 
-    let nombrePersonalizado = document.getElementById(`input-${prefijo}-nombre`)?.value.trim() || "";
-    const nombreEjercicio = nombrePersonalizado !== "" ? nombrePersonalizado : `${tipo.toUpperCase()} - ${txtTiempo}`;
+    // --- LÓGICA INTELIGENTE Y "PELADA" PARA EL NOMBRE ---
+    const fLindo = (segs) => {
+        if (segs <= 0) return "0 min";
+        if (segs < 60) return segs + " seg";
+        if (segs % 60 === 0) return (segs / 60) + " min";
+        return Math.floor(segs / 60) + ":" + String(segs % 60).padStart(2, '0') + " min";
+    };
+    
+    let totalSegsDisplay = tiempoSeg;
+    if (tipo === 'tabata') {
+        const trabajo = parsearTiempoAsegundos(document.getElementById('input-tabata-trabajo').value);
+        const pausa = parsearTiempoAsegundos(document.getElementById('input-tabata-pausa').value);
+        totalSegsDisplay = (trabajo + pausa) * rondas * ciclos;
+    }
+    
+    let tiempoTextoLindo = fLindo(totalSegsDisplay);
+    let nombreBase = document.getElementById(`input-${prefijo}-nombre`)?.value.trim() || "";
+    if (nombreBase === "") nombreBase = tipo.toUpperCase(); // Si no puso nada, es EMOM/AMRAP pelado
 
-
+    const nombreEjercicio = `${nombreBase} - ${tiempoTextoLindo}`;
+    // ----------------------------------------
+    
     if (contextoModalEjercicio === 'pack') {
         let nuevoEj = { zona: 'General', nombre: nombreEjercicio, series: seriesRepsTexto, descanso: codigoFases, sub_bloque: subbloqueIngresado || null, notas: notasProfe || null };
 
@@ -2460,22 +2586,30 @@ function generarInputsEjerciciosProfe() {
     const rondas = parseInt(document.getElementById('input-profe-rondas').value) || 1;
     const trabajoSegs = parsearTiempoAsegundos(document.getElementById('input-profe-trabajo').value);
 
+    // --- LÓGICA NUEVA PARA EL INTERVALO ---
+    let intervaloSegs = 60; // 1 minuto por defecto
+    const inputIntervalo = document.getElementById('input-profe-intervalo');
+    if (inputIntervalo && modalidad === 'EMOM') {
+        intervaloSegs = parsearTiempoAsegundos(inputIntervalo.value);
+        if (intervaloSegs <= 0) intervaloSegs = 60; // Prevenir división por cero
+    }
 
-    const minutos = Math.ceil(trabajoSegs / 60) || 1;
+    // Calculamos los bloques dividiendo el tiempo total por el intervalo
+    const cantidadBloques = Math.ceil(trabajoSegs / intervaloSegs) || 1;
+    // --------------------------------------
 
     let cantidad = 1;
     let etiquetaBase = 'Rnd';
 
-
     if (modalidad === 'EMOM') {
-        cantidad = minutos;
-        etiquetaBase = 'Min';
+        cantidad = cantidadBloques;
+        // Si el intervalo es mayor a 60s dice "Bloque", sino "Min"
+        etiquetaBase = intervaloSegs > 60 ? 'Bloque' : 'Min';
     } else {
         cantidad = rondas;
     }
 
     const contenedor = document.getElementById('contenedor-inputs-ejercicios-profe');
-
 
     let valoresPrevios = [];
     contenedor.querySelectorAll('.input-ej-profe-dinamico').forEach(input => {
@@ -2503,6 +2637,67 @@ function generarInputsEjerciciosProfe() {
     contenedor.innerHTML = html;
 }
 
+function abrirListaEjerciciosReloj(idInputDestino) {
+    inputDestinoEjercicio = idInputDestino; 
+    modalIdSelectZona = "";
+    
+    esContextoPackModal = true; 
+    modalFiltroCategoria = "Entrenamiento";
+    modalFiltroZona = "Todas";
+
+    const contenedorCat = document.getElementById("contenedor-chips-modal-cat");
+    const contenedorZona = document.getElementById("contenedor-chips-modal-zona");
+    
+    if (contenedorCat) contenedorCat.style.display = "flex";
+    if (contenedorZona) contenedorZona.style.display = "flex";
+
+    const contenedorBuscador = document.getElementById("buscador-modal-ejercicios")?.parentElement;
+    if (contenedorBuscador) contenedorBuscador.style.display = "flex";
+    
+    const buscador = document.getElementById("buscador-modal-ejercicios");
+    if (buscador) {
+        buscador.placeholder = "Buscar nombre o alias...";
+        buscador.onkeyup = filtrarListaEjerciciosModal;
+        buscador.value = ""; 
+    }
+
+    const tituloModal = document.querySelector("#modal-lista-ejercicios h3");
+    if (tituloModal) tituloModal.innerText = "Elegí un ejercicio para el Reloj";
+
+    renderizarChipsModal();
+    aplicarFiltrosListaModal();
+    
+    document.getElementById("modal-lista-ejercicios").style.display = "flex";
+}
+
+
+function actualizarTextosDinamicosTiempos() {
+    const fLindo = (segs) => {
+        if (segs <= 0) return "0 min";
+        if (segs < 60) return segs + " seg";
+        if (segs % 60 === 0) return (segs / 60) + " min";
+        return Math.floor(segs / 60) + ":" + String(segs % 60).padStart(2, '0') + " min";
+    };
+
+    let emomSegs = parsearTiempoAsegundos(document.getElementById('input-emom-minutos')?.value);
+    let spanEmom = document.getElementById('span-emom-tiempo-dinamico');
+    if (spanEmom) spanEmom.innerText = "- " + fLindo(emomSegs);
+
+    let amrapSegs = parsearTiempoAsegundos(document.getElementById('input-amrap-minutos')?.value);
+    let spanAmrap = document.getElementById('span-amrap-tiempo-dinamico');
+    if (spanAmrap) spanAmrap.innerText = "- " + fLindo(amrapSegs);
+
+    let tcSegs = parsearTiempoAsegundos(document.getElementById('input-timecap-minutos')?.value);
+    let spanTc = document.getElementById('span-timecap-tiempo-dinamico');
+    if (spanTc) spanTc.innerText = "- " + fLindo(tcSegs);
+
+    let tabW = parsearTiempoAsegundos(document.getElementById('input-tabata-trabajo')?.value);
+    let tabP = parsearTiempoAsegundos(document.getElementById('input-tabata-pausa')?.value);
+    let tabR = parseInt(document.getElementById('input-tabata-rondas')?.value) || 1;
+    let tabC = parseInt(document.getElementById('input-tabata-ciclos')?.value) || 1;
+    let spanTab = document.getElementById('span-tabata-tiempo-dinamico');
+    if (spanTab) spanTab.innerText = "- " + fLindo((tabW + tabP) * tabR * tabC);
+}
 
 
 
@@ -2510,9 +2705,8 @@ function generarInputsEjerciciosProfe() {
 
 
 
-
-
-
+window.actualizarTextosDinamicosTiempos = actualizarTextosDinamicosTiempos;
+window.abrirListaEjerciciosReloj = abrirListaEjerciciosReloj;
 window.abrirModalEjercicio = abrirModalEjercicio;
 window.resetearFormulariosEjercicio = resetearFormulariosEjercicio;
 window.abrirModalEditar = abrirModalEditar;

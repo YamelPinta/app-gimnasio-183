@@ -476,75 +476,56 @@
 
                         <div id="contenedor-reloj-emom" class="reloj-timer-plus" style="display: none;">
 
-                            
-                            <div
-                                style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-
-                                
-                                <span id="titulo-reloj-avanzado"
-                                    style="color: #000000; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;"></span>
-
-                                
+                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span id="titulo-reloj-avanzado" style="color: #000000; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;"></span>
+        
                                 <button aria-label="Elegir cronómetro vinculado" onclick="abrirModalSelectorReloj()"
                                     style="background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.2); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: #000000; cursor: pointer; transition: 0.2s;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        width="14">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14">
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
                                 </button>
-
                             </div>
 
-                            
-                            <div class="timer-header-fase">
-                                <span id="fase-reloj-texto">ENTRENAMIENTO</span>
-                                <span id="contador-rounds" class="timer-round-badge">Ronda 1/10</span>
+                            <!-- Texto de la Fase (Entrenamiento / Preparación / Descanso) -->
+                            <div class="timer-header-fase" style="justify-content: center; margin-bottom: 5px; text-align: center;">
+                                <span id="fase-reloj-texto" style="font-size: 1.1rem; letter-spacing: 2px; font-weight: 800;">ENTRENAMIENTO</span>
                             </div>
 
-                            
-                            <div class="timer-display-wrapper-simple">
+                            <!-- Chip del Tiempo Total Restante (Igual al del profe) -->
+                            <div style="margin-bottom: 8px; display: flex; justify-content: center; width: 100%;">
+                                <span id="contador-rounds-total" class="timer-round-badge" style="background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.3); box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: #000; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;">Total: 00:00</span>
+                            </div>
+
+                            <!-- Display de los minutos de la ronda/fase actual -->
+                            <div class="timer-display-wrapper-simple" style="margin: 5px 0 0 0;">
                                 <div id="display-tiempo-emom" class="display-reloj-gigante">00:00</div>
-                                <div id="sub-texto-timer" class="timer-sub-ms">restantes</div>
+                                <div id="sub-texto-timer" class="timer-sub-ms" style="margin-top: 2px;">Ronda 1/10</div>
                             </div>
 
-                            
-                            <div class="controles-reloj-pro">
-
-                                
-                                <button type="button" class="btn-timer-pro btn-stop-pro"
-                                    aria-label="Detener y reiniciar reloj" onclick="detenerRelojGlobal()">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                                        width="22">
+                            <!-- Controles del reproductor (Se mantienen igual) -->
+                            <div class="controles-reloj-pro" style="margin-top: 15px;">
+                                <button type="button" class="btn-timer-pro btn-stop-pro" aria-label="Detener y reiniciar reloj" onclick="detenerRelojGlobal()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22">
                                         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                                         <polyline points="3 3 3 8 8 8"></polyline>
                                     </svg>
                                 </button>
-
-                                
-                                <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase anterior"
-                                    onclick="cambiarFaseReloj(-1)">
+                                <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase anterior" onclick="cambiarFaseReloj(-1)">
                                     <svg viewBox="0 0 24 24" fill="currentColor" width="22">
                                         <polygon points="19 4 9 12 19 20 19 4"></polygon>
-                                        <line x1="5" y1="4" x2="5" y2="20" stroke="currentColor" stroke-width="2.5">
-                                        </line>
+                                        <line x1="5" y1="4" x2="5" y2="20" stroke="currentColor" stroke-width="2.5"></line>
                                     </svg>
                                 </button>
-
-                                
-                                <button type="button" id="btn-play-pause-pro" class="btn-timer-pro btn-play-pro"
-                                    aria-label="Reproducir o pausar temporizador" onclick="togglePlayPauseReloj()">
+                                <button type="button" id="btn-play-pause-pro" class="btn-timer-pro btn-play-pro" aria-label="Reproducir o pausar temporizador" onclick="togglePlayPauseReloj()">
                                     <svg id="svg-icono-play" viewBox="0 0 24 24" fill="currentColor" width="28">
                                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                     </svg>
                                 </button>
-
-                                
-                                <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase siguiente"
-                                    onclick="cambiarFaseReloj(1)">
+                                <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase siguiente" onclick="cambiarFaseReloj(1)">
                                     <svg viewBox="0 0 24 24" fill="currentColor" width="22">
                                         <polygon points="5 4 15 12 5 20 5 4"></polygon>
-                                        <line x1="19" y1="4" x2="19" y2="20" stroke="currentColor" stroke-width="2.5">
-                                        </line>
+                                        <line x1="19" y1="4" x2="19" y2="20" stroke="currentColor" stroke-width="2.5"></line>
                                     </svg>
                                 </button>
                             </div>
@@ -914,6 +895,13 @@
                         <label class="label-reloj-config">Descanso</label>
                         <input type="text" id="input-profe-descanso" class="input-modal input-reloj-config"
                             value="00:00" readonly onclick="abrirTimePicker('input-profe-descanso', false)">
+                    </div>
+
+                    <div class="campo-detalle" id="campo-profe-intervalo" style="margin: 0;">
+                        <label class="label-reloj-config">T. por Bloque</label>
+                        <input type="text" id="input-profe-intervalo" class="input-modal input-reloj-config" value="01:00"
+                            readonly onclick="abrirTimePicker('input-profe-intervalo', false)"
+                            onchange="if(typeof generarInputsEjerciciosProfe === 'function') generarInputsEjerciciosProfe()">
                     </div>
                     
                     <div class="campo-detalle" id="caja-profe-rondas" style="margin: 0;">
@@ -1451,35 +1439,30 @@
 
                         <div class="campo-detalle" style="margin-bottom: 15px;">
                             <label class="label-modal">Nombre del Entrenamiento (Opcional):</label>
-                            <input type="text" id="input-emom-nombre" class="input-modal"
-                                placeholder="Ej: EMOM - 10:00 o Circuito A">
+                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
+                                <input type="text" id="input-emom-nombre" placeholder="Ej: EMOM" style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
+                                <span id="span-emom-tiempo-dinamico" style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">- 0 min</span>
+                            </div>
                         </div>
 
-                        <div id="caja-input-minutos" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Prep:</label>
-
-                                <input type="text" id="input-emom-prep" class="input-modal" placeholder="00:00"
-                                    style="text-align: center; cursor: pointer;" readonly
-                                    onclick="abrirTimePicker('input-emom-prep', false)">
+                                <input type="text" id="input-emom-prep" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-emom-prep', false)">
                             </div>
-                            <div class="campo-detalle" style="flex: 1.5; margin: 0;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Entreno:</label>
-
-                                <input type="text" id="input-emom-minutos" class="input-modal" placeholder="00:00"
-                                    style="text-align: center; border-color: #f39c12; cursor: pointer; font-weight: bold;"
-                                    readonly onclick="abrirTimePicker('input-emom-minutos', true)">
+                                <input type="text" id="input-emom-minutos" class="input-modal input-reloj-config" value="01:00" readonly onclick="abrirTimePicker('input-emom-minutos', true)" style="border-color: #f39c12; font-weight: bold;">
                             </div>
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
-                                <label class="label-modal">Desc:</label>
-                                <input type="text" id="input-emom-descanso" class="input-modal" placeholder="00:00"
-                                    style="text-align: center; cursor: pointer;" readonly
-                                    onclick="abrirTimePicker('input-emom-descanso', false)">
+                            <div class="campo-detalle" style="margin: 0;">
+                                <label class="label-modal">Descanso:</label>
+                                <input type="text" id="input-emom-descanso" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-emom-descanso', false)">
+                            </div>
+                            <div class="campo-detalle" style="margin: 0;">
+                                <label class="label-modal">T. por Bloque:</label>
+                                <input type="text" id="input-emom-intervalo" class="input-modal input-reloj-config" value="01:00" readonly onclick="abrirTimePicker('input-emom-intervalo', false)" onchange="if(typeof generarMinutosEmom === 'function') generarMinutosEmom()">
                             </div>
                         </div>
-
-                        <label class="label-modal">Tiempo por Bloque</label>
-                        <input class="input-modal mb-10" type="text" id="input-emom-intervalo" value="01:00" placeholder="Ej: 01:00 o 02:00" onclick="abrirTimePicker(this.id, false)">
 
                         <div id="contenedor-minutos-emom"
                             style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px;"></div>
@@ -1529,28 +1512,32 @@
 
                         <div class="campo-detalle" style="margin-bottom: 15px;">
                             <label class="label-modal">Nombre del Entrenamiento (Opcional):</label>
-                            <input type="text" id="input-amrap-nombre" class="input-modal"
-                                placeholder="Ej: AMRAP - 15:00 o Circuito Fuego">
+                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
+                                <input type="text" id="input-amrap-nombre" placeholder="Ej: AMRAP" style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
+                                <span id="span-amrap-tiempo-dinamico" style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">- 0 min</span>
+                            </div>
                         </div>
 
-                        <div id="caja-input-minutos-amrap" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Prep:</label>
-                                <input type="text" id="input-amrap-prep" class="input-modal" placeholder="00:00"
-                                    style="text-align: center; cursor: pointer;" readonly
-                                    onclick="abrirTimePicker('input-amrap-prep', false)">
+                                <input type="text" id="input-amrap-prep" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-amrap-prep', false)">
                             </div>
-                            <div class="campo-detalle" style="flex: 1.5; margin: 0;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Tiempo:</label>
-                                <input type="text" id="input-amrap-minutos" class="input-modal" placeholder="00:00"
-                                    style="text-align: center; border-color: #f39c12; cursor: pointer; font-weight: bold;"
-                                    readonly onclick="abrirTimePicker('input-amrap-minutos', false)">
+                                <input type="text" id="input-amrap-minutos" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-amrap-minutos', false)" style="border-color: #f39c12; font-weight: bold;">
                             </div>
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
-                                <label class="label-modal">Desc:</label>
-                                <input type="text" id="input-amrap-descanso" class="input-modal" placeholder="00:00"
-                                    style="text-align: center; cursor: pointer;" readonly
-                                    onclick="abrirTimePicker('input-amrap-descanso', false)">
+                            <div class="campo-detalle" style="margin: 0;">
+                                <label class="label-modal">Descanso:</label>
+                                <input type="text" id="input-amrap-descanso" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-amrap-descanso', false)">
+                            </div>
+                            <div class="campo-detalle" style="margin: 0;">
+                                <label class="label-modal">Rondas:</label>
+                                <input type="number" id="input-amrap-rondas" class="input-modal input-reloj-config" value="1">
+                            </div>
+                            <div class="campo-detalle" style="margin: 0; grid-column: span 2;">
+                                <label class="label-modal">Ciclos:</label>
+                                <input type="number" id="input-amrap-ciclos" class="input-modal input-reloj-config" value="1">
                             </div>
                         </div>
 
@@ -1597,37 +1584,41 @@
                         </div>
                     </div>
 
-                    
                     <div id="configuracion-tabata" style="display: none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <button type="button" class="btn-volver-texto" onclick="volverSeleccionModalidad()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="15 18 9 12 15 6"></polyline></svg> Volver atrás</button>
                         </div>
                         <div class="campo-detalle" style="margin-bottom: 15px;">
                             <label class="label-modal">Nombre del Entrenamiento (Opcional):</label>
-                            <input type="text" id="input-tabata-nombre" class="input-modal" placeholder="Ej: Tabata Explosivo">
+                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
+                                <input type="text" id="input-tabata-nombre" placeholder="Ej: TABATA" style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
+                                <span id="span-tabata-tiempo-dinamico" style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">- 0 min</span>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Prep:</label>
-                                <input type="text" id="input-tabata-prep" class="input-modal" value="00:10" style="text-align: center; cursor: pointer;" readonly onclick="abrirTimePicker('input-tabata-prep', false)">
+                                <input type="text" id="input-tabata-prep" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-tabata-prep', false)">
                             </div>
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Trabajo:</label>
-                                <input type="text" id="input-tabata-trabajo" class="input-modal" value="00:20" style="text-align: center; border-color: #f39c12; cursor: pointer; font-weight: bold;" readonly onclick="abrirTimePicker('input-tabata-trabajo', false)">
+                                <input type="text" id="input-tabata-trabajo" class="input-modal input-reloj-config" value="00:20" readonly onclick="abrirTimePicker('input-tabata-trabajo', false)" style="border-color: #f39c12; font-weight: bold;">
                             </div>
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Pausa:</label>
-                                <input type="text" id="input-tabata-pausa" class="input-modal" value="00:10" style="text-align: center; cursor: pointer;" readonly onclick="abrirTimePicker('input-tabata-pausa', false)">
+                                <input type="text" id="input-tabata-pausa" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-tabata-pausa', false)">
                             </div>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Rondas:</label>
-                                <input type="number" id="input-tabata-rondas" class="input-modal" value="8" style="text-align: center; font-weight: bold;">
+                                <input type="number" id="input-tabata-rondas" class="input-modal input-reloj-config" value="8" style="font-weight: bold;" oninput="if(typeof actualizarTextosDinamicosTiempos === 'function') actualizarTextosDinamicosTiempos()">
                             </div>
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Desc. Final:</label>
-                                <input type="text" id="input-tabata-descanso" class="input-modal" value="00:00" style="text-align: center; cursor: pointer;" readonly onclick="abrirTimePicker('input-tabata-descanso', false)">
+                                <input type="text" id="input-tabata-descanso" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-tabata-descanso', false)">
+                            </div>
+                            <div class="campo-detalle" style="margin: 0;">
+                                <label class="label-modal">Ciclos:</label>
+                                <input type="number" id="input-tabata-ciclos" class="input-modal input-reloj-config" value="1" oninput="if(typeof actualizarTextosDinamicosTiempos === 'function') actualizarTextosDinamicosTiempos()">
                             </div>
                         </div>
                         <div class="campo-detalle">
@@ -1655,27 +1646,37 @@
                         </div>
                     </div>
 
-                    
                     <div id="configuracion-timecap" style="display: none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <button type="button" class="btn-volver-texto" onclick="volverSeleccionModalidad()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="15 18 9 12 15 6"></polyline></svg> Volver atrás</button>
                         </div>
                         <div class="campo-detalle" style="margin-bottom: 15px;">
                             <label class="label-modal">Nombre del Entrenamiento (Opcional):</label>
-                            <input type="text" id="input-timecap-nombre" class="input-modal" placeholder="Ej: Time Cap 12:00">
+                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
+                                <input type="text" id="input-timecap-nombre" placeholder="Ej: TIME CAP" style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
+                                <span id="span-timecap-tiempo-dinamico" style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">- 0 min</span>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Prep:</label>
-                                <input type="text" id="input-timecap-prep" class="input-modal" placeholder="00:10" style="text-align: center; cursor: pointer;" readonly onclick="abrirTimePicker('input-timecap-prep', false)">
+                                <input type="text" id="input-timecap-prep" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-timecap-prep', false)">
                             </div>
-                            <div class="campo-detalle" style="flex: 1.5; margin: 0;">
+                            <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Límite (Cap):</label>
-                                <input type="text" id="input-timecap-minutos" class="input-modal" placeholder="00:00" style="text-align: center; border-color: #f39c12; cursor: pointer; font-weight: bold;" readonly onclick="abrirTimePicker('input-timecap-minutos', false)">
+                                <input type="text" id="input-timecap-minutos" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-timecap-minutos', false)" style="border-color: #f39c12; font-weight: bold;">
                             </div>
-                            <div class="campo-detalle" style="flex: 1; margin: 0;">
-                                <label class="label-modal">Desc:</label>
-                                <input type="text" id="input-timecap-descanso" class="input-modal" placeholder="00:00" style="text-align: center; cursor: pointer;" readonly onclick="abrirTimePicker('input-timecap-descanso', false)">
+                            <div class="campo-detalle" style="margin: 0;">
+                                <label class="label-modal">Descanso:</label>
+                                <input type="text" id="input-timecap-descanso" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-timecap-descanso', false)">
+                            </div>
+                            <div class="campo-detalle" style="margin: 0;">
+                                <label class="label-modal">Rondas:</label>
+                                <input type="number" id="input-timecap-rondas" class="input-modal input-reloj-config" value="1">
+                            </div>
+                            <div class="campo-detalle" style="margin: 0; grid-column: span 2;">
+                                <label class="label-modal">Ciclos:</label>
+                                <input type="number" id="input-timecap-ciclos" class="input-modal input-reloj-config" value="1">
                             </div>
                         </div>
                         <div class="campo-detalle">

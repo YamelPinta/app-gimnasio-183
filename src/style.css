@@ -1383,7 +1383,7 @@ body .grilla-perfiles-moderna {
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
   width: 100%;
   justify-content: center;
 }
@@ -1886,7 +1886,7 @@ body .chip-rutina.activo {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
@@ -2408,7 +2408,7 @@ body .modal-dashboard-rendimiento {
   align-items: center;
   justify-content: center;
   width: 100%;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
   margin-top: 5px;
 }
 
@@ -2430,7 +2430,7 @@ body .modal-dashboard-rendimiento {
   align-items: center;
   justify-content: center;
   width: 100%;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
   margin-top: 5px;
 }
 

@@ -260,7 +260,47 @@ async function guardarProfeEnBD() {
     }
 }
 
-function entrarPerfil(id, nombre, apellido, emailAuth) {
+async function entrarPerfil(id, nombre, apellido, emailAuth) {
+    
+    // --- 1. LÓGICA DE AUTO-LOGIN CON SUPABASE ---
+    try {
+        // Pedimos la sesión actual viva al backend
+        const { data: { session } } = await clienteSupabase.auth.getSession();
+
+        // Si hay sesión y el email guardado coincide con la tarjeta que tocó:
+        if (session && session.user && session.user.email === emailAuth) {
+            
+            // Reconstruimos las variables de estado necesarias
+            AppState.profeActivoId = id;
+            document.getElementById("nombre-profe-activo").innerText = "Profe " + nombre;
+
+            // Buscamos si es admin para habilitar sus botones
+            const { data: datosProfe } = await clienteSupabase
+                .from('profesores')
+                .select('es_admin')
+                .eq('id', id)
+                .single();
+            
+            AppState.esAdminActual = datosProfe ? datosProfe.es_admin : false;
+            document.querySelectorAll('.nav-admin-only').forEach(btn => {
+                btn.style.display = AppState.esAdminActual ? 'flex' : 'none';
+            });
+
+            // Entramos directo al panel sin pedir clave
+            navegarA('pantalla-dashboard', 'block');
+            cargarAlumnos();
+            cargarChips();
+            actualizarMenuInferior('alumnos');
+            
+            return; // Cortamos la función acá para que no salte el cartel de login
+        }
+    } catch (e) {
+        console.warn("No se pudo validar sesión automática, pidiendo clave...", e);
+    }
+    // --- FIN AUTO-LOGIN ---
+
+
+    // --- 2. LÓGICA ORIGINAL (Si no hay sesión válida, pide contraseña) ---
     AppState.idProfePendiente = id;
     AppState.nombreProfePendiente = nombre;
     AppState.apellidoProfePendiente = apellido;
@@ -300,7 +340,6 @@ function entrarPerfil(id, nombre, apellido, emailAuth) {
         cajaConfirmar.style.display = "none"; 
         btnIniciar.innerText = "Iniciar sesión";
     }
-
 }
 
 

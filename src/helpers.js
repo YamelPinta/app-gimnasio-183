@@ -39,23 +39,23 @@ function formatearTiempo(segundosTotales) {
 function formatearDescansoVisual(descansoStr) {
     if (!descansoStr || descansoStr === 'null' || descansoStr === 'undefined') return "-";
     
-
+    // Si no tiene el tag de avanzado, devolvemos el texto normal
     if (!descansoStr.includes('_SEG:')) return descansoStr;
 
-    let prep = 0, entreno = 0, desc = 0;
+    let prep = 0, entreno = 0, desc = 0, rondas = 0, ciclos = 0;
 
     const partes = descansoStr.split('|');
     partes.forEach(p => {
         if (p.startsWith('PREP_SEG:')) prep = parseInt(p.split(':')[1]) || 0;
         
-
         if (p.startsWith('EMOM_SEG:') || p.startsWith('AMRAP_SEG:') || p.startsWith('TABATA_SEG:') || p.startsWith('TIMECAP_SEG:')) {
             entreno = parseInt(p.split(':')[1]) || 0;
         }
         
         if (p.startsWith('DESC_SEG:')) desc = parseInt(p.split(':')[1]) || 0;
+        if (p.startsWith('RNDS:')) rondas = parseInt(p.split(':')[1]) || 0;
+        if (p.startsWith('CYCLES:')) ciclos = parseInt(p.split(':')[1]) || 0;
     });
-
 
     const fTime = (segs) => {
         const m = Math.floor(segs / 60).toString().padStart(2, '0');
@@ -63,7 +63,13 @@ function formatearDescansoVisual(descansoStr) {
         return `${m}:${s}`;
     };
 
-    return `Prep: ${fTime(prep)} | Entreno: ${fTime(entreno)} | Desc: ${fTime(desc)}`;
+    // Armamos el texto dinámico sumando Rondas y Ciclos si los hay
+    let texto = `Prep: ${fTime(prep)} | Entreno: ${fTime(entreno)}`;
+    if (rondas > 1) texto += ` | ${rondas} Rnd`;
+    if (ciclos > 1) texto += ` | ${ciclos} Ciclos`;
+    if (desc > 0) texto += ` | Desc: ${fTime(desc)}`;
+
+    return texto;
 }
 
 function obtenerAliasPipe(nombreOficial) {

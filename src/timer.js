@@ -169,46 +169,75 @@ function cambiarFaseReloj(direccion) {
 }
 
 function actualizarDisplayReloj() {
+    if (!AppState.relojFases || AppState.relojFases.length === 0) return;
+    const faseActual = AppState.relojFases[AppState.relojIndiceFase];
+
+    // 1. CRONÓGRAFO GRANDE: Muestra el tiempo exacto de la ronda/bloque actual
+    let tiempoParaMostrarEnGrande = AppState.tiempoRestanteSegundos;
+    if (faseActual.tipo === 'emom' && faseActual.intervalo) {
+        let intervaloActual = faseActual.intervalo;
+        tiempoParaMostrarEnGrande = (AppState.tiempoRestanteSegundos - 1) % intervaloActual + 1;
+    }
+
     const display = document.getElementById('display-tiempo-emom');
-    if (display) display.innerText = formatearTiempo(AppState.tiempoRestanteSegundos); 
+    if (display) display.innerText = formatearTiempo(tiempoParaMostrarEnGrande); 
 
-    const badgeRonda = document.getElementById('contador-rounds');
+    // 2. CÁLCULO DEL TIEMPO TOTAL (Únicamente fases de ENTRENAMIENTO)
+    let workoutTotal = 0;
+    let workoutTranscurrido = 0;
 
-    if (badgeRonda && AppState.relojFases && AppState.relojFases.length > 0) {
-        const faseActual = AppState.relojFases[AppState.relojIndiceFase];
-        
-        if (faseActual.nombre === 'PREPARACIÓN' || faseActual.nombre === 'PREPARACION') {
-            badgeRonda.innerText = "¡Preparate!";
-            badgeRonda.style.display = 'inline-block';
-        } else if (faseActual.nombre === 'DESCANSO') {
-            badgeRonda.innerText = "Recuperación";
-            badgeRonda.style.display = 'inline-block';
-        } else {
-            if (faseActual.tipo === 'amrap' || faseActual.tipo === 'timecap') {
-                badgeRonda.innerText = "¡A DARLO TODO!";
-                badgeRonda.style.display = 'inline-block';
-            } else if (faseActual.tipo === 'tabata') {
-                badgeRonda.innerText = `Ronda ${faseActual.rondaActual}/${faseActual.rondasTotales}`;
-                badgeRonda.style.display = 'inline-block';
-            } else if (faseActual.tipo === 'emom') {
-                const segundosTotales = faseActual.segundos;
-                const intervaloActual = faseActual.intervalo || 60; 
-                const rondasTotales = Math.ceil(segundosTotales / intervaloActual); 
-                
-                if (rondasTotales > 0) {
-                    let rondaActual = rondasTotales - Math.floor((AppState.tiempoRestanteSegundos - 1) / intervaloActual);
-                    if (rondaActual > rondasTotales) rondaActual = rondasTotales;
-                    if (rondaActual < 1) rondaActual = 1;
-                    
-                    badgeRonda.innerText = `Ronda ${rondaActual}/${rondasTotales}`;
-                    badgeRonda.style.display = 'inline-block';
-                } else {
-                    badgeRonda.style.display = 'none';
-                }
-            } else {
-                badgeRonda.style.display = 'none'; 
+    for (let i = 0; i < AppState.relojFases.length; i++) {
+        let f = AppState.relojFases[i];
+        if (f.nombre === 'ENTRENAMIENTO') {
+            workoutTotal += f.segundos;
+            
+            if (i < AppState.relojIndiceFase) {
+                workoutTranscurrido += f.segundos;
+            } else if (i === AppState.relojIndiceFase) {
+                let tiempoFaseSeguro = Math.max(0, Math.min(f.segundos, AppState.tiempoRestanteSegundos));
+                workoutTranscurrido += (f.segundos - tiempoFaseSeguro);
             }
         }
+    }
+    let workoutRestante = workoutTotal - workoutTranscurrido;
+    if (workoutRestante < 0) workoutRestante = 0;
+
+    // 3. CHIP SUPERIOR DE TOTAL
+    const badgeTotal = document.getElementById('contador-rounds-total');
+    if (badgeTotal) {
+        if (faseActual.nombre === 'PREPARACIÓN' || faseActual.nombre === 'PREPARACION' || faseActual.nombre === 'DESCANSO') {
+            badgeTotal.style.display = 'none';
+        } else {
+            badgeTotal.style.display = 'inline-block';
+            badgeTotal.innerText = `Total: ${formatearTiempo(workoutRestante)}`;
+        }
+    }
+
+    // 4. SUBTEXTO INFERIOR: Indica el número de ronda y ciclo actual para TODAS las modalidades
+    let textoRondaFase = "";
+    if (faseActual.nombre === 'PREPARACIÓN' || faseActual.nombre === 'PREPARACION') {
+        textoRondaFase = "¡Preparate!";
+    } else if (faseActual.nombre === 'DESCANSO') {
+        textoRondaFase = "Recuperación";
+    } else {
+        // Lógica universal para los entrenamientos (EMOM, AMRAP, TABATA, TIMECAP)
+        if (faseActual.rondaActual && faseActual.rondasTotales) {
+            let texto = `Ronda ${faseActual.rondaActual}/${faseActual.rondasTotales}`;
+            
+            // Si el ejercicio tiene más de 1 ciclo configurado, lo sumamos al lado
+            if (faseActual.ciclosTotales && faseActual.ciclosTotales > 1) {
+                texto += ` | Ciclo ${faseActual.cicloActual}/${faseActual.ciclosTotales}`;
+            }
+            
+            textoRondaFase = texto;
+        } else {
+            textoRondaFase = "Entrenamiento"; 
+        }
+    }
+    
+    const subTextoTimer = document.getElementById('sub-texto-timer');
+    if (subTextoTimer) {
+        subTextoTimer.innerText = textoRondaFase;
     }
 }
 
@@ -413,36 +442,67 @@ function reproducirAlertaRing() {
 }
 
 function abrirModalSelectorReloj() {
-    if (!AppState.ejerciciosActualesCache) return;
+    const contenedor = document.getElementById('lista-relojes-disponibles');
+    if (!contenedor) return;
     
-    let avanzados = AppState.ejerciciosActualesCache.filter(ej => 
-        (ej.descanso && ej.descanso.includes('EMOM_SEG:')) || 
+    contenedor.innerHTML = '';
+    
+    if (!AppState.ejerciciosActualesCache || AppState.ejerciciosActualesCache.length === 0) {
+        contenedor.innerHTML = '<p style="color: #888; font-size: 0.9rem; text-align: center;">No hay entrenamientos cargados.</p>';
+        document.getElementById('modal-seleccionar-reloj').style.display = 'flex';
+        return;
+    }
+    
+    // Filtro inteligente para atrapar todas las modalidades
+    const avanzados = AppState.ejerciciosActualesCache.filter(ej =>
+        (ej.descanso && (
+            ej.descanso.includes('EMOM_SEG:') || 
+            ej.descanso.includes('AMRAP_SEG:') || 
+            ej.descanso.includes('TIMECAP_SEG:') || 
+            ej.descanso.includes('TABATA_SEG:')
+        )) ||
         (ej.ejercicio_nombre && (
-            ej.ejercicio_nombre.toUpperCase().startsWith("EMOM") || 
-            ej.ejercicio_nombre.toUpperCase().startsWith("AMRAP") || 
-            ej.ejercicio_nombre.toUpperCase().startsWith("TIMECAP") || 
+            ej.ejercicio_nombre.toUpperCase().startsWith("EMOM") ||
+            ej.ejercicio_nombre.toUpperCase().startsWith("AMRAP") ||
+            ej.ejercicio_nombre.toUpperCase().startsWith("TIMECAP") ||
             ej.ejercicio_nombre.toUpperCase().startsWith("TABATA")
         ))
     );
-
-    const contenedor = document.getElementById('lista-relojes-disponibles');
-    contenedor.innerHTML = "";
-
+    
     if (avanzados.length === 0) {
-        contenedor.innerHTML = "<p class='text-muted text-center'>No hay ejercicios avanzados en esta rutina.</p>";
+        contenedor.innerHTML = '<p style="color: #888; font-size: 0.9rem; text-align: center;">No hay entrenamientos avanzados (EMOM, AMRAP, etc.) en este día.</p>';
     } else {
         avanzados.forEach(ej => {
-            const esActivo = String(ej.id) === String(AppState.relojActivoId);
+            const btn = document.createElement('button');
+            btn.style.cssText = 'width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.95rem;';
+            btn.innerText = ej.ejercicio_nombre;
             
-            contenedor.innerHTML += `
-                <button onclick="seleccionarRelojManual('${ej.id}')" style="background: ${esActivo ? 'rgba(243, 156, 18, 0.2)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${esActivo ? '#f39c12' : '#333'};" class="d-flex justify-between align-center p-12 radius-8 text-white cursor-pointer text-left w-100 transition-200 mb-8">
-                    <span style="font-weight: ${esActivo ? 'bold' : 'normal'}; color: ${esActivo ? '#f39c12' : '#fff'};">${ej.ejercicio_nombre}</span>
-                    ${esActivo ? '<svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="16"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
-                </button>
-            `;
+            btn.onmouseover = () => btn.style.background = 'rgba(243, 156, 18, 0.2)';
+            btn.onmouseout = () => btn.style.background = 'rgba(255,255,255,0.05)';
+
+            btn.onclick = () => {
+                // --- CORRECCIÓN: LIMPIEZA TOTAL DEL RELOJ PREVIO ---
+                if (AppState.intervaloReloj) {
+                    clearInterval(AppState.intervaloReloj);
+                    AppState.intervaloReloj = null;
+                }
+                AppState.relojFases = [];
+                AppState.relojIndiceFase = 0;
+                AppState.relojEstado = 'detenido';
+                AppState.relojActivoId = ej.id;
+                // ---------------------------------------------------
+
+                document.getElementById('modal-seleccionar-reloj').style.display = 'none';
+                
+                // Disparamos la recarga para que el reloj principal se reconstruya
+                if (typeof cargarEjerciciosCategoriaBD === 'function') {
+                    cargarEjerciciosCategoriaBD(); 
+                }
+            };
+            contenedor.appendChild(btn);
         });
     }
-
+    
     document.getElementById('modal-seleccionar-reloj').style.display = 'flex';
 }
 
@@ -548,7 +608,11 @@ function aceptarTimePicker() {
             if (typeof generarInputsEjerciciosProfe === 'function') generarInputsEjerciciosProfe();
         }
     }
-    
+
+    if (typeof actualizarTextosDinamicosTiempos === 'function') {
+        actualizarTextosDinamicosTiempos();
+    }
+
     cerrarTimePicker();
 }
 
@@ -642,14 +706,17 @@ function seleccionarModalidadReloj(btn, tipo) {
     
     const cajaRondas = document.getElementById('caja-profe-rondas');
     const cajaCiclos = document.getElementById('caja-profe-ciclos');
+    const cajaIntervalo = document.getElementById('campo-profe-intervalo'); // <- NUEVO
     
     if (cajaRondas && cajaCiclos) {
         if (tipo === 'emom') {
             cajaRondas.style.display = 'none';  
             cajaCiclos.style.display = 'none'; 
+            if (cajaIntervalo) cajaIntervalo.style.display = 'flex'; // Mostramos el intervalo
         } else {
             cajaRondas.style.display = 'flex'; 
             cajaCiclos.style.display = 'flex'; 
+            if (cajaIntervalo) cajaIntervalo.style.display = 'none'; // Ocultamos el intervalo
         }
     }
 
@@ -665,11 +732,15 @@ function seleccionarModalidadReloj(btn, tipo) {
         document.getElementById('input-profe-rondas').value = "1";
         document.getElementById('input-profe-ciclos').value = "1";
     } else {
+        // EMOM por defecto
         document.getElementById('input-profe-prep').value = "00:10";
         document.getElementById('input-profe-trabajo').value = "01:00";
         document.getElementById('input-profe-descanso').value = "00:00";
         document.getElementById('input-profe-rondas').value = "1";
         document.getElementById('input-profe-ciclos').value = "1";
+        if (document.getElementById('input-profe-intervalo')) {
+            document.getElementById('input-profe-intervalo').value = "01:00";
+        }
     }
     
     if (typeof guardarConfigRelojProfe === 'function') guardarConfigRelojProfe();
@@ -692,9 +763,23 @@ function prepararRelojProfe() {
     const modalidad = document.querySelector('.btn-modalidad-reloj.activo')?.innerText.toUpperCase() || 'EMOM';
 
     if (modalidad === 'EMOM') {
-        rondas = Math.ceil(trabajo / 60);
-        if (trabajo >= 60) trabajo = 60; 
+        // --- MODIFICACIÓN DEL INTERVALO PARA EMOM ---
+        let intervaloSegs = 60; // Valor por defecto
+        const inputIntervalo = document.getElementById('input-profe-intervalo');
+        
+        if (inputIntervalo) {
+            intervaloSegs = parsearTiempoAsegundos(inputIntervalo.value);
+            if (intervaloSegs <= 0) intervaloSegs = 60; 
+        }
+
+        // Dividimos el tiempo total por el tiempo de cada bloque
+        rondas = Math.ceil(trabajo / intervaloSegs);
+        
+        // El tiempo de trabajo de cada fase ya no es "60" fijo, es tu intervalo
+        if (trabajo >= intervaloSegs) trabajo = intervaloSegs; 
+        
         ciclos = 1; 
+        // ---------------------------------------------
     }
 
     const habilitarEjercicios = document.getElementById('check-habilitar-ejercicios')?.checked;
@@ -1022,13 +1107,17 @@ function restaurarRelojProfeCompleto() {
                 
                 const cajaRondas = document.getElementById('caja-profe-rondas');
                 const cajaCiclos = document.getElementById('caja-profe-ciclos');
+                const cajaIntervalo = document.getElementById('campo-profe-intervalo'); // <- NUEVO
+
                 if (cajaRondas && cajaCiclos) {
                     if (config.modalidadActiva.toUpperCase() === 'EMOM') {
                         cajaRondas.style.display = 'none';
                         cajaCiclos.style.display = 'none';
+                        if (cajaIntervalo) cajaIntervalo.style.display = 'flex'; // <- NUEVO
                     } else {
                         cajaRondas.style.display = 'flex';
                         cajaCiclos.style.display = 'flex';
+                        if (cajaIntervalo) cajaIntervalo.style.display = 'none'; // <- NUEVO
                     }
                 }
             }
@@ -1217,13 +1306,17 @@ function aplicarRelojGuardado(index) {
 
     const cajaRondas = document.getElementById('caja-profe-rondas');
     const cajaCiclos = document.getElementById('caja-profe-ciclos');
+    const cajaIntervalo = document.getElementById('campo-profe-intervalo'); // <- NUEVO
+
     if (cajaRondas && cajaCiclos) {
         if (reloj.modalidad.toUpperCase() === 'EMOM') {
             cajaRondas.style.display = 'none';
             cajaCiclos.style.display = 'none';
+            if (cajaIntervalo) cajaIntervalo.style.display = 'flex'; // <- NUEVO
         } else {
             cajaRondas.style.display = 'flex';
             cajaCiclos.style.display = 'flex';
+            if (cajaIntervalo) cajaIntervalo.style.display = 'none'; // <- NUEVO
         }
     }
 
@@ -1351,39 +1444,6 @@ function actualizarAnimacionTopReloj(nombreEjercicio, nombreFase) {
         divLogo.classList.add('activo'); divLogo.classList.remove('oculto');
         divAnim.classList.remove('activo'); divAnim.classList.add('oculto');
     }
-}
-
-function abrirListaEjerciciosReloj(idInputDestino) {
-    inputDestinoEjercicio = idInputDestino; 
-    modalIdSelectZona = "";
-    
-    esContextoPackModal = true; 
-    modalFiltroCategoria = "Entrenamiento";
-    modalFiltroZona = "Todas";
-
-    const contenedorCat = document.getElementById("contenedor-chips-modal-cat");
-    const contenedorZona = document.getElementById("contenedor-chips-modal-zona");
-    
-    if (contenedorCat) contenedorCat.style.display = "flex";
-    if (contenedorZona) contenedorZona.style.display = "flex";
-
-    const contenedorBuscador = document.getElementById("buscador-modal-ejercicios")?.parentElement;
-    if (contenedorBuscador) contenedorBuscador.style.display = "flex";
-    
-    const buscador = document.getElementById("buscador-modal-ejercicios");
-    if (buscador) {
-        buscador.placeholder = "Buscar nombre o alias...";
-        buscador.onkeyup = filtrarListaEjerciciosModal;
-        buscador.value = ""; 
-    }
-
-    const tituloModal = document.querySelector("#modal-lista-ejercicios h3");
-    if (tituloModal) tituloModal.innerText = "Elegí un ejercicio para el Reloj";
-
-    renderizarChipsModal();
-    aplicarFiltrosListaModal();
-    
-    document.getElementById("modal-lista-ejercicios").style.display = "flex";
 }
 
 let audioCtxGym = null;
@@ -1807,7 +1867,6 @@ window.reiniciarRelojProfeCompleto = reiniciarRelojProfeCompleto;
 window.reiniciarFaseActualProfe = reiniciarFaseActualProfe;
 window.toggleAnimacionRelojProfe = toggleAnimacionRelojProfe;
 window.actualizarAnimacionTopReloj = actualizarAnimacionTopReloj;
-window.abrirListaEjerciciosReloj = abrirListaEjerciciosReloj;
 window.obtenerAudioContext = obtenerAudioContext;
 window.inicializarAudioApple = inicializarAudioApple;
 window.reproducirBeep = reproducirBeep;
