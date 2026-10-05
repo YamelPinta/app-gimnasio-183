@@ -216,15 +216,26 @@ async function guardarFormularioAlumnoEnBD() {
 
     try {
         if (AppState.alumnoEditandoId) {
-
             const { error } = await clienteSupabase.from('alumnos').update(datosAGuardar).eq('id', AppState.alumnoEditandoId);
             if (error) throw error;
+            
+            // Si le cambió la fecha de pago a una nueva, llamamos al registro de pago para que el admin lo vea
+            const alumnoPrevio = (AppState.alumnosCache || []).find(a => a.id === AppState.alumnoEditandoId);
+            if (fechaPagoStr && (!alumnoPrevio || alumnoPrevio.fecha_ultimo_pago !== fechaPagoStr)) {
+                await clienteSupabase.rpc('registrar_pago_cuota', { p_alumno_id: AppState.alumnoEditandoId });
+            }
+
             mostrarAlerta("¡Edición Exitosa!", "Los datos del alumno se actualizaron correctamente.");
         } else {
-
             datosAGuardar.profesor_id = AppState.profeActivoId;
-            const { error } = await clienteSupabase.from('alumnos').insert([datosAGuardar]);
+            const { data, error } = await clienteSupabase.from('alumnos').insert([datosAGuardar]).select();
             if (error) throw error;
+            
+            // Si al crear al alumno le puso que pagó hoy, registramos el recibo real para el admin
+            if (fechaPagoStr && data && data.length > 0) {
+                await clienteSupabase.rpc('registrar_pago_cuota', { p_alumno_id: data[0].id });
+            }
+
             mostrarAlerta("¡Guardado con Éxito!", "El alumno se registró correctamente.");
         }
 
