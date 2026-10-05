@@ -283,7 +283,7 @@ function descargarExcelAdmin() {
         const t = datosAdminActualParaExcel.totales;
         const f = (n) => `$${(n || 0).toLocaleString('es-AR')}`;
         matrizExcel.push(["MES:", datosAdminActualParaExcel.mes]);
-        matrizExcel.push(["Total cuotas (debería haber):", f(t.esperado), "Confirmado:", f(t.confirmado), "Sin confirmar:", f(t.sin_confirmar)]);
+
         matrizExcel.push(["PARTE DEL GYM (debería haber):", f(t.esperado_gym), "Confirmado:", f(t.confirmado_gym)]);
         matrizExcel.push([]);
 
