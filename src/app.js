@@ -1,4 +1,5 @@
 import './style.css';
+import './alumno_auth.js';
 
 
 // Limpiador automático de cachés de la versión anterior
@@ -15,7 +16,7 @@ if ('caches' in window) {
 
 
 
-let sortableChips = null; 
+let sortableChips = null;
 
 const estilosChips = document.createElement('style');
 estilosChips.innerHTML = `
@@ -28,36 +29,36 @@ document.head.appendChild(estilosChips);
 
 
 document.addEventListener("DOMContentLoaded", async () => {
-
     document.querySelectorAll('input:not([list])').forEach(input => {
-        input.setAttribute('autocomplete', 'nope'); 
-        input.setAttribute('data-lpignore', 'true'); 
+        input.setAttribute('autocomplete', 'nope');
+        input.setAttribute('data-lpignore', 'true');
     });
 
     inicializarTema();
     cargarProfesores();
-
 
     clienteSupabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_OUT' || !session) {
             localStorage.removeItem('sesionGimnasioID');
             localStorage.removeItem('sesionGimnasioNombre');
             localStorage.removeItem('sesionGimnasioApellido');
-            
-            document.getElementById("pantalla-dashboard").style.display = "none";
-            document.getElementById("pantalla-perfiles").style.display = "none";
-            document.getElementById("pantalla-inicio").style.display = "flex";
+
+            // Solo limpiamos si el que se desloguea es el profe
+            if (!localStorage.getItem('sesionAlumnoDNI')) {
+                document.getElementById("pantalla-dashboard").style.display = "none";
+                document.getElementById("pantalla-perfiles").style.display = "none";
+                document.getElementById("pantalla-inicio").style.display = "flex";
+            }
         }
     });
 
-
     const { data: { session }, error: errorSesion } = await clienteSupabase.auth.getSession();
+    const dniAlumnoGuardado = localStorage.getItem('sesionAlumnoDNI');
 
     if (session && !errorSesion) {
-
-
+        // --- LÓGICA DE AUTO-LOGIN PROFESOR ---
         const { data: profe } = await clienteSupabase
-            .from('profesores') 
+            .from('profesores')
             .select('id, nombre, apellido, es_admin')
             .eq('email_auth', session.user.email)
             .single();
@@ -65,71 +66,70 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (profe) {
             AppState.profeActivoId = profe.id;
             AppState.esAdminActual = profe.es_admin || false;
-            
+
             document.getElementById("nombre-profe-activo").innerText = "Profe " + profe.nombre;
-            
             document.querySelectorAll('.nav-admin-only').forEach(btn => {
                 btn.style.display = AppState.esAdminActual ? 'flex' : 'none';
             });
 
             document.getElementById("pantalla-inicio").style.display = "none";
-            document.getElementById("pantalla-login").style.display = "none";
-            document.getElementById("pantalla-perfiles").style.display = "none";
             document.getElementById("pantalla-dashboard").style.display = "block";
-           
+
             cargarAlumnos();
             cargarChips();
             actualizarMenuInferior('alumnos');
         } else {
-
             await clienteSupabase.auth.signOut();
             document.getElementById("pantalla-inicio").style.display = "flex";
         }
+    } else if (dniAlumnoGuardado) {
+        // --- LÓGICA DE AUTO-LOGIN ALUMNO ---
+        document.getElementById("pantalla-inicio").style.display = "none";
+        // Llamamos a la función que lo manda a la Pantalla 3
+        if (typeof autoLoginAlumno === 'function') {
+            autoLoginAlumno(dniAlumnoGuardado);
+        }
     } else {
-
+        // --- NINGÚN LOGIN GUARDADO, PANTALLA INICIAL ---
         document.getElementById("pantalla-inicio").style.display = "flex";
-        document.getElementById("pantalla-login").style.display = "none";
-        document.getElementById("pantalla-perfiles").style.display = "none";
-        document.getElementById("pantalla-dashboard").style.display = "none";
     }
 });
-
 
 function abrirModalFormularioAlumno(modo) {
     window.scrollTo(0, 0);
     const modal = document.getElementById("modal-alumno");
     const titulo = modal.querySelector("h3");
-    
+
     const setValor = (id, valor) => {
         const el = document.getElementById(id);
         if (el) el.value = valor;
     };
 
     if (modo === 'crear') {
-        AppState.alumnoEditandoId = null; 
+        AppState.alumnoEditandoId = null;
         titulo.innerText = "Añadir Alumno";
-        
+
         setValor("input-alumno-nombre", "");
         setValor("input-alumno-dni", "");
-        setValor("select-alumno-tipo", "Con rutina"); 
+        setValor("select-alumno-tipo", "Con rutina");
         setValor("select-alumno-actividad", "Musculación");
         setValor("input-alumno-objetivo", "");
         setValor("input-alumno-edad", "");
         setValor("input-alumno-condicion", "");
         setValor("input-alumno-cuota", "");
-        
+
         const fechaHoy = new Date();
         setValor("input-alumno-pago", fechaHoy.toISOString().split('T')[0]);
-        
+
     } else if (modo === 'editar') {
         if (!AppState.alumnoDataActual) return;
-        AppState.alumnoEditandoId = AppState.alumnoSeleccionadoId; 
+        AppState.alumnoEditandoId = AppState.alumnoSeleccionadoId;
         titulo.innerText = "Editar Alumno";
-        
+
         const data = AppState.alumnoDataActual;
         setValor("input-alumno-nombre", `${data.nombre} ${data.apellido}`);
         setValor("input-alumno-dni", data.dni || "");
-        setValor("select-alumno-tipo", data.tipo_rutina || "Con rutina"); 
+        setValor("select-alumno-tipo", data.tipo_rutina || "Con rutina");
         setValor("select-alumno-actividad", data.actividad || "Musculación");
         setValor("input-alumno-objetivo", data.objetivo || "");
         setValor("input-alumno-edad", data.edad || "");
@@ -157,19 +157,28 @@ async function guardarFormularioAlumnoEnBD() {
 
     const nombreCompleto = getValor("input-alumno-nombre");
     const dni = getValor("input-alumno-dni");
-    const tipoRutina = document.getElementById("select-alumno-tipo")?.value || "Con rutina"; 
+    const tipoRutina = document.getElementById("select-alumno-tipo")?.value || "Con rutina";
     const actividad = document.getElementById("select-alumno-actividad")?.value || "Musculación";
     let objetivo = getValor("input-alumno-objetivo") || "General";
     const edad = getValor("input-alumno-edad");
     let condicion = getValor("input-alumno-condicion") || "Sin observaciones.";
     const cuota = getValor("input-alumno-cuota");
-    
+
     let fechaPagoStr = getValor("input-alumno-pago");
     let vencimientoCuota = null;
     if (fechaPagoStr) {
-        let fPago = new Date(fechaPagoStr + 'T00:00:00');
-        fPago.setDate(fPago.getDate() + 30); 
-        vencimientoCuota = fPago.toISOString().split('T')[0];
+        const alumnoPrevio = AppState.alumnoEditandoId
+            ? (AppState.alumnosCache || []).find(a => a.id === AppState.alumnoEditandoId)
+            : null;
+
+        if (alumnoPrevio && alumnoPrevio.fecha_ultimo_pago === fechaPagoStr && alumnoPrevio.vencimiento_cuota) {
+            // No tocó la fecha de pago: se conserva el vencimiento (por si hay cuotas adelantadas)
+            vencimientoCuota = alumnoPrevio.vencimiento_cuota;
+        } else {
+            let fPago = new Date(fechaPagoStr + 'T00:00:00');
+            fPago.setDate(fPago.getDate() + 30);
+            vencimientoCuota = fPago.toISOString().split('T')[0];
+        }
     }
 
     if (!nombreCompleto) {
@@ -184,15 +193,15 @@ async function guardarFormularioAlumnoEnBD() {
 
     const partes = nombreCompleto.split(" ");
     const nombre = partes[0];
-    const apellido = partes.slice(1).join(" ") || ""; 
+    const apellido = partes.slice(1).join(" ") || "";
 
 
     const datosAGuardar = {
-        nombre: nombre, 
-        apellido: apellido, 
-        dni: dni || null, 
-        tipo_rutina: tipoRutina, 
-        vencimiento_cuota: vencimientoCuota, 
+        nombre: nombre,
+        apellido: apellido,
+        dni: dni || null,
+        tipo_rutina: tipoRutina,
+        vencimiento_cuota: vencimientoCuota,
         fecha_ultimo_pago: fechaPagoStr || null,
         actividad: actividad,
         objetivo: objetivo,
@@ -218,15 +227,15 @@ async function guardarFormularioAlumnoEnBD() {
             if (error) throw error;
             mostrarAlerta("¡Guardado con Éxito!", "El alumno se registró correctamente.");
         }
-        
+
         toggleModal('modal-alumno', false);
-        cargarAlumnos(); 
-        
+        cargarAlumnos();
+
 
         if (AppState.alumnoEditandoId && document.getElementById("pantalla-detalle-alumno").style.display === "block") {
-            abrirGrillaAlumno(AppState.alumnoEditandoId); 
+            abrirGrillaAlumno(AppState.alumnoEditandoId);
         }
-        
+
     } catch (error) {
         if (error.message.includes("Failed to fetch")) {
             mostrarAlerta("Sin conexión", "Se cortó el internet intentando guardar.");
@@ -293,12 +302,13 @@ async function cargarAlumnos() {
             .select('*')
             .eq('profesor_id', AppState.profeActivoId)
             .order('nombre', { ascending: true })
-            .order('apellido', { ascending: true }); 
+            .order('apellido', { ascending: true });
 
         if (error) throw error;
 
 
         AppState.alumnosCache = alumnos;
+        clienteSupabase.rpc('asegurar_cuotas_mes').then(() => { }, () => { });
         document.getElementById("contador-alumnos").innerText = `${alumnos.length} alumnos asignados`;
 
         procesarNotificaciones(alumnos);
@@ -311,38 +321,46 @@ async function cargarAlumnos() {
 }
 
 
+// Fecha de vencimiento real del alumno (respeta pagos de varias cuotas por adelantado)
+function obtenerVencimiento(alumno) {
+    if (alumno.vencimiento_cuota) {
+        return new Date(alumno.vencimiento_cuota + 'T00:00:00');
+    }
+    if (alumno.fecha_ultimo_pago) {
+        const f = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
+        f.setDate(f.getDate() + 30);
+        return f;
+    }
+    return null;
+}
+window.obtenerVencimiento = obtenerVencimiento;
+
+
 function procesarNotificaciones(alumnos) {
     const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0); 
+    hoy.setHours(0, 0, 0, 0);
     let nuevasNotif = 0;
     let listaNotificaciones = [];
     let leidasGuardadas = JSON.parse(localStorage.getItem('notifLeidas_' + AppState.profeActivoId)) || [];
 
     alumnos.forEach((alumno) => {
-        let vencimientoCalculado = null;
-        if (alumno.fecha_ultimo_pago) {
-            let f = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
-            f.setDate(f.getDate() + 30);
-            vencimientoCalculado = f;
-        } else if (alumno.vencimiento_cuota) {
-            vencimientoCalculado = new Date(alumno.vencimiento_cuota + 'T00:00:00');
-        }
+        const vencimientoCalculado = obtenerVencimiento(alumno);
 
         if (vencimientoCalculado) {
             const diferenciaDias = Math.ceil((vencimientoCalculado - hoy) / (1000 * 60 * 60 * 24));
-            
+
             if (diferenciaDias <= 5) {
                 let tipoNotif = diferenciaDias <= 0 ? 'vencida' : 'pronto';
                 let fechaNotifStr = vencimientoCalculado.toISOString().split('T')[0];
-                let idNotif = `${alumno.id}_${fechaNotifStr}_${tipoNotif}`; 
+                let idNotif = `${alumno.id}_${fechaNotifStr}_${tipoNotif}`;
                 let esNueva = !leidasGuardadas.includes(idNotif);
-                
+
                 listaNotificaciones.push({
-                    idNotif: idNotif, 
+                    idNotif: idNotif,
                     alumnoNombre: `${alumno.nombre} ${alumno.apellido}`,
-                    tipo: tipoNotif, 
+                    tipo: tipoNotif,
                     dias: Math.abs(diferenciaDias),
-                    esNueva: esNueva, 
+                    esNueva: esNueva,
                     fechaFormateada: formatearFechaSegura(fechaNotifStr)
                 });
 
@@ -351,7 +369,25 @@ function procesarNotificaciones(alumnos) {
         }
     });
 
-    AppState.notificacionesGlobales = listaNotificaciones; 
+    // Recordatorio periódico: mientras haya cuotas vencidas, vuelve a figurar como "nuevo" cada 3 días
+    const vencidasSinRegistrar = listaNotificaciones.filter(n => n.tipo === 'vencida');
+    if (vencidasSinRegistrar.length > 0) {
+        const bloque = Math.floor(Date.now() / (3 * 24 * 60 * 60 * 1000));
+        const idRecordatorio = `recordatorio_${AppState.profeActivoId}_${bloque}`;
+        const esNuevoRec = !leidasGuardadas.includes(idRecordatorio);
+
+        listaNotificaciones.unshift({
+            idNotif: idRecordatorio,
+            tipo: 'recordatorio',
+            alumnoNombre: 'Cuotas sin registrar',
+            dias: vencidasSinRegistrar.length,
+            esNueva: esNuevoRec,
+            fechaFormateada: ''
+        });
+        if (esNuevoRec) nuevasNotif++;
+    }
+
+    AppState.notificacionesGlobales = listaNotificaciones;
     const badge = document.getElementById("badge-notificaciones");
     if (badge) badge.style.display = nuevasNotif > 0 ? "block" : "none";
 }
@@ -360,7 +396,7 @@ function procesarNotificaciones(alumnos) {
 function aplicarFiltros() {
     const inputBuscador = document.getElementById("buscador-alumnos");
     const textoBusqueda = inputBuscador ? normalizarTexto(inputBuscador.value) : "";
-    
+
     let actividadesPrendidas = [];
     let estadosPrendidos = [];
     let modalidadesPrendidas = [];
@@ -377,31 +413,25 @@ function aplicarFiltros() {
             if (txt === 'Cuota al día') estadosPrendidos.push('al dia');
             else if (txt === 'Vencida') estadosPrendidos.push('vencida');
             else if (txt === 'Con rutina') modalidadesPrendidas.push('con rutina');
-            else if (txt === 'Libre') modalidadesPrendidas.push('alumno libre'); 
+            else if (txt === 'Libre') modalidadesPrendidas.push('alumno libre');
             else actividadesPrendidas.push(normalizarTexto(txt));
         }
     });
 
     const hoy = new Date();
-    hoy.setHours(0,0,0,0);
+    hoy.setHours(0, 0, 0, 0);
 
 
     const filtrados = AppState.alumnosCache.filter(alumno => {
         const nombreCompleto = normalizarTexto(`${alumno.nombre} ${alumno.apellido}`);
         const pasaBuscador = nombreCompleto.includes(textoBusqueda);
-        
+
         let pasaChips = chipTodosActivo;
-        
+
         if (!chipTodosActivo) {
 
             let estadoPago = "al dia";
-            let vCalc = null;
-            if (alumno.fecha_ultimo_pago) {
-                vCalc = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
-                vCalc.setDate(vCalc.getDate() + 30);
-            } else if (alumno.vencimiento_cuota) {
-                vCalc = new Date(alumno.vencimiento_cuota + 'T00:00:00');
-            }
+            const vCalc = obtenerVencimiento(alumno);
             if (vCalc && Math.ceil((vCalc - hoy) / (1000 * 60 * 60 * 24)) <= 0) {
                 estadoPago = "vencida";
             }
@@ -415,7 +445,7 @@ function aplicarFiltros() {
             const pasaAct = actividadesPrendidas.length === 0 || actividadesPrendidas.some(act => textoVirtual.includes(act));
             const pasaEst = estadosPrendidos.length === 0 || estadosPrendidos.some(est => textoVirtual.includes(est));
             const pasaMod = modalidadesPrendidas.length === 0 || modalidadesPrendidas.some(mod => textoVirtual.includes(mod));
-            
+
             pasaChips = pasaAct && pasaEst && pasaMod;
         }
 
@@ -430,8 +460,8 @@ function filtrarAlumnos() { aplicarFiltros(); }
 
 function filtrarPorChip(botonClickeado, textoFiltro) {
     const todosLosChips = Array.from(document.querySelectorAll("#contenedor-chips-dinamicos .chip"));
-    const chipLapiz = todosLosChips[0]; 
-    const chipTodos = todosLosChips[1]; 
+    const chipLapiz = todosLosChips[0];
+    const chipTodos = todosLosChips[1];
 
     if (textoFiltro === 'Todos') {
         todosLosChips.forEach(chip => {
@@ -466,7 +496,7 @@ function renderizarListaAlumnos(alumnosFiltrados) {
     }
 
     const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0); 
+    hoy.setHours(0, 0, 0, 0);
 
     const mapaActividades = {
         "Musculación": "./imagenes/MUSCULACION.webp", "Tela": "./imagenes/TELA.webp",
@@ -478,18 +508,11 @@ function renderizarListaAlumnos(alumnosFiltrados) {
     const template = document.getElementById('tmpl-tarjeta-alumno');
 
     alumnosFiltrados.forEach((alumno) => {
-        let claseBadge = "badge-vencida"; 
+        let claseBadge = "badge-vencida";
         let textoBadge = "Vencida";
         let estaAlDia = false;
 
-        let vencimientoCalculado = null;
-        if (alumno.fecha_ultimo_pago) {
-            let f = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
-            f.setDate(f.getDate() + 30);
-            vencimientoCalculado = f;
-        } else if (alumno.vencimiento_cuota) {
-            vencimientoCalculado = new Date(alumno.vencimiento_cuota + 'T00:00:00');
-        }
+        const vencimientoCalculado = obtenerVencimiento(alumno);
 
         if (vencimientoCalculado) {
             const diferenciaDias = Math.ceil((vencimientoCalculado - hoy) / (1000 * 60 * 60 * 24));
@@ -514,7 +537,7 @@ function renderizarListaAlumnos(alumnosFiltrados) {
 
         const tmpHoy = new Date();
         const fechaHoyStr = `${tmpHoy.getFullYear()}-${String(tmpHoy.getMonth() + 1).padStart(2, '0')}-${String(tmpHoy.getDate()).padStart(2, '0')}`;
-        const estaPresenteHoy = (alumno.ultima_sesion === fechaHoyStr); 
+        const estaPresenteHoy = (alumno.ultima_sesion === fechaHoyStr);
 
         if (alumno.ultima_sesion) {
             const fechaUltima = new Date(alumno.ultima_sesion + 'T00:00:00');
@@ -522,13 +545,13 @@ function renderizarListaAlumnos(alumnosFiltrados) {
             const difDiasSesion = Math.floor(difTiempoSesion / (1000 * 60 * 60 * 24));
 
             if (difDiasSesion === 0) {
-                textoUltimaSesion = "Entrenó hoy"; colorUltimaSesion = "#2ecc71"; 
+                textoUltimaSesion = "Entrenó hoy"; colorUltimaSesion = "#2ecc71";
             } else if (difDiasSesion === 1) {
-                textoUltimaSesion = "Entrenó ayer"; colorUltimaSesion = "#2ecc71"; 
+                textoUltimaSesion = "Entrenó ayer"; colorUltimaSesion = "#2ecc71";
             } else if (difDiasSesion <= 7) {
-                textoUltimaSesion = `Última vez: hace ${difDiasSesion} días`; colorUltimaSesion = "#f39c12"; 
+                textoUltimaSesion = `Última vez: hace ${difDiasSesion} días`; colorUltimaSesion = "#f39c12";
             } else {
-                textoUltimaSesion = `Ausente hace ${difDiasSesion} días`; colorUltimaSesion = "#e74c3c"; 
+                textoUltimaSesion = `Ausente hace ${difDiasSesion} días`; colorUltimaSesion = "#e74c3c";
                 iconoMalo = true;
             }
         }
@@ -536,11 +559,11 @@ function renderizarListaAlumnos(alumnosFiltrados) {
 
         const clone = template.content.cloneNode(true);
         const card = clone.querySelector('.card-alumno');
-        
+
         card.onclick = () => abrirGrillaAlumno(alumno.id);
         clone.querySelector('.avatar-actividad').src = imagenAsignada;
         clone.querySelector('.tmpl-nombre-completo').textContent = `${alumno.nombre} ${alumno.apellido}`;
-        
+
 
         const modoEl = clone.querySelector('.tmpl-modalidad');
         if (alumno.tipo_rutina === "Libre") {
@@ -550,10 +573,10 @@ function renderizarListaAlumnos(alumnosFiltrados) {
             modoEl.className = 'info-detalle mb-6 tmpl-modalidad font-inherit fs-75 text-muted fw-600 text-uppercase ls-05';
             modoEl.textContent = 'CON RUTINA';
         }
-        
+
         clone.querySelector('.tmpl-actividad-real').textContent = actividadReal;
         clone.querySelector('.tmpl-cuota-texto').textContent = cuotaTexto;
-        
+
 
         const contSesion = clone.querySelector('.tmpl-ultima-sesion-container');
         const textoSesion = contSesion.querySelector('.tmpl-texto-sesion');
@@ -577,18 +600,18 @@ function renderizarListaAlumnos(alumnosFiltrados) {
         const badge = clone.querySelector('.tmpl-badge-estado');
         badge.textContent = textoBadge;
         badge.classList.add(claseBadge);
-        
+
         if (AppState.modoBorradoActivo) {
             const btnBorrar = clone.querySelector('.tmpl-btn-borrar');
             btnBorrar.style.display = 'block';
             btnBorrar.onclick = (e) => { e.stopPropagation(); borrarAlumno(alumno.id); };
         }
-        
+
         const btnPago = clone.querySelector('.tmpl-btn-pago');
         btnPago.textContent = textoBotonPago;
         btnPago.classList.add(claseBotonPago);
         btnPago.onclick = (e) => { e.stopPropagation(); modificarCicloPago(alumno.id, alumno.fecha_ultimo_pago, estaAlDia); };
-        
+
         if (estaPresenteHoy) {
             const btnPres = clone.querySelector('.tmpl-btn-asistencia-presente');
             btnPres.style.display = 'flex';
@@ -598,57 +621,65 @@ function renderizarListaAlumnos(alumnosFiltrados) {
             btnPend.style.display = 'block';
             btnPend.onclick = (e) => { e.stopPropagation(); abrirModalCheckin(alumno.id); };
         }
-        
+
         contenedor.appendChild(clone);
     });
 }
 
-async function modificarCicloPago(alumnoId, fechaUltimoPagoDb, yaEstabaPagado) {
-    let fechaBasePago = new Date();
-    
+
+// Días que faltan para el vencimiento (negativo = ya venció). null si no tiene fechas.
+function diasParaVencer(alumno) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const venc = obtenerVencimiento(alumno);
+    if (!venc) return null;
+    return Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+}
+
+// 'vencida' | 'pronto' | 'aldia' (misma lógica que ya usás en las tarjetas)
+function calcularEstadoPago(alumno) {
+    const d = diasParaVencer(alumno);
+    if (d === null || d <= 0) return 'vencida';
+    if (d <= 5) return 'pronto';
+    return 'aldia';
+}
+
+function modificarCicloPago(alumnoId, fechaUltimoPagoDb, yaEstabaPagado) {
     if (yaEstabaPagado) {
         pedirConfirmacion(
             "Anular Pago",
-            "¿Querés deshacer el pago? Se restarán 30 días de su vencimiento.",
+            "¿Querés deshacer el último pago de este alumno?",
             "Anular pago",
-            async () => {
-                
-                if (fechaUltimoPagoDb && fechaUltimoPagoDb !== "null") {
-                    fechaBasePago = new Date(fechaUltimoPagoDb + 'T00:00:00');
-                    fechaBasePago.setDate(fechaBasePago.getDate() - 30);
-                } else {
-                    fechaBasePago.setDate(fechaBasePago.getDate() - 30);
-                }
-                ejecutarCambioDePago(alumnoId, fechaBasePago, false);
-            }
+            () => ejecutarAnulacionPago(alumnoId)
         );
-    } else {
-        
-        fechaBasePago = new Date(); 
-        ejecutarCambioDePago(alumnoId, fechaBasePago, true);
+        return;
     }
+    ejecutarPagoCuota(alumnoId);
 }
 
-async function ejecutarCambioDePago(alumnoId, fechaPagoReal, estadoActivo) {
-    const fechaPagoStr = fechaPagoReal.toISOString().split('T')[0];
-    
-    let vencimiento = new Date(fechaPagoReal);
-    vencimiento.setDate(vencimiento.getDate() + 30);
-    const vencimientoStr = vencimiento.toISOString().split('T')[0];
-
+async function ejecutarPagoCuota(alumnoId) {
     try {
-        const { error } = await clienteSupabase.from('alumnos').update({ 
-            fecha_ultimo_pago: fechaPagoStr,
-            vencimiento_cuota: vencimientoStr,
-            activo: estadoActivo
-        }).eq('id', alumnoId);
-        
+        const { error } = await clienteSupabase.rpc('registrar_pago_cuota', {
+            p_alumno_id: alumnoId
+        });
         if (error) throw error;
         cargarAlumnos();
-    } catch (error) { 
-        mostrarAlerta("Error al actualizar pago: " + error.message); 
+    } catch (error) {
+        mostrarAlerta("Error", "No se pudo registrar el pago: " + error.message);
     }
 }
+
+async function ejecutarAnulacionPago(alumnoId) {
+    try {
+        const { error } = await clienteSupabase.rpc('anular_pago_cuota', { p_alumno_id: alumnoId });
+        if (error) throw error;
+        cargarAlumnos();
+    } catch (error) {
+        mostrarAlerta("Error", "No se pudo anular el pago: " + error.message);
+    }
+}
+
+
 
 function borrarAlumno(id) {
     pedirConfirmacion(
@@ -668,22 +699,22 @@ function borrarAlumno(id) {
 
 
 function activarModoBorrado() {
-    AppState.modoBorradoActivo = !AppState.modoBorradoActivo; 
-    
+    AppState.modoBorradoActivo = !AppState.modoBorradoActivo;
+
     const btnTachito = document.getElementById("btn-activar-borrado");
 
     if (AppState.modoBorradoActivo) {
-        btnTachito.classList.add("activo"); 
+        btnTachito.classList.add("activo");
     } else {
-        btnTachito.classList.remove("activo"); 
+        btnTachito.classList.remove("activo");
     }
 
-    cargarAlumnos(); 
+    cargarAlumnos();
 }
 
 async function abrirGrillaAlumno(id) {
     window.scrollTo(0, 0);
-    AppState.alumnoSeleccionadoId = id; 
+    AppState.alumnoSeleccionadoId = id;
 
 
     document.getElementById("pantalla-dashboard").style.display = "none";
@@ -707,7 +738,7 @@ async function abrirGrillaAlumno(id) {
 
         try {
             const { data: alumno, error } = await clienteSupabase
-                .from('alumnos').select('*').eq('id', id).single(); 
+                .from('alumnos').select('*').eq('id', id).single();
             if (error) throw error;
             AppState.alumnoDataActual = alumno;
 
@@ -726,41 +757,33 @@ async function abrirGrillaAlumno(id) {
 
             document.getElementById("detalle-nombre-completo").innerText = `${alumno.nombre} ${alumno.apellido}`;
             document.getElementById("detalle-objetivo").innerText = alumno.objetivo || "General";
-            document.getElementById("detalle-edad").innerText = alumno.edad ? alumno.edad : "No especificada"; 
+            document.getElementById("detalle-edad").innerText = alumno.edad ? alumno.edad : "No especificada";
             document.getElementById("detalle-salud").innerText = alumno.condicion_medica || "Sin observaciones.";
             document.getElementById("detalle-cuota").innerText = alumno.cuota ? alumno.cuota.toLocaleString('es-AR') : "No definida";
-            
+
             let fechaFormateada = "Sin definir";
-            let vencimientoCalculado = null;
-            
-            if (alumno.fecha_ultimo_pago) {
-                let f = new Date(alumno.fecha_ultimo_pago + 'T00:00:00');
-                f.setDate(f.getDate() + 30); 
-                vencimientoCalculado = f;
-            } else if (alumno.vencimiento_cuota) {
-                vencimientoCalculado = new Date(alumno.vencimiento_cuota + 'T00:00:00');
-            }
+            const vencimientoCalculado = obtenerVencimiento(alumno);
 
             if (vencimientoCalculado) {
                 const isoString = vencimientoCalculado.toISOString().split('T')[0];
-                const partes = isoString.split('-'); 
-                fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`; 
+                const partes = isoString.split('-');
+                fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
             document.getElementById("detalle-vencimiento").innerText = fechaFormateada;
 
             let fechaAltaVisual = "Sin registro";
-            const fechaBase = alumno.creado_en || alumno.created_at; 
+            const fechaBase = alumno.creado_en || alumno.created_at;
             if (fechaBase && fechaBase !== "null") {
                 try {
-                    const soloFecha = fechaBase.split('T')[0]; 
-                    const partes = soloFecha.split('-'); 
-                    if (partes.length === 3) fechaAltaVisual = `${partes[2]}/${partes[1]}/${partes[0]}`; 
-                } catch(e) {}
+                    const soloFecha = fechaBase.split('T')[0];
+                    const partes = soloFecha.split('-');
+                    if (partes.length === 3) fechaAltaVisual = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                } catch (e) { }
             }
             document.getElementById("detalle-fecha-alta").innerText = fechaAltaVisual;
 
-            cerrarCategoria(); 
-            generarChipsRutina(); 
+            cerrarCategoria();
+            generarChipsRutina();
 
         } catch (error) {
             mostrarAlerta("Error", "No se pudo cargar la información del alumno.");
@@ -776,7 +799,7 @@ function generarChipsRutina() {
     const diaHoy = hoy.getDate();
     const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
 
-    contenedorSemanas.innerHTML = ""; 
+    contenedorSemanas.innerHTML = "";
     contenedorDias.innerHTML = "";
 
     const rangosSemanas = [
@@ -788,8 +811,8 @@ function generarChipsRutina() {
 
     rangosSemanas.forEach(rango => {
         let asistioEstaSemana = false;
-        let semanaYaPaso = diaHoy > rango.fin; 
-        
+        let semanaYaPaso = diaHoy > rango.fin;
+
         if (AppState.asistenciasAlumnoMes) {
             asistioEstaSemana = AppState.asistenciasAlumnoMes.some(fechaStr => {
                 const diaAsistencia = parseInt(fechaStr.split('-')[2]);
@@ -803,7 +826,7 @@ function generarChipsRutina() {
 
         let colorClase = "";
         if (asistioEstaSemana) colorClase = "chip-verde";
-        else if (semanaYaPaso && !asistioEstaSemana) colorClase = "chip-rojo"; 
+        else if (semanaYaPaso && !asistioEstaSemana) colorClase = "chip-rojo";
 
         const btn = document.createElement("button");
         btn.className = `chip-rutina ${rango.sem === AppState.semanaActiva ? 'activo' : ''} ${colorClase}`;
@@ -822,12 +845,12 @@ function generarChipsRutina() {
         btn.appendChild(spanFechas);
         contenedorSemanas.appendChild(btn);
     });
-    
+
     let dias = ["D1", "D2", "D3", "D4", "D5"];
     if (AppState.alumnoDataActual && AppState.alumnoDataActual.nombres_dias && AppState.alumnoDataActual.nombres_dias.length > 0) {
         dias = AppState.alumnoDataActual.nombres_dias;
     }
-    
+
     const rangoSemanaSeleccionada = rangosSemanas.find(r => r.sem === AppState.semanaActiva);
     const semanaElegidaYaPaso = diaHoy > rangoSemanaSeleccionada.fin;
 
@@ -835,7 +858,7 @@ function generarChipsRutina() {
         const numDia = index + 1;
         const anioMes = `${hoy.getFullYear()}-${hoy.getMonth() + 1}`;
         const codigoDia = `${anioMes}_Sem_${AppState.semanaActiva}_${diaTexto}`;
-        
+
         const hizoEsteDia = AppState.asistenciasDiasAlumno && AppState.asistenciasDiasAlumno.includes(codigoDia);
         let colorClase = hizoEsteDia ? "chip-verde" : (semanaElegidaYaPaso ? "chip-rojo" : "");
 
@@ -857,40 +880,40 @@ function generarChipsRutina() {
 
 function seleccionarSemana(numSemana) {
     AppState.semanaActiva = numSemana;
-    
+
     generarChipsRutina();
 
-    if(AppState.vistaSliderActual === 'ejercicios') {
-        cargarEjerciciosCategoriaBD(); 
+    if (AppState.vistaSliderActual === 'ejercicios') {
+        cargarEjerciciosCategoriaBD();
     }
 }
 
 function seleccionarDia(numDia) {
     AppState.diaActivo = numDia;
-    
+
     const botonesDias = document.querySelectorAll("#chips-dias .chip-rutina");
     botonesDias.forEach((btn, index) => {
         if (index + 1 === numDia) btn.classList.add("activo");
         else btn.classList.remove("activo");
     });
-    if(AppState.vistaSliderActual === 'categorias') dibujarCategoriasAlumno();
-    if(AppState.vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD(); 
+    if (AppState.vistaSliderActual === 'categorias') dibujarCategoriasAlumno();
+    if (AppState.vistaSliderActual === 'ejercicios') cargarEjerciciosCategoriaBD();
 }
 
-let diasEditandoTemp = []; 
-let sortableDiasModal = null; 
+let diasEditandoTemp = [];
+let sortableDiasModal = null;
 
 function abrirModalEditarDias() {
     let dias = ["D1", "D2", "D3", "D4", "D5"];
     if (AppState.alumnoDataActual && AppState.alumnoDataActual.nombres_dias && AppState.alumnoDataActual.nombres_dias.length > 0) {
         dias = AppState.alumnoDataActual.nombres_dias;
     }
-    
-    diasEditandoTemp = [...dias]; 
-    
+
+    diasEditandoTemp = [...dias];
+
     const contenedor = document.getElementById("contenedor-inputs-dias");
     contenedor.innerHTML = "";
-    
+
     dias.forEach((dia, index) => {
         contenedor.innerHTML += `
             <div class="fila-editar-dia d-flex gap-8 mb-0 align-center bg-dark p-8 radius-8 border-dark" data-original="${dia}">
@@ -902,12 +925,12 @@ function abrirModalEditarDias() {
             </div>
         `;
     });
-    
+
     document.getElementById("modal-editar-dias").style.display = "flex";
 
     if (sortableDiasModal) sortableDiasModal.destroy();
     sortableDiasModal = new Sortable(contenedor, {
-        handle: '.handle-dia', 
+        handle: '.handle-dia',
         animation: 200,
         ghostClass: "tarjeta-indicador-caida"
     });
@@ -916,7 +939,7 @@ function abrirModalEditarDias() {
 function agregarFilaDia() {
     const contenedor = document.getElementById("contenedor-inputs-dias");
     const index = contenedor.querySelectorAll('.fila-editar-dia').length;
-    
+
     contenedor.insertAdjacentHTML('beforeend', `
         <div class="fila-editar-dia d-flex gap-8 mb-0 align-center bg-dark p-8 radius-8 border-dark">
             <svg class="handle-dia text-666 flex-shrink-0 cursor-grab" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
@@ -926,14 +949,14 @@ function agregarFilaDia() {
             </button>
         </div>
     `);
-    
+
     setTimeout(() => { contenedor.parentElement.scrollTop = contenedor.parentElement.scrollHeight; }, 10);
 }
 
 async function guardarEdicionDias() {
     const filas = document.querySelectorAll('.fila-editar-dia');
     const nuevosDias = [];
-    const mapeoMudanza = []; 
+    const mapeoMudanza = [];
     const diasConservadosOG = [];
 
     if (filas.length === 0) {
@@ -944,7 +967,7 @@ async function guardarEdicionDias() {
     filas.forEach(fila => {
         const nuevoValor = fila.querySelector('.input-nombre-dia').value.trim() || "Día";
         nuevosDias.push(nuevoValor);
-        
+
         const valorOriginal = fila.getAttribute('data-original');
         if (valorOriginal && valorOriginal !== "undefined") {
             diasConservadosOG.push(valorOriginal);
@@ -969,7 +992,7 @@ async function guardarEdicionDias() {
             .from('alumnos')
             .update({ nombres_dias: nuevosDias })
             .eq('id', AppState.alumnoSeleccionadoId);
-        
+
         if (error) throw error;
 
         const promesasMudanza = [];
@@ -1010,10 +1033,10 @@ async function guardarEdicionDias() {
 async function abrirModalCheckin(alumnoId) {
     AppState.checkinAlumnoId = alumnoId;
     document.getElementById("modal-checkin").style.display = "flex";
-    
+
     const contenedorDias = document.getElementById("lista-dias-checkin");
-    contenedorDias.innerHTML = ""; 
-    
+    contenedorDias.innerHTML = "";
+
     const pCargando = document.createElement("p");
     pCargando.className = "text-muted fs-80";
     pCargando.textContent = "Cargando días...";
@@ -1025,7 +1048,7 @@ async function abrirModalCheckin(alumnoId) {
             .select('nombres_dias')
             .eq('id', alumnoId)
             .single();
-        
+
         if (error) throw error;
 
         let dias = ["D1", "D2", "D3", "D4", "D5"];
@@ -1033,7 +1056,7 @@ async function abrirModalCheckin(alumnoId) {
             dias = alumno.nombres_dias;
         }
 
-        contenedorDias.innerHTML = ""; 
+        contenedorDias.innerHTML = "";
 
         dias.forEach(diaTexto => {
             const btn = document.createElement("button");
@@ -1043,7 +1066,7 @@ async function abrirModalCheckin(alumnoId) {
             contenedorDias.appendChild(btn);
         });
 
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         contenedorDias.innerHTML = "";
         const pError = document.createElement("p");
@@ -1054,9 +1077,9 @@ async function abrirModalCheckin(alumnoId) {
 }
 
 async function procesarCheckin(diaSeleccionado) {
-    const idSeguro = AppState.checkinAlumnoId; 
-    toggleModal('modal-checkin', false); 
-    
+    const idSeguro = AppState.checkinAlumnoId;
+    toggleModal('modal-checkin', false);
+
     try {
         const { data: ejercicios, error: errorSupabase } = await clienteSupabase
             .from('rutinas_planificadas').select('zona_muscular, series_reps')
@@ -1072,7 +1095,7 @@ async function procesarCheckin(diaSeleccionado) {
             const fuerzaPorZona = {};
             ejercicios.forEach(ej => {
                 if (ej.series_reps) {
-                    let zonaAsignada = ej.zona_muscular || "General"; 
+                    let zonaAsignada = ej.zona_muscular || "General";
                     try {
                         let series = JSON.parse(ej.series_reps);
                         if (Array.isArray(series)) {
@@ -1085,7 +1108,7 @@ async function procesarCheckin(diaSeleccionado) {
                                 }
                             });
                         }
-                    } catch(e) { console.warn("Error calculando el peso movido en procesarCheckin:", e); }
+                    } catch (e) { console.warn("Error calculando el peso movido en procesarCheckin:", e); }
                 }
             });
 
@@ -1105,27 +1128,27 @@ async function procesarCheckin(diaSeleccionado) {
 
         const anioMes = `${tmpHoy.getFullYear()}-${tmpHoy.getMonth() + 1}`;
         const codigoDia = `${anioMes}_Sem_${AppState.semanaActiva}_${diaSeleccionado}`;
-        
+
         if (!AppState.asistenciasDiasAlumno) AppState.asistenciasDiasAlumno = [];
         if (!AppState.asistenciasDiasAlumno.includes(codigoDia)) {
             AppState.asistenciasDiasAlumno.push(codigoDia);
         }
         const nuevoHistorialDias = AppState.asistenciasDiasAlumno.join(',');
 
-        await clienteSupabase.from('alumnos').update({ 
+        await clienteSupabase.from('alumnos').update({
             ultima_sesion: fechaHoy,
             historial_dias: nuevoHistorialDias
         }).eq('id', idSeguro);
-        
+
         cargarAlumnos();
-        
+
         if (AppState.alumnoSeleccionadoId === idSeguro && document.getElementById("pantalla-detalle-alumno").style.display === "block") {
             abrirGrillaAlumno(idSeguro);
         }
-        
+
         mostrarAlerta("¡Asistencia Registrada!", mensajeAlerta);
-        
-    } catch(e) {
+
+    } catch (e) {
         mostrarAlerta("Error Crítico", "No se pudo procesar la solicitud.");
     }
 }
@@ -1150,25 +1173,25 @@ function deshacerAsistencia(alumnoId) {
                 if (AppState.asistenciasDiasAlumno) {
                     let dias = ["D1", "D2", "D3", "D4", "D5"];
                     if (AppState.alumnoDataActual && AppState.alumnoDataActual.nombres_dias) dias = AppState.alumnoDataActual.nombres_dias;
-    
+
                     dias.forEach(d => {
                         const codigoDia = `${anioMes}_Sem_${AppState.semanaActiva}_${d}`;
                         AppState.asistenciasDiasAlumno = AppState.asistenciasDiasAlumno.filter(item => item !== codigoDia);
                     });
                 }
                 const nuevoHistorialDias = AppState.asistenciasDiasAlumno ? AppState.asistenciasDiasAlumno.join(',') : "";
-                
-                await clienteSupabase.from('alumnos').update({ 
+
+                await clienteSupabase.from('alumnos').update({
                     ultima_sesion: fechaAnterior,
                     historial_dias: nuevoHistorialDias
                 }).eq('id', alumnoId);
 
                 cargarAlumnos();
-                
+
                 if (AppState.alumnoSeleccionadoId === alumnoId && document.getElementById("pantalla-detalle-alumno").style.display === "block") {
                     abrirGrillaAlumno(alumnoId);
                 }
-                
+
             } catch (error) {
                 mostrarAlerta("Error", "No se pudo deshacer la asistencia: " + error.message);
             }
@@ -1194,7 +1217,7 @@ async function cargarChips() {
             AppState.chipsActuales = profe.chips_filtros;
         } else {
             AppState.chipsActuales = [
-                "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación", 
+                "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación",
                 "Hyrox", "Crossfit", "Cuota al día", "Vencida", "Con rutina", "Libre"
             ];
         }
@@ -1203,7 +1226,7 @@ async function cargarChips() {
     } catch (e) {
         console.error("Error al cargar chips de la nube:", e);
         AppState.chipsActuales = [
-            "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación", 
+            "Musculación", "Tela", "Funcional", "Calistenia", "Readaptación",
             "Hyrox", "Crossfit", "Cuota al día", "Vencida", "Con rutina", "Libre"
         ];
         dibujarChipsPrincipales();
@@ -1213,8 +1236,8 @@ async function cargarChips() {
 function abrirModalEditarChips() {
     document.getElementById("modal-editar-chips").style.display = "flex";
     const contenedor = document.getElementById("lista-chips-editables");
-    contenedor.innerHTML = ""; 
-    
+    contenedor.innerHTML = "";
+
     AppState.chipsActuales.forEach((chip) => {
         agregarChipFila(chip);
     });
@@ -1222,27 +1245,27 @@ function abrirModalEditarChips() {
     if (sortableChips) {
         sortableChips.destroy();
     }
-    
+
     sortableChips = new Sortable(contenedor, {
-        handle: '.handle-arrastre', 
-        animation: 200, 
-        ghostClass: "tarjeta-indicador-caida", 
+        handle: '.handle-arrastre',
+        animation: 200,
+        ghostClass: "tarjeta-indicador-caida",
     });
 }
 
 function agregarChipFila(valor = "") {
     const contenedor = document.getElementById("lista-chips-editables");
-    
+
     const div = document.createElement("div");
     div.style.display = "flex";
     div.style.gap = "12px";
     div.style.alignItems = "center";
-    div.style.background = "#141414"; 
+    div.style.background = "#141414";
     div.style.border = "1px solid #262626";
     div.style.padding = "8px 12px";
     div.style.borderRadius = "8px";
     div.style.marginBottom = "6px";
-    
+
     div.innerHTML = `
         <svg class="handle-arrastre text-666 flex-shrink-0 cursor-grab" viewBox="0 0 24 24" width="20"><path fill="currentColor" d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
         <input class="input-modal input-chip-edit m-0 flex-grow-1 border-none bg-transparent p-0 cursor-text outline-none" type="text" value="${valor}" oninput="this.setAttribute('value', this.value)" placeholder="Ej: Pilates...">
@@ -1250,7 +1273,7 @@ function agregarChipFila(valor = "") {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </button>
     `;
-    
+
     contenedor.appendChild(div);
     setTimeout(() => { contenedor.scrollTop = contenedor.scrollHeight; }, 10);
 }
@@ -1258,17 +1281,17 @@ function agregarChipFila(valor = "") {
 async function guardarEdicionChips() {
     const inputs = document.querySelectorAll(".input-chip-edit");
     let nuevosChips = [];
-    
+
     inputs.forEach(input => {
         const val = input.value.trim();
-        if (val) nuevosChips.push(val); 
+        if (val) nuevosChips.push(val);
     });
-    
+
     AppState.chipsActuales = nuevosChips;
-    
+
     document.getElementById("modal-editar-chips").style.display = "none";
     dibujarChipsPrincipales();
-    
+
     const chipTodos = document.querySelector("#contenedor-chips-dinamicos .chip:nth-child(2)");
     if (chipTodos) {
         filtrarPorChip(chipTodos, 'Todos');
@@ -1288,7 +1311,7 @@ async function guardarEdicionChips() {
 function dibujarChipsPrincipales() {
     const contenedor = document.getElementById("contenedor-chips-dinamicos");
     if (!contenedor) return;
-    
+
     let html = `
         <button class="chip p-0-12 border-warning text-warning d-flex align-center justify-center flex-shrink-0" onclick="abrirModalEditarChips()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
@@ -1296,18 +1319,18 @@ function dibujarChipsPrincipales() {
     `;
 
     html += `<button class="chip activo" onclick="filtrarPorChip(this, 'Todos')">Todos</button>`;
-    
+
     AppState.chipsActuales.forEach(chip => {
         html += `<button class="chip" onclick="filtrarPorChip(this, '${chip}')">${chip}</button>`;
     });
-    
+
     contenedor.innerHTML = html;
 }
 
 // --- FUNCIÓN PARA FORZAR ACTUALIZACIÓN DE LA APP ---
 async function forzarActualizacion() {
     mostrarAlerta("Actualizando...", "Limpiando la memoria para descargar la última versión. Aguardá unos segundos...");
-    
+
     setTimeout(async () => {
         try {
             // 1. Desregistrar todos los Service Workers (la PWA instalada)
@@ -1368,8 +1391,10 @@ window.aplicarFiltros = aplicarFiltros;
 window.filtrarAlumnos = filtrarAlumnos;
 window.filtrarPorChip = filtrarPorChip;
 window.renderizarListaAlumnos = renderizarListaAlumnos;
-window.modificarCicloPago = modificarCicloPago;
-window.ejecutarCambioDePago = ejecutarCambioDePago;
+window.calcularEstadoPago = calcularEstadoPago;
+window.ejecutarPagoCuota = ejecutarPagoCuota;
+window.ejecutarAnulacionPago = ejecutarAnulacionPago;
+
 window.borrarAlumno = borrarAlumno;
 window.activarModoBorrado = activarModoBorrado;
 window.abrirGrillaAlumno = abrirGrillaAlumno;

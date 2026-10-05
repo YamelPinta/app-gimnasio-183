@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
-    
+
 
     <link rel="manifest" href="./manifest.json">
 
@@ -49,14 +49,15 @@
             </button>
 
             <div class="logo-container-inicio">
-                <img src="/imagenes/LOGOACENTO.webp" alt="18.3 Clubhouse" class="img-logo-inicio logo-modo-oscuro-inicio">
+                <img src="/imagenes/LOGOACENTO.webp" alt="18.3 Clubhouse"
+                    class="img-logo-inicio logo-modo-oscuro-inicio">
 
                 <img src="/imagenes/LOGOFULLCOLOR.webp" alt="18.3 Clubhouse"
                     class="img-logo-inicio logo-modo-claro-inicio">
             </div>
 
             <div class="contenedor-botones-rol">
-                <div class="tarjeta-rol" onclick="navegarA('pantalla-alumno-proximamente', 'flex')">
+                <div class="tarjeta-rol" onclick="navegarA('pantalla-login-alumno', 'flex')">
                     <div class="fondo-tarjeta-rol fondo-alumno"></div>
 
                     <div class="contenido-rol">
@@ -98,7 +99,7 @@
                 </div>
             </div>
 
-            
+
             <div class="footer-creditos">
                 <a href="https://www.instagram.com/18punto3" target="_blank" rel="noopener noreferrer"
                     class="credito-ig">
@@ -232,7 +233,8 @@
 
             <div id="grilla-profesores" class="grilla-perfiles-moderna" style="margin-bottom: 60px;"></div>
 
-            <button class="btn-flotante-atras" aria-label="Actualizar App" onclick="forzarActualizacion()" style="bottom: 95px; right: 20px; z-index: 100; background-color: var(--color-marca); color: var(--color-negro-100);">
+            <button class="btn-flotante-atras" aria-label="Actualizar App" onclick="forzarActualizacion()"
+                style="bottom: 95px; right: 20px; z-index: 100; background-color: var(--color-marca); color: var(--color-negro-100);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22" height="22">
                     <polyline points="23 4 23 10 17 10"></polyline>
                     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -256,7 +258,8 @@
 
                 <div class="iconos-derecha-header">
 
-                    <svg class="icono-header" onclick="forzarActualizacion()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-label="Actualizar App">
+                    <svg class="icono-header" onclick="forzarActualizacion()" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" aria-label="Actualizar App">
                         <polyline points="23 4 23 10 17 10"></polyline>
                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                     </svg>
@@ -383,7 +386,6 @@
             </div>
 
 
-
             <div id="lista-alumnos" class="lista-alumnos-moderna"></div>
 
             <div style="display: flex; justify-content: center; padding: 20px 0 90px 0;">
@@ -398,7 +400,7 @@
                 </button>
             </div>
 
-            
+
             <div class="espacio-final-botones"></div>
 
         </div>
@@ -437,7 +439,8 @@
                     </svg>
                 </button>
 
-                <button class="btn-editar-alumno-card" aria-label="Editar datos del alumno" onclick="abrirModalFormularioAlumno('editar')">
+                <button class="btn-editar-alumno-card" aria-label="Editar datos del alumno"
+                    onclick="abrirModalFormularioAlumno('editar')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 20h9"></path>
                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
@@ -476,25 +479,32 @@
 
                         <div id="contenedor-reloj-emom" class="reloj-timer-plus" style="display: none;">
 
-                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <span id="titulo-reloj-avanzado" style="color: #000000; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;"></span>
-        
+                            <div
+                                style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span id="titulo-reloj-avanzado"
+                                    style="color: #000000; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;"></span>
+
                                 <button aria-label="Elegir cronómetro vinculado" onclick="abrirModalSelectorReloj()"
                                     style="background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.2); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: #000000; cursor: pointer; transition: 0.2s;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="14">
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
                                 </button>
                             </div>
 
                             <!-- Texto de la Fase (Entrenamiento / Preparación / Descanso) -->
-                            <div class="timer-header-fase" style="justify-content: center; margin-bottom: 5px; text-align: center;">
-                                <span id="fase-reloj-texto" style="font-size: 1.1rem; letter-spacing: 2px; font-weight: 800;">ENTRENAMIENTO</span>
+                            <div class="timer-header-fase"
+                                style="justify-content: center; margin-bottom: 5px; text-align: center;">
+                                <span id="fase-reloj-texto"
+                                    style="font-size: 1.1rem; letter-spacing: 2px; font-weight: 800;">ENTRENAMIENTO</span>
                             </div>
 
                             <!-- Chip del Tiempo Total Restante (Igual al del profe) -->
                             <div style="margin-bottom: 8px; display: flex; justify-content: center; width: 100%;">
-                                <span id="contador-rounds-total" class="timer-round-badge" style="background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.3); box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: #000; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;">Total: 00:00</span>
+                                <span id="contador-rounds-total" class="timer-round-badge"
+                                    style="background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.3); box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: #000; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;">Total:
+                                    00:00</span>
                             </div>
 
                             <!-- Display de los minutos de la ronda/fase actual -->
@@ -505,27 +515,34 @@
 
                             <!-- Controles del reproductor (Se mantienen igual) -->
                             <div class="controles-reloj-pro" style="margin-top: 15px;">
-                                <button type="button" class="btn-timer-pro btn-stop-pro" aria-label="Detener y reiniciar reloj" onclick="detenerRelojGlobal()">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22">
+                                <button type="button" class="btn-timer-pro btn-stop-pro"
+                                    aria-label="Detener y reiniciar reloj" onclick="detenerRelojGlobal()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                        width="22">
                                         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                                         <polyline points="3 3 3 8 8 8"></polyline>
                                     </svg>
                                 </button>
-                                <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase anterior" onclick="cambiarFaseReloj(-1)">
+                                <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase anterior"
+                                    onclick="cambiarFaseReloj(-1)">
                                     <svg viewBox="0 0 24 24" fill="currentColor" width="22">
                                         <polygon points="19 4 9 12 19 20 19 4"></polygon>
-                                        <line x1="5" y1="4" x2="5" y2="20" stroke="currentColor" stroke-width="2.5"></line>
+                                        <line x1="5" y1="4" x2="5" y2="20" stroke="currentColor" stroke-width="2.5">
+                                        </line>
                                     </svg>
                                 </button>
-                                <button type="button" id="btn-play-pause-pro" class="btn-timer-pro btn-play-pro" aria-label="Reproducir o pausar temporizador" onclick="togglePlayPauseReloj()">
+                                <button type="button" id="btn-play-pause-pro" class="btn-timer-pro btn-play-pro"
+                                    aria-label="Reproducir o pausar temporizador" onclick="togglePlayPauseReloj()">
                                     <svg id="svg-icono-play" viewBox="0 0 24 24" fill="currentColor" width="28">
                                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                     </svg>
                                 </button>
-                                <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase siguiente" onclick="cambiarFaseReloj(1)">
+                                <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase siguiente"
+                                    onclick="cambiarFaseReloj(1)">
                                     <svg viewBox="0 0 24 24" fill="currentColor" width="22">
                                         <polygon points="5 4 15 12 5 20 5 4"></polygon>
-                                        <line x1="19" y1="4" x2="19" y2="20" stroke="currentColor" stroke-width="2.5"></line>
+                                        <line x1="19" y1="4" x2="19" y2="20" stroke="currentColor" stroke-width="2.5">
+                                        </line>
                                     </svg>
                                 </button>
                             </div>
@@ -542,7 +559,7 @@
                             Volver atrás
                         </button>
 
-                        
+
                         <div class="espacio-final-botones"></div>
                     </div>
                 </div>
@@ -566,7 +583,7 @@
                 </button>
             </div>
 
-            
+
             <div class="espacio-final-botones"></div>
 
         </div>
@@ -617,7 +634,7 @@
 
             <div id="lista-ejercicios-pack" class="contenedor-ejercicios"></div>
 
-            
+
             <button class="btn-volver-categoria" onclick="abrirPantallaRutinas()" style="margin-top: 20px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -626,7 +643,7 @@
                 Volver atrás
             </button>
 
-            
+
             <div class="espacio-final-botones"></div>
 
             <div class="contenedor-fab">
@@ -647,7 +664,7 @@
                 </button>
             </div>
 
-            
+
             <div class="espacio-final-botones"></div>
 
         </div>
@@ -655,11 +672,11 @@
         <div id="pantalla-reloj" class="pantalla-dashboard-moderna pantalla-reloj-base"
             style="display: none; flex-direction: column; transition: background 0.5s ease;">
 
-            
+
             <div id="contenedor-top-reloj" class="contenedor-top-reloj-base"
                 style="display: flex; justify-content: center; align-items: center; padding-top: 0px; flex-shrink: 0;">
 
-                
+
                 <div id="logo-reloj-profe" class="transicion-reloj activo">
                     <img src="/imagenes/LOGOBLANCO.webp" alt="Logo" class="logo-modo-oscuro-dash"
                         style="width: 170px; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.5));">
@@ -667,15 +684,15 @@
                         style="width: 170px; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.2));">
                 </div>
 
-                
-                
+
+
                 <div id="animacion-reloj-profe" class="transicion-reloj oculto animacion-reloj-profe-base"
                     style="width: 200px; height: 200px; overflow: hidden; background: white;">
-                    
+
                 </div>
             </div>
 
-            
+
             <button onclick="abrirMenuReloj()" aria-label="Abrir menú de opciones"
                 style="position: absolute; top: 20px; left: 20px; z-index: 100; width: 45px; height: 45px; border-radius: 50%; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; color: #000; cursor: pointer; outline: none;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"
@@ -686,29 +703,29 @@
                 </svg>
             </button>
 
-            
+
             <button onclick="toggleRotacionReloj()" aria-label="Rotar pantalla"
                 style="position: absolute; top: 20px; right: 75px; z-index: 100; width: 45px; height: 45px; border-radius: 50%; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; color: #000; cursor: pointer; outline: none; transition: 0.2s;">
 
                 <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-linecap="round"
                     stroke-linejoin="round" width="26">
 
-                    
+
                     <g stroke-width="1.2">
-                        
+
                         <path d="M 26 3 A 17 17 0 0 1 33 10"></path>
                         <polyline points="33 3 33 10 26 10"></polyline>
 
-                        
+
                         <path d="M 10 33 A 17 17 0 0 1 3 26"></path>
                         <polyline points="3 33 3 26 10 26"></polyline>
                     </g>
 
-                    
+
                     <g class="celular-animado" stroke-width="1.8">
-                        
+
                         <rect x="11" y="6" width="14" height="24" rx="2.5"></rect>
-                        
+
                         <line x1="18" y1="26.5" x2="18.01" y2="26.5" stroke-width="3"></line>
                     </g>
 
@@ -716,8 +733,8 @@
 
             </button>
 
-            
-            
+
+
             <button onclick="abrirMenuDerecho()" aria-label="Ajustes del reloj"
                 style="position: absolute; top: 20px; right: 20px; z-index: 100; width: 45px; height: 45px; border-radius: 50%; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; color: #000; cursor: pointer; outline: none;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"
@@ -729,17 +746,17 @@
                 </svg>
             </button>
 
-            
+
             <div id="overlay-menu-derecho" onclick="cerrarMenuDerecho()"
                 style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);opacity: 0; transition: opacity 0.3s;">
             </div>
 
-            
-            
+
+
             <div id="menu-lateral-derecho" class="menu-lateral-derecho-base"
                 style="position: fixed; right: -320px; background: #111; transition: right 0.3s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column;">
 
-                
+
                 <div class="cabecera-menu-derecho-base"
                     style="display: flex; justify-content: space-between; align-items: center; padding-left: 20px; padding-right: 20px; border-bottom: 1px solid #333;">
                     <h3
@@ -749,11 +766,11 @@
                         style="background: none; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; color: #fff; width: 32px; height: 32px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; transition: 0.2s;">&times;</button>
                 </div>
 
-                
+
                 <div class="contenido-ajustes-derecho-base"
                     style="padding-left: 20px; padding-right: 20px; padding-bottom: 25px;">
 
-                    
+
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <span
@@ -773,7 +790,7 @@
                     <p class="texto-pitidos-base" style="color: #888; font-size: 0.85rem; margin: 0; line-height: 1.4;">
                         Activa o silencia el pitido de cuenta regresiva y cambio de fase.</p>
 
-                    
+
                     <div id="contenedor-volumen" class="contenedor-volumen-base"
                         style="margin-top: 25px; padding-bottom: 25px; transition: opacity 0.3s ease;">
                         <div
@@ -789,7 +806,7 @@
                             onchange="cambiarVolumenReloj()" oninput="actualizarEstiloVolumen()" class="slider-volumen">
                     </div>
 
-                    
+
                     <div class="fila-asistente-voz-base"
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <span
@@ -817,7 +834,7 @@
                         </select>
                     </div>
 
-                    
+
                     <div class="fila-vibracion-base"
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <span
@@ -839,15 +856,15 @@
                 </div>
             </div>
 
-            
+
             <div id="overlay-menu-reloj"
                 style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);"
                 onclick="cerrarMenuReloj()"></div>
 
-            
+
             <div id="menu-lateral-reloj" class="menu-lateral-oculto">
 
-                
+
                 <div class="cabecera-menu-reloj-base"
                     style="display: flex; justify-content: space-between; align-items: center;">
                     <h3
@@ -862,7 +879,7 @@
                     </button>
                 </div>
 
-                
+
                 <div class="campo-detalle campo-modalidad-reloj-base">
                     <label class="label-reloj-config">Modalidad</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -879,7 +896,7 @@
                     </div>
                 </div>
 
-                
+
                 <div class="grid-tiempos-reloj-base" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="campo-detalle" style="margin: 0;">
                         <label class="label-reloj-config">Preparación</label>
@@ -899,24 +916,24 @@
 
                     <div class="campo-detalle" id="campo-profe-intervalo" style="margin: 0;">
                         <label class="label-reloj-config">T. por Bloque</label>
-                        <input type="text" id="input-profe-intervalo" class="input-modal input-reloj-config" value="01:00"
-                            readonly onclick="abrirTimePicker('input-profe-intervalo', false)"
+                        <input type="text" id="input-profe-intervalo" class="input-modal input-reloj-config"
+                            value="01:00" readonly onclick="abrirTimePicker('input-profe-intervalo', false)"
                             onchange="if(typeof generarInputsEjerciciosProfe === 'function') generarInputsEjerciciosProfe()">
                     </div>
-                    
+
                     <div class="campo-detalle" id="caja-profe-rondas" style="margin: 0;">
                         <label class="label-reloj-config">Rondas</label>
                         <input type="number" id="input-profe-rondas" class="input-modal input-reloj-config" value="1">
                     </div>
 
-                    
+
                     <div class="campo-detalle" id="caja-profe-ciclos" style="margin: 0; grid-column: span 2;">
                         <label class="label-reloj-config">Ciclos</label>
                         <input type="number" id="input-profe-ciclos" class="input-modal input-reloj-config" value="1">
                     </div>
                 </div>
 
-                
+
                 <style>
                     #contenedor-inputs-ejercicios-profe::-webkit-scrollbar {
                         display: none;
@@ -934,11 +951,11 @@
 
                     <div id="contenedor-inputs-ejercicios-profe" class="scroll-ejercicios-profe"
                         style="display: none; margin-top: 15px; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; padding-right: 5px;">
-                        
+
                     </div>
                 </div>
 
-                
+
                 <div class="campo-detalle campo-relojes-guardados-base"
                     style="padding-left: 15px; padding-right: 15px; padding-bottom: 15px; border-radius: 14px;">
                     <div
@@ -951,12 +968,12 @@
 
                     <div id="lista-relojes-guardados"
                         style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto; padding-right: 5px;">
-                        
+
                         <p style="color: #666; font-size: 0.8rem; font-style: italic;">Cargando...</p>
                     </div>
                 </div>
 
-                
+
                 <button class="btn-guardar btn-iniciar-glow" onclick="prepararRelojProfe()">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="22">
                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -965,22 +982,23 @@
                 </button>
             </div>
 
-            
+
             <div id="contenedor-reloj-profe" class="contenedor-reloj-profe-base"
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; position: relative;">
 
-                
+
                 <div style="margin-top: 5vh; display: flex; flex-direction: column; align-items: center; width: 100%;">
 
-                    
+
                     <div
                         style="margin-bottom: 0px; display: flex; justify-content: center; align-items: center; gap: 10px; min-height: 28px; width: 100%; max-width: 90vw;">
 
-                        
+
                         <span id="titulo-ejercicio-profe"
                             style="color: #000; font-size: 1.3rem; font-family: 'Oswald', sans-serif; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; white-space: nowrap; transition: font-size 0.2s ease; overflow: hidden; text-overflow: ellipsis; min-width: 0;"></span>
 
-                        <button id="btn-ojo-animacion" aria-label="Ocultar o mostrar animación" onclick="toggleAnimacionRelojProfe()"
+                        <button id="btn-ojo-animacion" aria-label="Ocultar o mostrar animación"
+                            onclick="toggleAnimacionRelojProfe()"
                             style="background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.3); border-radius: 50%; width: 28px; height: 28px; display: none; align-items: center; justify-content: center; color: #000; cursor: pointer; transition: 0.2s; outline: none; flex-shrink: 0;">
                             <svg id="svg-ojo-animacion" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
                                 width="16">
@@ -990,14 +1008,14 @@
                         </button>
                     </div>
 
-                    
+
                     <div class="timer-header-fase"
                         style="justify-content: center; margin-bottom: 5px; text-align: center;">
                         <span id="fase-reloj-profe-texto"
                             style="font-size: 1.5rem; letter-spacing: 2px; font-weight: 800; color: rgba(0,0,0,0.8);">ESPERANDO...</span>
                     </div>
 
-                    
+
                     <div style="margin-bottom: 5px; display: flex; justify-content: center; width: 100%;">
                         <span id="contador-rounds-profe" class="timer-round-badge contador-rounds-profe-base"
                             style="background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.3); box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; color: #000; font-weight: 700;">Total:
@@ -1005,7 +1023,7 @@
                     </div>
                 </div>
 
-                
+
                 <div class="timer-display-wrapper-simple"
                     style="margin: 2vh 0 0 0; flex-grow: 1; display: flex; align-items: center;">
                     <div id="display-tiempo-profe" class="display-reloj-gigante"
@@ -1013,11 +1031,11 @@
                         00:00</div>
                 </div>
 
-                
+
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 350px;">
 
-                    
+
                     <div id="display-rondas-lateral"
                         style="display: flex; flex-direction: column; align-items: center; opacity: 0; transition: opacity 0.3s ease; width: 85px;">
                         <div id="numero-ronda-lateral"
@@ -1029,7 +1047,7 @@
                             style="font-size: 0.85rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: rgba(0,0,0,0.7); margin-top: 2px;">Rondas</span>
                     </div>
 
-                    
+
                     <div id="display-ciclos-lateral"
                         style="display: flex; flex-direction: column; align-items: center; opacity: 0; transition: opacity 0.3s ease; width: 85px;">
                         <div id="numero-ciclo-lateral"
@@ -1042,11 +1060,11 @@
                     </div>
                 </div>
 
-                
+
                 <div id="controles-reloj-profe"
                     class="controles-reloj-pro oculto-animado-abajo controles-reloj-profe-base">
 
-                    
+
                     <button type="button" class="btn-timer-pro btn-stop-pro" aria-label="Reiniciar reloj completo"
                         onclick="reiniciarRelojProfeCompleto()"
                         style="width: 50px; height: 50px; background: rgba(0,0,0,0.15); border: 2px solid rgba(0,0,0,0.4);">
@@ -1055,7 +1073,7 @@
                         </svg>
                     </button>
 
-                    
+
                     <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase anterior"
                         onclick="cambiarFaseRelojProfe(-1)"
                         style="width: 50px; height: 50px; background: rgba(0,0,0,0.15); border: 2px solid rgba(0,0,0,0.4);">
@@ -1065,7 +1083,7 @@
                         </svg>
                     </button>
 
-                    
+
                     <button type="button" id="btn-play-pause-profe" aria-label="Reproducir o pausar temporizador"
                         class="btn-timer-pro btn-play-pro" onclick="togglePlayPauseRelojProfe()"
                         style="width: 65px; height: 65px; background: rgba(0,0,0,0.25); border: 2px solid rgba(0,0,0,0.5);">
@@ -1075,7 +1093,7 @@
                         </svg>
                     </button>
 
-                    
+
                     <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Fase siguiente"
                         onclick="cambiarFaseRelojProfe(1)"
                         style="width: 50px; height: 50px; background: rgba(0,0,0,0.15); border: 2px solid rgba(0,0,0,0.4);">
@@ -1085,7 +1103,7 @@
                         </svg>
                     </button>
 
-                    
+
                     <button type="button" class="btn-timer-pro btn-skip-pro" aria-label="Reiniciar fase actual"
                         onclick="reiniciarFaseActualProfe()"
                         style="width: 50px; height: 50px; background: rgba(0,0,0,0.15); border: 2px solid rgba(0,0,0,0.4);">
@@ -1098,7 +1116,7 @@
                 </div>
             </div>
 
-            
+
 
 
         </div>
@@ -1138,10 +1156,34 @@
                         style="display: flex; flex-direction: column; overflow-x: hidden; padding-bottom: 10px;">
 
                         <div
-                            style="margin: 0 20px 15px 20px; text-align: center; background: #2c3e50; padding: 15px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                            <h3 style="margin:0; font-size: 0.9rem; color: #bdc3c7; text-transform: uppercase;">
-                                Recaudación Total (30% Gym)</h3>
-                            <strong id="monto-gran-total" style="font-size: 2.2rem; color: #2ecc71;">$0</strong>
+                            style="margin: 0 20px 15px 20px; background: #2c3e50; padding: 20px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
+
+                            <!-- Título centrado -->
+                            <div style="text-align: center; margin-bottom: 12px;">
+                                <span style="font-size: 0.88rem; color: #bdc3c7; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;">Recaudación Total (Gym)</span>
+                            </div>
+
+                            <!-- Total confirmado del GYM en grande, centrado -->
+                            <div id="kpi-gym-conf"
+                                style="font-size: 2.8rem; font-weight: 800; color: #2ecc71; line-height: 1; letter-spacing: -0.02em;">
+                                $0
+                            </div>
+
+                            <!-- Debería haber - pequeño, centrado abajo -->
+                            <div style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 8px;">
+                                <span style="font-size: 0.7rem; color: #95a5a6;">debería haber:</span>
+                                <span id="kpi-gym-esp" style="font-size: 0.8rem; font-weight: 600; color: #bdc3c7;">$0</span>
+                            </div>
+
+                            <!-- Elementos ocultos para compatibilidad con el JS existente -->
+                            <h3 id="titulo-gran-total" style="display:none;">Recaudación Total (Gym)</h3>
+                            <span id="kpi-total-esp" style="display:none;">$0</span>
+                            <span id="kpi-total-conf" style="display:none;">$0</span>
+                            <span id="kpi-label-gym" style="display:none;"></span>
+                            <span id="kpi-pendiente" style="display:none;">$0</span>
+                            <span id="kpi-masivas" style="display:none;"></span>
+                            <input type="month" id="input-mes-admin" style="display:none;"
+                                onchange="cambiarMesAdmin(this.value)">
                         </div>
 
                         <div id="contenedor-admin-columnas">
@@ -1175,16 +1217,314 @@
                 </div>
             </div>
 
-            
+
             <div class="espacio-final-botones"></div>
 
 
         </div>
 
-        <div id="pantalla-alumno-proximamente" class="pantalla-inicio" style="display: none; justify-content: center;">
-            <h2 style="color: white; font-family: 'Oswald', sans-serif;">PANTALLA ALUMNOS</h2>
-            <button class="btn-guardar" onclick="navegarA('pantalla-inicio', 'flex')">Volver al Inicio</button>
+        <!-- PANTALLA 1: LOGIN ALUMNO (Ingreso DNI) -->
+        <div id="pantalla-login-alumno" class="login-visual" style="display: none;">
+            <button class="btn-volver-atras" aria-label="Volver al inicio"
+                onclick="navegarA('pantalla-inicio', 'flex')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+
+            <button id="btn-tema-alumno" class="btn-tema" aria-label="Alternar tema claro u oscuro"
+                onclick="alternarTemaGlobal()">
+                <svg id="icono-sol-alumno" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg id="icono-luna-alumno" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="display: none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+
+            <div class="login-header-visual">
+                <img src="/imagenes/LOGOACENTO.webp" alt="18.3 Clubhouse" class="logo-visual logo-modo-oscuro-login">
+                <img src="/imagenes/LOGOFULLCOLOR.webp" alt="18.3 Clubhouse" class="logo-visual logo-modo-claro-login">
+
+                <div class="contenedor-texto-visual">
+                    <h1 class="titulo-visual">REGISTRO DEL ALUMNO</h1>
+                    <p class="subtitulo-visual" style="margin-top: 15px; margin-bottom: 5px;">Ingresá tu documento para
+                        ingresar a tu plan de entrenamiento.</p>
+                </div>
+            </div>
+
+            <div class="tarjeta-login-visual" style="margin-top: -10px;">
+                <div class="campo-detalle" style="margin-bottom: 5px;">
+                    <label
+                        style="font-size: 0.85rem; color: var(--color-marca); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; text-align: center; display: block;">Documento</label>
+
+                    <input type="number" id="login-dni-alumno" class="input-modal" placeholder="Ingresá tu DNI"
+                        style="text-align: center; font-size: 1.4rem; letter-spacing: 4px; font-weight: 700; padding: 16px; background: rgba(0, 0, 0, 0.6);">
+                </div>
+
+                <button id="btn-continuar-alumno" class="btn-iniciar-visual" style="margin-top: 15px;"
+                    onclick="iniciarSesionAlumno()">CONTINUAR</button>
+            </div>
         </div>
+
+        <!-- PANTALLA 2: SELECCIÓN DE MODALIDAD (Opcional, en caso de no estar predefinida) -->
+        <div id="pantalla-modalidad-alumno" class="pantalla-inicio"
+            style="display: none; justify-content: flex-start; padding-top: 5vh; padding-bottom: 20px;">
+            <div
+                style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 0 20px; z-index: 10; position: relative;">
+                <button class="btn-volver-atras" style="position: absolute; left: 20px; top: 0;"
+                    onclick="cerrarSesionAlumno()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <h3 style="font-family: 'Oswald', sans-serif; font-size: 1rem; letter-spacing: 1.5px; color: white; margin: 0; padding-top: 8px;"
+                    class="texto-adaptable-claro">MODALIDAD</h3>
+            </div>
+
+            <div
+                style="width: 85%; max-width: 340px; margin-top: 8vh; flex-grow: 1; display: flex; flex-direction: column;">
+                <h2 style="font-family: 'Oswald', sans-serif; font-size: 2rem; color: white; text-transform: uppercase; line-height: 1.1; margin-bottom: 5px;"
+                    class="texto-adaptable-claro">¿Cómo vas a<br>entrenar hoy?</h2>
+                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 30px;" class="texto-adaptable-claro-mut">
+                    Seleccioná tu modalidad de entrenamiento para la sesión.</p>
+
+                <div class="tarjeta-modalidad-alumno bg-mod-profe" onclick="seleccionarModalidadAlumno('Con rutina')">
+                    <span class="badge-modalidad">GUIADO</span>
+                    <div class="contenido-tarjeta-mod">
+                        <div class="d-flex align-center gap-6 mb-4">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-marca)" stroke-width="2"
+                                width="20">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <h4>ALUMNO CON PROFE</h4>
+                        </div>
+                        <p>Entrenamiento guiado con profesor de sala. Planificación y técnica asegurada.</p>
+                    </div>
+                </div>
+
+                <div class="tarjeta-modalidad-alumno bg-mod-libre" onclick="seleccionarModalidadAlumno('Libre')">
+                    <div class="contenido-tarjeta-mod">
+                        <div class="d-flex align-center gap-6 mb-4">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" width="20">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <h4 style="color: #ddd;">ALUMNO LIBRE</h4>
+                        </div>
+                        <p>Entrenamiento por tu cuenta. Acceso libre al equipamiento e instalaciones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA 3: BOTÓN EMPEZAR (Siempre activa) -->
+        <div id="pantalla-empezar-alumno" class="login-visual pantalla-vidrio-total" style="display: none;">
+            <div class="capa-vidrio-completa"></div>
+
+            <!-- Encabezado -->
+            <div
+                style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 0 20px; z-index: 10; position: relative;">
+                <button class="btn-volver-atras" style="position: absolute; left: 20px; top: -5px;"
+                    aria-label="Cerrar sesión" onclick="cerrarSesionAlumno()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+
+                <h3 style="font-family: 'Oswald', sans-serif; font-size: 1.1rem; letter-spacing: 1.5px; color: white; margin: 0; padding-top: 8px;"
+                    class="texto-adaptable-claro">PREPARADO</h3>
+
+                <button class="btn-tema" style="position: absolute; right: 20px; top: -10px;"
+                    onclick="alternarTemaGlobal()">
+                    <svg id="icono-sol-empezar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg id="icono-luna-empezar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="display: none;">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Contenido Principal Centrado -->
+            <div
+                style="width: 100%; margin-top: 5vh; flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; padding: 0 20px;">
+
+                <div class="badge-alumno-info texto-adaptable-claro">
+                    <div class="punto-ama flex-shrink-0" style="width: 8px; height: 8px; border-radius: 50%;"></div>
+                    <span id="label-alumno-modalidad">...</span>
+                </div>
+
+                <h2 style="font-family: 'Oswald', sans-serif; font-size: 3rem; color: white; text-transform: uppercase; line-height: 1.05; text-align: center; margin-bottom: 12px; letter-spacing: 1px;"
+                    class="texto-adaptable-claro">ES HORA DE FORJAR</h2>
+
+                <p style="color: #ccc; font-size: 0.95rem; text-align: center; margin-bottom: 40px; max-width: 300px; line-height: 1.3;"
+                    class="texto-adaptable-claro-mut">Presioná el botón para iniciar tu registro de hoy.</p>
+
+                <div class="contenedor-boton-empezar" onclick="empezarEntrenamientoAlumno()">
+                    <div class="onda-pulso"></div>
+                    <div class="onda-pulso delay-1"></div>
+                    <button class="btn-circulo-empezar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="36"
+                            style="margin-bottom: 4px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        EMPEZAR
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <p
+                style="color: #888; font-size: 0.75rem; text-align: center; font-weight: 700; letter-spacing: 1px; margin-top: auto; padding-bottom: 25px; text-transform: uppercase; z-index: 10; opacity: 0.7;">
+                #18Punto3 • La Técnica no se Negocia </p>
+        </div>
+
+        <!-- PANTALLA 4: DASHBOARD ALUMNO (INICIO) -->
+        <div id="pantalla-dashboard-alumno" class="pantalla-dashboard-moderna" style="display: none;">
+            <div class="decoracion-top-right"></div>
+
+            <!-- Encabezado Alumno -->
+            <div class="header-dashboard header-alumno">
+                <!-- Icono Configuración (Izquierda) -->
+                <div class="icono-header" aria-label="Ajustes">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="24">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                </div>
+
+                <!-- Logo (Centro) -->
+                <div class="logo-container-header">
+                    <img src="/imagenes/LOGOFULLCOLOR.webp" alt="Logo" class="logo-dash logo-modo-claro-dash"
+                        style="width: 110px;">
+                    <img src="/imagenes/LOGOACENTO.webp" alt="Logo" class="logo-dash logo-modo-oscuro-dash"
+                        style="width: 110px;">
+                </div>
+
+                <!-- Tema y Notificaciones (Derecha) -->
+                <div class="iconos-derecha-header">
+                    <svg class="icono-header" onclick="alternarTemaGlobal()" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" id="icono-luna-dash-al">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="icono-header" onclick="alternarTemaGlobal()" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" style="display: none;" id="icono-sol-dash-al">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+
+                    <div class="contenedor-campanita">
+                        <svg class="icono-header" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <div class="badge-notificacion" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="titulo-dashboard" style="margin-top: 15px; margin-bottom: 25px;">
+                <h2 id="titulo-hola-alumno">¡Hola!</h2>
+                <p>Este es tu plan de entrenamiento para hoy.</p>
+            </div>
+
+            <!-- Tarjeta Principal: Rutina de Hoy -->
+            <div class="tarjeta-resumen-hoy">
+                <div class="info-hoy">
+                    <span class="etiqueta-hoy">HOY TOCA</span>
+                    <h3 id="nombre-dia-hoy-alumno">DÍA 1</h3>
+                    <p id="detalle-rutina-hoy-alumno">Piernas y Glúteos</p>
+                </div>
+                <div class="grafico-circular-progreso">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Progreso Semanal (Muestra visual rápida) -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 15px;">
+                <h3 style="font-size: 1.05rem; font-weight: 600;" class="texto-adaptable-claro">Progreso semanal</h3>
+                <span style="font-size: 0.8rem; color: var(--color-marca); font-weight: 600;">Semana 1</span>
+            </div>
+
+            <div class="progreso-dias-semana">
+                <div class="dia-progreso completado">1</div>
+                <div class="dia-progreso completado">2</div>
+                <div class="dia-progreso actual">3</div>
+                <div class="dia-progreso">4</div>
+                <div class="dia-progreso">5</div>
+            </div>
+
+            <div class="espacio-final-botones"></div>
+        </div>
+
+        <!-- MENÚ INFERIOR ALUMNO -->
+        <nav id="menu-inferior-alumno" class="bottom-nav" style="display: none;">
+            <button class="nav-item activo" onclick="navegarAlumno('inicio')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item" onclick="navegarAlumno('rutina')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 12h4l3-9 5 18 3-9h5"></path>
+                </svg>
+                <span>Rutina</span>
+            </button>
+            <button class="nav-item" onclick="navegarAlumno('progreso')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span>Progreso</span>
+            </button>
+            <button class="nav-item" onclick="navegarAlumno('perfil')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Perfil</span>
+            </button>
+        </nav>
 
         <div id="modal-alumno" class="modal-overlay" style="display: none;">
             <div class="modal-contenido">
@@ -1382,7 +1722,8 @@
         <div id="modal-ejercicio" class="modal-overlay" style="display: none;">
             <div class="modal-contenido"
                 style="max-height: 90vh; overflow-y: auto;padding-bottom: 20px; position: relative;">
-                <button type="button" class="btn-cerrar-modal-x" aria-label="Cerrar ventana" onclick="intentarCerrarModal('modal-ejercicio')">
+                <button type="button" class="btn-cerrar-modal-x" aria-label="Cerrar ventana"
+                    onclick="intentarCerrarModal('modal-ejercicio')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1439,28 +1780,38 @@
 
                         <div class="campo-detalle" style="margin-bottom: 15px;">
                             <label class="label-modal">Nombre del Entrenamiento (Opcional):</label>
-                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
-                                <input type="text" id="input-emom-nombre" placeholder="Ej: EMOM" style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
-                                <span id="span-emom-tiempo-dinamico" style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">- 0 min</span>
+                            <div
+                                style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
+                                <input type="text" id="input-emom-nombre" placeholder="Ej: EMOM"
+                                    style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
+                                <span id="span-emom-tiempo-dinamico"
+                                    style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">-
+                                    0 min</span>
                             </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Prep:</label>
-                                <input type="text" id="input-emom-prep" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-emom-prep', false)">
+                                <input type="text" id="input-emom-prep" class="input-modal input-reloj-config"
+                                    value="00:10" readonly onclick="abrirTimePicker('input-emom-prep', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Entreno:</label>
-                                <input type="text" id="input-emom-minutos" class="input-modal input-reloj-config" value="01:00" readonly onclick="abrirTimePicker('input-emom-minutos', true)" style="border-color: #f39c12; font-weight: bold;">
+                                <input type="text" id="input-emom-minutos" class="input-modal input-reloj-config"
+                                    value="01:00" readonly onclick="abrirTimePicker('input-emom-minutos', true)"
+                                    style="border-color: #f39c12; font-weight: bold;">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Descanso:</label>
-                                <input type="text" id="input-emom-descanso" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-emom-descanso', false)">
+                                <input type="text" id="input-emom-descanso" class="input-modal input-reloj-config"
+                                    value="00:00" readonly onclick="abrirTimePicker('input-emom-descanso', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">T. por Bloque:</label>
-                                <input type="text" id="input-emom-intervalo" class="input-modal input-reloj-config" value="01:00" readonly onclick="abrirTimePicker('input-emom-intervalo', false)" onchange="if(typeof generarMinutosEmom === 'function') generarMinutosEmom()">
+                                <input type="text" id="input-emom-intervalo" class="input-modal input-reloj-config"
+                                    value="01:00" readonly onclick="abrirTimePicker('input-emom-intervalo', false)"
+                                    onchange="if(typeof generarMinutosEmom === 'function') generarMinutosEmom()">
                             </div>
                         </div>
 
@@ -1512,32 +1863,42 @@
 
                         <div class="campo-detalle" style="margin-bottom: 15px;">
                             <label class="label-modal">Nombre del Entrenamiento (Opcional):</label>
-                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
-                                <input type="text" id="input-amrap-nombre" placeholder="Ej: AMRAP" style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
-                                <span id="span-amrap-tiempo-dinamico" style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">- 0 min</span>
+                            <div
+                                style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
+                                <input type="text" id="input-amrap-nombre" placeholder="Ej: AMRAP"
+                                    style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
+                                <span id="span-amrap-tiempo-dinamico"
+                                    style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">-
+                                    0 min</span>
                             </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Prep:</label>
-                                <input type="text" id="input-amrap-prep" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-amrap-prep', false)">
+                                <input type="text" id="input-amrap-prep" class="input-modal input-reloj-config"
+                                    value="00:10" readonly onclick="abrirTimePicker('input-amrap-prep', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Tiempo:</label>
-                                <input type="text" id="input-amrap-minutos" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-amrap-minutos', false)" style="border-color: #f39c12; font-weight: bold;">
+                                <input type="text" id="input-amrap-minutos" class="input-modal input-reloj-config"
+                                    value="00:00" readonly onclick="abrirTimePicker('input-amrap-minutos', false)"
+                                    style="border-color: #f39c12; font-weight: bold;">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Descanso:</label>
-                                <input type="text" id="input-amrap-descanso" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-amrap-descanso', false)">
+                                <input type="text" id="input-amrap-descanso" class="input-modal input-reloj-config"
+                                    value="00:00" readonly onclick="abrirTimePicker('input-amrap-descanso', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Rondas:</label>
-                                <input type="number" id="input-amrap-rondas" class="input-modal input-reloj-config" value="1">
+                                <input type="number" id="input-amrap-rondas" class="input-modal input-reloj-config"
+                                    value="1">
                             </div>
                             <div class="campo-detalle" style="margin: 0; grid-column: span 2;">
                                 <label class="label-modal">Ciclos:</label>
-                                <input type="number" id="input-amrap-ciclos" class="input-modal input-reloj-config" value="1">
+                                <input type="number" id="input-amrap-ciclos" class="input-modal input-reloj-config"
+                                    value="1">
                             </div>
                         </div>
 
@@ -1548,7 +1909,8 @@
                             <div id="contenedor-ejercicios-amrap"
                                 style="display: flex; flex-direction: column; gap: 10px;"></div>
 
-                            <button type="button" class="btn-agregar-serie" onclick="agregarFilaAvanzada('amrap')" style="margin-top: 10px;">+ Añadir Ejercicio al circuito</button>
+                            <button type="button" class="btn-agregar-serie" onclick="agregarFilaAvanzada('amrap')"
+                                style="margin-top: 10px;">+ Añadir Ejercicio al circuito</button>
                         </div>
 
                         <div class="campo-detalle" style="margin-top: 15px;">
@@ -1585,122 +1947,183 @@
                     </div>
 
                     <div id="configuracion-tabata" style="display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <button type="button" class="btn-volver-texto" onclick="volverSeleccionModalidad()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="15 18 9 12 15 6"></polyline></svg> Volver atrás</button>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <button type="button" class="btn-volver-texto" onclick="volverSeleccionModalidad()"><svg
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg> Volver atrás</button>
                         </div>
                         <div class="campo-detalle" style="margin-bottom: 15px;">
                             <label class="label-modal">Nombre del Entrenamiento (Opcional):</label>
-                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
-                                <input type="text" id="input-tabata-nombre" placeholder="Ej: TABATA" style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
-                                <span id="span-tabata-tiempo-dinamico" style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">- 0 min</span>
+                            <div
+                                style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
+                                <input type="text" id="input-tabata-nombre" placeholder="Ej: TABATA"
+                                    style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
+                                <span id="span-tabata-tiempo-dinamico"
+                                    style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">-
+                                    0 min</span>
                             </div>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Prep:</label>
-                                <input type="text" id="input-tabata-prep" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-tabata-prep', false)">
+                                <input type="text" id="input-tabata-prep" class="input-modal input-reloj-config"
+                                    value="00:10" readonly onclick="abrirTimePicker('input-tabata-prep', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Trabajo:</label>
-                                <input type="text" id="input-tabata-trabajo" class="input-modal input-reloj-config" value="00:20" readonly onclick="abrirTimePicker('input-tabata-trabajo', false)" style="border-color: #f39c12; font-weight: bold;">
+                                <input type="text" id="input-tabata-trabajo" class="input-modal input-reloj-config"
+                                    value="00:20" readonly onclick="abrirTimePicker('input-tabata-trabajo', false)"
+                                    style="border-color: #f39c12; font-weight: bold;">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Pausa:</label>
-                                <input type="text" id="input-tabata-pausa" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-tabata-pausa', false)">
+                                <input type="text" id="input-tabata-pausa" class="input-modal input-reloj-config"
+                                    value="00:10" readonly onclick="abrirTimePicker('input-tabata-pausa', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Rondas:</label>
-                                <input type="number" id="input-tabata-rondas" class="input-modal input-reloj-config" value="8" style="font-weight: bold;" oninput="if(typeof actualizarTextosDinamicosTiempos === 'function') actualizarTextosDinamicosTiempos()">
+                                <input type="number" id="input-tabata-rondas" class="input-modal input-reloj-config"
+                                    value="8" style="font-weight: bold;"
+                                    oninput="if(typeof actualizarTextosDinamicosTiempos === 'function') actualizarTextosDinamicosTiempos()">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Desc. Final:</label>
-                                <input type="text" id="input-tabata-descanso" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-tabata-descanso', false)">
+                                <input type="text" id="input-tabata-descanso" class="input-modal input-reloj-config"
+                                    value="00:00" readonly onclick="abrirTimePicker('input-tabata-descanso', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Ciclos:</label>
-                                <input type="number" id="input-tabata-ciclos" class="input-modal input-reloj-config" value="1" oninput="if(typeof actualizarTextosDinamicosTiempos === 'function') actualizarTextosDinamicosTiempos()">
+                                <input type="number" id="input-tabata-ciclos" class="input-modal input-reloj-config"
+                                    value="1"
+                                    oninput="if(typeof actualizarTextosDinamicosTiempos === 'function') actualizarTextosDinamicosTiempos()">
                             </div>
                         </div>
                         <div class="campo-detalle">
-                            <label class="label-modal" style="color: #f39c12; font-size: 0.95rem; margin-bottom: 10px;">Ejercicios del Tabata:</label>
-                            <div id="contenedor-ejercicios-tabata" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                            <button type="button" class="btn-agregar-serie" onclick="agregarFilaAvanzada('tabata')" style="margin-top: 10px;">+ Añadir Ejercicio</button>
+                            <label class="label-modal"
+                                style="color: #f39c12; font-size: 0.95rem; margin-bottom: 10px;">Ejercicios del
+                                Tabata:</label>
+                            <div id="contenedor-ejercicios-tabata"
+                                style="display: flex; flex-direction: column; gap: 10px;"></div>
+                            <button type="button" class="btn-agregar-serie" onclick="agregarFilaAvanzada('tabata')"
+                                style="margin-top: 10px;">+ Añadir Ejercicio</button>
                         </div>
                         <div class="campo-detalle" style="margin-top: 15px;">
                             <label class="label-modal">Sub-bloque (Opcional):</label>
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="input-tabata-subbloque" class="input-modal" placeholder="Ej: Finisher..." style="flex: 1; margin: 0;">
-                                <button type="button" class="btn-guardar" onclick="abrirListaSubbloques('input-tabata-subbloque')" style="padding: 0 15px; margin: 0; background: #ff9900; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                <input type="text" id="input-tabata-subbloque" class="input-modal"
+                                    placeholder="Ej: Finisher..." style="flex: 1; margin: 0;">
+                                <button type="button" class="btn-guardar"
+                                    onclick="abrirListaSubbloques('input-tabata-subbloque')"
+                                    style="padding: 0 15px; margin: 0; background: #ff9900; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="16">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
                                     Los que ya tenés
                                 </button>
                             </div>
                         </div>
                         <div class="campo-detalle" style="margin-bottom: 20px;">
                             <label class="label-modal">Notas del profe (Opcional):</label>
-                            <textarea id="input-tabata-notas" class="input-modal" placeholder="Ej: Máxima intensidad en los 20s..." rows="2" style="resize: none;"></textarea>
+                            <textarea id="input-tabata-notas" class="input-modal"
+                                placeholder="Ej: Máxima intensidad en los 20s..." rows="2"
+                                style="resize: none;"></textarea>
                         </div>
-                        <div class="modal-botones" id="botones-modal-tabata" style="display: none; gap: 10px; margin-top: 15px;">
-                            <button type="button" class="btn-cancelar" onclick="intentarCerrarModal('modal-ejercicio')">Cancelar</button>
-                            <button type="button" id="btn-guardar-tabata" class="btn-guardar" style="margin: 0;" onclick="guardarCircuitoAvanzado('tabata')">Guardar TABATA</button>
+                        <div class="modal-botones" id="botones-modal-tabata"
+                            style="display: none; gap: 10px; margin-top: 15px;">
+                            <button type="button" class="btn-cancelar"
+                                onclick="intentarCerrarModal('modal-ejercicio')">Cancelar</button>
+                            <button type="button" id="btn-guardar-tabata" class="btn-guardar" style="margin: 0;"
+                                onclick="guardarCircuitoAvanzado('tabata')">Guardar TABATA</button>
                         </div>
                     </div>
 
                     <div id="configuracion-timecap" style="display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <button type="button" class="btn-volver-texto" onclick="volverSeleccionModalidad()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="15 18 9 12 15 6"></polyline></svg> Volver atrás</button>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <button type="button" class="btn-volver-texto" onclick="volverSeleccionModalidad()"><svg
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg> Volver atrás</button>
                         </div>
                         <div class="campo-detalle" style="margin-bottom: 15px;">
                             <label class="label-modal">Nombre del Entrenamiento (Opcional):</label>
-                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
-                                <input type="text" id="input-timecap-nombre" placeholder="Ej: TIME CAP" style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
-                                <span id="span-timecap-tiempo-dinamico" style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">- 0 min</span>
+                            <div
+                                style="display: flex; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding-right: 15px;">
+                                <input type="text" id="input-timecap-nombre" placeholder="Ej: TIME CAP"
+                                    style="border: none; background: transparent; color: white; padding: 12px 15px; margin: 0; box-shadow: none; flex: 1; outline: none; font-family: inherit; font-size: 0.95rem;">
+                                <span id="span-timecap-tiempo-dinamico"
+                                    style="color: #f39c12; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">-
+                                    0 min</span>
                             </div>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Prep:</label>
-                                <input type="text" id="input-timecap-prep" class="input-modal input-reloj-config" value="00:10" readonly onclick="abrirTimePicker('input-timecap-prep', false)">
+                                <input type="text" id="input-timecap-prep" class="input-modal input-reloj-config"
+                                    value="00:10" readonly onclick="abrirTimePicker('input-timecap-prep', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Límite (Cap):</label>
-                                <input type="text" id="input-timecap-minutos" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-timecap-minutos', false)" style="border-color: #f39c12; font-weight: bold;">
+                                <input type="text" id="input-timecap-minutos" class="input-modal input-reloj-config"
+                                    value="00:00" readonly onclick="abrirTimePicker('input-timecap-minutos', false)"
+                                    style="border-color: #f39c12; font-weight: bold;">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Descanso:</label>
-                                <input type="text" id="input-timecap-descanso" class="input-modal input-reloj-config" value="00:00" readonly onclick="abrirTimePicker('input-timecap-descanso', false)">
+                                <input type="text" id="input-timecap-descanso" class="input-modal input-reloj-config"
+                                    value="00:00" readonly onclick="abrirTimePicker('input-timecap-descanso', false)">
                             </div>
                             <div class="campo-detalle" style="margin: 0;">
                                 <label class="label-modal">Rondas:</label>
-                                <input type="number" id="input-timecap-rondas" class="input-modal input-reloj-config" value="1">
+                                <input type="number" id="input-timecap-rondas" class="input-modal input-reloj-config"
+                                    value="1">
                             </div>
                             <div class="campo-detalle" style="margin: 0; grid-column: span 2;">
                                 <label class="label-modal">Ciclos:</label>
-                                <input type="number" id="input-timecap-ciclos" class="input-modal input-reloj-config" value="1">
+                                <input type="number" id="input-timecap-ciclos" class="input-modal input-reloj-config"
+                                    value="1">
                             </div>
                         </div>
                         <div class="campo-detalle">
-                            <label class="label-modal" style="color: #f39c12; font-size: 0.95rem; margin-bottom: 10px;">Circuito a completar:</label>
-                            <div id="contenedor-ejercicios-timecap" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                            <button type="button" class="btn-agregar-serie" onclick="agregarFilaAvanzada('timecap')" style="margin-top: 10px;">+ Añadir Ejercicio</button>
+                            <label class="label-modal"
+                                style="color: #f39c12; font-size: 0.95rem; margin-bottom: 10px;">Circuito a
+                                completar:</label>
+                            <div id="contenedor-ejercicios-timecap"
+                                style="display: flex; flex-direction: column; gap: 10px;"></div>
+                            <button type="button" class="btn-agregar-serie" onclick="agregarFilaAvanzada('timecap')"
+                                style="margin-top: 10px;">+ Añadir Ejercicio</button>
                         </div>
                         <div class="campo-detalle" style="margin-top: 15px;">
                             <label class="label-modal">Sub-bloque (Opcional):</label>
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="input-timecap-subbloque" class="input-modal" placeholder="Ej: WOD 1..." style="flex: 1; margin: 0;">
-                                <button type="button" class="btn-guardar" onclick="abrirListaSubbloques('input-timecap-subbloque')" style="padding: 0 15px; margin: 0; background: #ff9900; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                <input type="text" id="input-timecap-subbloque" class="input-modal"
+                                    placeholder="Ej: WOD 1..." style="flex: 1; margin: 0;">
+                                <button type="button" class="btn-guardar"
+                                    onclick="abrirListaSubbloques('input-timecap-subbloque')"
+                                    style="padding: 0 15px; margin: 0; background: #ff9900; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="16">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
                                     Los que ya tenés
                                 </button>
                             </div>
                         </div>
                         <div class="campo-detalle" style="margin-bottom: 20px;">
                             <label class="label-modal">Notas del profe (Opcional):</label>
-                            <textarea id="input-timecap-notas" class="input-modal" placeholder="Ej: Terminar lo antes posible..." rows="2" style="resize: none;"></textarea>
+                            <textarea id="input-timecap-notas" class="input-modal"
+                                placeholder="Ej: Terminar lo antes posible..." rows="2"
+                                style="resize: none;"></textarea>
                         </div>
-                        <div class="modal-botones" id="botones-modal-timecap" style="display: none; gap: 10px; margin-top: 15px;">
-                            <button type="button" class="btn-cancelar" onclick="intentarCerrarModal('modal-ejercicio')">Cancelar</button>
-                            <button type="button" id="btn-guardar-timecap" class="btn-guardar" style="margin: 0;" onclick="guardarCircuitoAvanzado('timecap')">Guardar TIME CAP</button>
+                        <div class="modal-botones" id="botones-modal-timecap"
+                            style="display: none; gap: 10px; margin-top: 15px;">
+                            <button type="button" class="btn-cancelar"
+                                onclick="intentarCerrarModal('modal-ejercicio')">Cancelar</button>
+                            <button type="button" id="btn-guardar-timecap" class="btn-guardar" style="margin: 0;"
+                                onclick="guardarCircuitoAvanzado('timecap')">Guardar TIME CAP</button>
                         </div>
                     </div>
                 </div>
@@ -1851,7 +2274,8 @@
                             <input type="number" class="input-serie-fuerza input-modal" placeholder="% RM">
                             <input type="number" class="input-serie-reps input-modal" placeholder="Reps">
                             <input type="number" class="input-serie-rir input-modal" placeholder="RIR">
-                            <button type="button" class="btn-eliminar-serie" aria-label="Eliminar esta serie" onclick="eliminarFilaSerie(this)">
+                            <button type="button" class="btn-eliminar-serie" aria-label="Eliminar esta serie"
+                                onclick="eliminarFilaSerie(this)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
                                     <polyline points="3 6 5 6 21 6"></polyline>
                                     <path
@@ -2102,18 +2526,18 @@
             <div class="modal-contenido" style="max-height: 80vh; display: flex; flex-direction: column;">
                 <h3 style="margin-bottom: 10px; flex-shrink: 0;">Notificaciones</h3>
 
-                
+
                 <div style="overflow-y: auto; flex-grow: 1; padding-right: 5px; display: flex; flex-direction: column;">
 
-                    
+
                     <div id="lista-notificaciones-emom" style="display: flex; flex-direction: column; gap: 10px;"></div>
 
-                    
+
                     <p
                         style="font-size: 0.8rem; color: #f39c12; margin: 15px 0 10px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; font-weight: 600; text-transform: uppercase;">
                         Cuotas y Vencimientos</p>
 
-                    
+
                     <div id="lista-notificaciones" style="display: flex; flex-direction: column; gap: 10px;"></div>
 
                 </div>
@@ -2547,7 +2971,7 @@
         </div>
 
 
-        
+
         <div id="modal-guardar-reloj-favorito" class="modal-overlay" style="display: none;">
             <div class="modal-contenido" style="max-width: 320px; text-align: center;">
                 <h3 style="margin-bottom: 5px; color: #f39c12;">Guardar Favorito</h3>
@@ -2569,7 +2993,7 @@
         </div>
 
 
-        
+
         <nav id="menu-inferior-global" class="bottom-nav" style="display: none;">
             <button class="nav-item tab-inicio" onclick="irAPerfiles()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2609,7 +3033,7 @@
                 <span>Rutinas</span>
             </button>
 
-            
+
             <button class="nav-item nav-admin-only tab-informe" style="display: none;" onclick="abrirPantallaInforme()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -2623,34 +3047,46 @@
     </main>
 
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <template id="tmpl-tarjeta-alumno">
         <div class="card-alumno">
             <img class="avatar-actividad" alt="Actividad">
             <div class="info-central">
                 <h3 class="tmpl-nombre-completo"></h3>
-                
-                
+
+
                 <div class="tmpl-modalidad"></div>
-                
+
                 <div class="info-detalle mr-6 flex-shrink-0">
-                    <svg viewBox="0 0 24 24" fill="#f39c12" width="14" height="14"><circle cx="12" cy="12" r="7.5"></circle></svg>
+                    <svg viewBox="0 0 24 24" fill="#f39c12" width="14" height="14">
+                        <circle cx="12" cy="12" r="7.5"></circle>
+                    </svg>
                     <span class="tmpl-actividad-real"></span>
                 </div>
-                
+
                 <div class="info-detalle mt-2 mr-6 flex-shrink-0 text-warning fw-600">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="14" height="14"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" width="14" height="14">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
                     <span class="tmpl-cuota-texto"></span>
                 </div>
-                
+
                 <div class="info-detalle mt-2 tmpl-ultima-sesion-container">
                     <div class="mr-6 flex-shrink-0 tmpl-icono-sesion">
-                        
-                        <svg class="svg-sesion-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                            <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+
+                        <svg class="svg-sesion-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" width="14" height="14">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
                         </svg>
-                        <svg class="svg-sesion-mal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="display:none;">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        <svg class="svg-sesion-mal" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" width="14" height="14" style="display:none;">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                            </path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
                     </div>
                     <span class="fw-500 tmpl-texto-sesion"></span>
@@ -2661,14 +3097,19 @@
                 <button class="btn-accion-admin peligro mb-5 tmpl-btn-borrar" style="display:none;">Borrar</button>
                 <div class="contenedor-accion-pago">
                     <button class="btn-pago-status tmpl-btn-pago"></button>
-                    <button class="btn-asistencia-presente tmpl-btn-asistencia-presente mr-4" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="20 6 9 17 4 12"></polyline></svg>Presente</button>
-                    <button class="btn-asistencia-pendiente tmpl-btn-asistencia-pendiente" style="display:none;">Asistencia</button>
+                    <button class="btn-asistencia-presente tmpl-btn-asistencia-presente mr-4" style="display:none;"><svg
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14"
+                            height="14">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>Presente</button>
+                    <button class="btn-asistencia-pendiente tmpl-btn-asistencia-pendiente"
+                        style="display:none;">Asistencia</button>
                 </div>
             </div>
         </div>
     </template>
-    
-    
+
+
     <template id="tmpl-admin-profe">
         <div class="tarjeta-admin-profe">
             <div class="admin-profe-header tmpl-header">
@@ -2680,13 +3121,14 @@
                     <div class="d-flex flex-column min-w-0">
                         <strong class="tmpl-nombre fs-100 ls-03"></strong>
                         <span class="tmpl-stats"></span>
+                        <span class="tmpl-informados fs-75 fw-600"></span>
                     </div>
                 </div>
                 <div class="text-right d-flex flex-column align-end justify-center flex-shrink-0 pl-10">
-                    
+
                     <strong class="tmpl-total precio fs-110 fw-600"></strong>
                     <span class="tmpl-total-profe fs-80 fw-600 text-warning mt-2"></span>
-                    
+
                     <div class="d-flex gap-6 mt-4">
                         <span class="badge-subbloque badge-porcentaje tmpl-btn-porc">
                             Gym: <span class="tmpl-porc-texto"></span>%
@@ -2706,7 +3148,7 @@
                         <tr class="fs-70 text-uppercase ls-1">
                             <th class="p-10-15 fw-600">Alumno</th>
                             <th class="p-10-15 fw-600">Act.</th>
-                            
+
                             <th class="p-10-15 fw-600 text-right">Cuota Total / Gym</th>
                         </tr>
                     </thead>
@@ -2717,21 +3159,23 @@
         </div>
     </template>
 
-    
+
     <template id="tmpl-admin-alumno-row">
         <tr>
             <td class="tmpl-al-nombre p-10-15 fw-400 fs-85"></td>
             <td class="tmpl-al-act p-10-15 fs-75"></td>
             <td class="p-10-15 text-right fw-400 fs-75">
                 <div class="d-flex align-center justify-end gap-6">
-                    
-                    
-                    <div class="d-flex flex-column align-end pr-10" style="border-right: 1px solid rgba(255, 255, 255, 0.2); padding-right: 10px;">
+
+
+                    <div class="d-flex flex-column align-end pr-10"
+                        style="border-right: 1px solid rgba(255, 255, 255, 0.2); padding-right: 10px;">
                         <span class="text-muted fs-65 text-uppercase">Total</span>
                         <span class="tmpl-al-cuota-full text-muted fs-80"></span>
+                        <span class="tmpl-al-estado fs-65 fw-600"></span>
                     </div>
 
-                    
+
                     <div class="d-flex flex-column align-end pl-4">
                         <div class="d-flex align-center gap-4">
                             <span class="tmpl-al-porc text-muted fs-65"></span>
@@ -2750,7 +3194,7 @@
         </tr>
     </template>
 
-    
+
     <template id="tmpl-informe-alumno-row">
         <tr>
             <td class="tmpl-inf-nombre fw-500"></td>
@@ -2763,7 +3207,7 @@
         </tr>
     </template>
 
-    
+
     <template id="tmpl-informe-separador-row">
         <tr>
             <td colspan="7" class="tmpl-inf-separador-texto tabla-separador-cat"></td>
@@ -2771,7 +3215,7 @@
     </template>
 
 
-    
+
     <template id="tmpl-tarjeta-historial">
         <div class="tarjeta-historial d-flex flex-column align-stretch">
             <div class="d-flex justify-between align-center">
@@ -2779,10 +3223,17 @@
                     <p class="tmpl-historial-titulo"></p>
                     <span class="tmpl-historial-fecha"></span>
                 </div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" width="20"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" width="20">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
             </div>
             <button class="btn-re-descarga tmpl-btn-redescarga">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
                 Volver a descargar
             </button>
         </div>
@@ -2791,7 +3242,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    
+
 
     <script type="module" src="./src/config.js"></script>
     <script type="module" src="./src/datos.js"></script>
@@ -2806,7 +3257,7 @@
     <script type="module" src="./src/rutinas.js"></script>
     <script type="module" src="./src/app.js"></script>
 
-    
+
 </body>
 
 </html>

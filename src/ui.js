@@ -3,14 +3,14 @@ function toggleModal(idModal, mostrar, displayType = 'flex') {
     const modal = document.getElementById(idModal);
     if (modal) {
         modal.style.display = mostrar ? displayType : 'none';
-        
+
         if (idModal === 'bottom-sheet-overlay') {
             const bsContent = document.getElementById("bottom-sheet-content");
             if (mostrar) {
                 setTimeout(() => modal.classList.add("activo"), 10);
             } else {
                 modal.classList.remove("activo");
-                if(bsContent) bsContent.style.transform = '';
+                if (bsContent) bsContent.style.transform = '';
             }
         }
     }
@@ -18,16 +18,18 @@ function toggleModal(idModal, mostrar, displayType = 'flex') {
 
 window.navegarA = function navegarA(idPantallaDestino, displayType = 'block') {
     const pantallas = [
-        'pantalla-inicio', 'pantalla-login', 'pantalla-perfiles', 
-        'pantalla-dashboard', 'pantalla-detalle-alumno', 'pantalla-rutinas', 
-        'pantalla-detalle-pack', 'pantalla-admin', 'pantalla-alumno-proximamente', 'pantalla-reloj'
+        'pantalla-inicio', 'pantalla-login', 'pantalla-perfiles',
+        'pantalla-dashboard', 'pantalla-detalle-alumno', 'pantalla-rutinas',
+        'pantalla-detalle-pack', 'pantalla-admin', 'pantalla-reloj',
+
+        'pantalla-login-alumno', 'pantalla-modalidad-alumno', 'pantalla-empezar-alumno'
     ];
-    
+
     pantallas.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
-    
+
     const destino = document.getElementById(idPantallaDestino);
     if (destino) destino.style.display = displayType;
 };
@@ -40,100 +42,100 @@ function pedirConfirmacion(titulo, mensaje, textoBoton, funcionAConfirmar) {
     document.getElementById("titulo-confirmacion").innerText = titulo;
     document.getElementById("texto-confirmacion").innerText = mensaje;
     document.getElementById("btn-confirmar-accion").innerText = textoBoton;
-    
-    AppState.accionPendiente = funcionAConfirmar; 
+
+    AppState.accionPendiente = funcionAConfirmar;
     document.getElementById("modal-confirmacion").style.display = "flex";
 }
 
 document.getElementById("btn-confirmar-accion").addEventListener("click", () => {
     if (AppState.accionPendiente) {
-        AppState.accionPendiente(); 
-        toggleModal('modal-confirmacion', false); 
+        AppState.accionPendiente();
+        toggleModal('modal-confirmacion', false);
     }
 });
 
 function mostrarAlerta(titulo, mensaje) {
     document.getElementById("titulo-alerta").innerText = titulo;
     document.getElementById("texto-alerta").innerText = mensaje;
-    
+
     const tituloMin = titulo.toLowerCase();
-    const esExito = tituloMin.includes('éxito') || 
-                    tituloMin.includes('exitosa') || 
-                    tituloMin.includes('registrada') || 
-                    tituloMin.includes('copiada') || 
-                    tituloMin.includes('limpio')||
-                    tituloMin.includes('guardado');
+    const esExito = tituloMin.includes('éxito') ||
+        tituloMin.includes('exitosa') ||
+        tituloMin.includes('registrada') ||
+        tituloMin.includes('copiada') ||
+        tituloMin.includes('limpio') ||
+        tituloMin.includes('guardado');
 
     const contenedorIcono = document.getElementById("contenedor-icono-alerta");
     const tituloDOM = document.getElementById("titulo-alerta");
 
     if (esExito) {
         contenedorIcono.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" class="anim-exito"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`;
-        tituloDOM.style.color = "#2ecc71"; 
+        tituloDOM.style.color = "#2ecc71";
     } else {
         contenedorIcono.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2.5" width="48" height="48" class="anim-alerta"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
-        tituloDOM.style.color = "#ffffff"; 
+        tituloDOM.style.color = "#ffffff";
     }
 
     document.getElementById("modal-alerta").style.display = "flex";
 }
 
 const funcionAlertaOriginal = mostrarAlerta;
-mostrarAlerta = function(titulo, mensaje) {
+mostrarAlerta = function (titulo, mensaje) {
     if (navigator.vibrate) {
         const tituloMin = titulo.toLowerCase();
         const esExito = tituloMin.includes('éxito') || tituloMin.includes('exitosa') || tituloMin.includes('registrada') || tituloMin.includes('copiada') || tituloMin.includes('limpio') || tituloMin.includes('guardado');
-        
+
         if (esExito) {
-            navigator.vibrate(100); 
+            navigator.vibrate(100);
         } else {
-            navigator.vibrate([50, 50, 50]); 
+            navigator.vibrate([50, 50, 50]);
         }
     }
-    funcionAlertaOriginal(titulo, mensaje); 
+    funcionAlertaOriginal(titulo, mensaje);
 };
 
 function inicializarTema() {
     const temaGuardado = localStorage.getItem('temaGlobalGym');
-    
+
     if (temaGuardado === 'claro') {
         AppState.esTemaOscuro = false;
     } else {
-        AppState.esTemaOscuro = true; 
+        AppState.esTemaOscuro = true;
     }
-    
+
     aplicarTemaVisual();
 }
 
 function alternarTemaGlobal() {
-    
+
     AppState.esTemaOscuro = !AppState.esTemaOscuro;
 
     localStorage.setItem('temaGlobalGym', AppState.esTemaOscuro ? 'oscuro' : 'claro');
-    
+
     aplicarTemaVisual();
 }
 
 function aplicarTemaVisual() {
-    const pantallasOscuras = ['pantalla-inicio', 'pantalla-login', 'pantalla-perfiles'];
+    const pantallasOscuras = ['pantalla-inicio', 'pantalla-login', 'pantalla-perfiles', 'pantalla-login-alumno', 'pantalla-modalidad-alumno', 'pantalla-empezar-alumno'];
     pantallasOscuras.forEach(id => {
         const el = document.getElementById(id);
-        if(el) {
-            if(AppState.esTemaOscuro) el.classList.remove('modo-claro');
+        if (el) {
+            if (AppState.esTemaOscuro) el.classList.remove('modo-claro');
             else el.classList.add('modo-claro');
         }
     });
 
-    const pantallasClaras = ['pantalla-dashboard', 'pantalla-detalle-alumno', 'pantalla-rutinas', 'pantalla-detalle-pack', 'pantalla-admin'];
+    const pantallasClaras = ['pantalla-dashboard', 'pantalla-detalle-alumno', 'pantalla-rutinas', 'pantalla-detalle-pack', 'pantalla-admin', 'pantalla-dashboard-alumno'];
     pantallasClaras.forEach(id => {
         const el = document.getElementById(id);
-        if(el) {
-            if(AppState.esTemaOscuro) el.classList.add('modo-oscuro');
+        if (el) {
+            if (AppState.esTemaOscuro) el.classList.add('modo-oscuro');
             else el.classList.remove('modo-oscuro');
         }
     });
 
-    if(AppState.esTemaOscuro) {
+    if (AppState.esTemaOscuro) {
         document.body.classList.add('tema-oscuro');
     } else {
         document.body.classList.remove('tema-oscuro');
@@ -142,12 +144,12 @@ function aplicarTemaVisual() {
     const soles = document.querySelectorAll('[id^="icono-sol"]');
     const lunas = document.querySelectorAll('[id^="icono-luna"]');
 
-    if(AppState.esTemaOscuro) {
-        soles.forEach(sol => sol.style.display = 'block'); 
+    if (AppState.esTemaOscuro) {
+        soles.forEach(sol => sol.style.display = 'block');
         lunas.forEach(luna => luna.style.display = 'none');
     } else {
         soles.forEach(sol => sol.style.display = 'none');
-        lunas.forEach(luna => luna.style.display = 'block'); 
+        lunas.forEach(luna => luna.style.display = 'block');
     }
 }
 
@@ -181,16 +183,16 @@ window.addEventListener('popstate', function (event) {
             const el = document.getElementById(id);
             if (el && (el.style.display === "flex" || el.style.display === "block")) {
                 if (id === 'modal-ejercicio') {
-                     intentarCerrarModal(id);
+                    intentarCerrarModal(id);
                 } else if (id === 'bottom-sheet-overlay') {
-                     cerrarBottomSheet();
+                    cerrarBottomSheet();
                 } else if (id === 'visor-fullscreen') {
-                     cerrarImagenFullscreen();
+                    cerrarImagenFullscreen();
                 } else {
-                     toggleModal(id, false); 
+                    toggleModal(id, false);
                 }
                 interceptado = true;
-                break; 
+                break;
             }
         }
     }
@@ -213,8 +215,15 @@ window.addEventListener('popstate', function (event) {
         } else if (esVisible("pantalla-login")) {
             irAPerfiles();
             interceptado = true;
-        } else if (esVisible("pantalla-alumno-proximamente")) {
+        } else if (esVisible("pantalla-login-alumno")) {
             navegarA('pantalla-inicio', 'flex');
+            interceptado = true;
+        } else if (esVisible("pantalla-modalidad-alumno") || esVisible("pantalla-empezar-alumno")) {
+            if (typeof cerrarSesionAlumno === 'function') {
+                cerrarSesionAlumno();
+            } else {
+                navegarA('pantalla-inicio', 'flex');
+            }
             interceptado = true;
         } else if (esVisible("pantalla-perfiles")) {
             const sesion = localStorage.getItem('sesionGimnasio');
@@ -223,7 +232,8 @@ window.addEventListener('popstate', function (event) {
                 interceptado = true;
             }
         }
-        } else if (esVisible("pantalla-reloj")) { irAlDashboard(); interceptado = true;
+    } else if (esVisible("pantalla-reloj")) {
+        irAlDashboard(); interceptado = true;
     }
 
     if (interceptado) {
@@ -234,9 +244,9 @@ window.addEventListener('popstate', function (event) {
 
 window.addEventListener('offline', () => {
     document.getElementById('modal-offline').style.display = 'flex';
-    
+
     if (navigator.vibrate) {
-        navigator.vibrate([50, 50, 50]); 
+        navigator.vibrate([50, 50, 50]);
     }
 });
 
@@ -245,36 +255,36 @@ window.addEventListener('online', () => {
     mostrarAlerta("¡Conexión Exitosa!", "Ya tenés internet de nuevo. Volviste a estar conectado.");
 });
 
-document.addEventListener('click', function(e) {
-    if (!navigator.vibrate) return; 
+document.addEventListener('click', function (e) {
+    if (!navigator.vibrate) return;
     const elementoTocado = e.target.closest('button, .card-alumno, .tarjeta-perfil-moderna, .tarjeta-rol, .chip, svg[onclick]');
-    if (elementoTocado) navigator.vibrate(15); 
+    if (elementoTocado) navigator.vibrate(15);
 });
 
-document.addEventListener('input', function(e) {
+document.addEventListener('input', function (e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        
+
         let valorOriginal = e.target.value;
         const idInput = e.target.id || '';
-        const esCampoRutina = idInput.includes('-ej-') || 
-                              idInput.includes('bs-input-') || 
-                              idInput.includes('-serie-');
+        const esCampoRutina = idInput.includes('-ej-') ||
+            idInput.includes('bs-input-') ||
+            idInput.includes('-serie-');
 
         if (e.target.type === 'text' || e.target.tagName === 'TEXTAREA') {
-            
+
             if (!idInput.includes('foto') && e.target.type !== 'email') {
-                
+
                 if (esCampoRutina) {
                     const tieneSimbolosRutina = /[<>{}]/g.test(valorOriginal);
-                    
+
                     if (tieneSimbolosRutina) {
                         mostrarAlerta("Símbolo no permitido", "En los textos de las rutinas no se permiten los símbolos: < > { }");
                         let valorLimpio = valorOriginal.replace(/[<>{}]/g, '');
                         e.target.value = valorLimpio;
                     }
                 } else {
-                    const tieneSimbolos = /[<>{}`=]/g.test(valorOriginal); 
-                    const tieneHttp = /http/i.test(valorOriginal);     
+                    const tieneSimbolos = /[<>{}`=]/g.test(valorOriginal);
+                    const tieneHttp = /http/i.test(valorOriginal);
 
                     if (tieneSimbolos || tieneHttp) {
                         mostrarAlerta("Símbolo no permitido", "Por seguridad no se permiten enlaces web ni usar los símbolos: < > { } ` =");
@@ -299,11 +309,11 @@ function irAlDashboard() {
     if (document.getElementById("pantalla-dashboard").style.display === "block") return;
 
     window.scrollTo(0, 0);
-    
+
     const pantallas = [
         "pantalla-inicio", "pantalla-login", "pantalla-perfiles",
         "pantalla-detalle-alumno", "pantalla-rutinas",
-        "pantalla-detalle-pack", "pantalla-admin", "pantalla-reloj" 
+        "pantalla-detalle-pack", "pantalla-admin", "pantalla-reloj"
     ];
     pantallas.forEach(id => {
         const el = document.getElementById(id);
@@ -312,7 +322,7 @@ function irAlDashboard() {
 
     document.getElementById("pantalla-dashboard").style.display = "block";
     actualizarMenuInferior('alumnos');
-    
+
     setTimeout(() => {
         if (typeof cargarAlumnos === 'function') cargarAlumnos();
     }, 50);
@@ -321,8 +331,8 @@ function irAlDashboard() {
 function irAPerfiles() {
     AppState.profeActivoId = null;
     AppState.esAdminActual = false;
-    
-    actualizarMenuInferior('perfiles'); 
+
+    actualizarMenuInferior('perfiles');
 
     requestAnimationFrame(() => {
         setTimeout(() => {
@@ -346,6 +356,17 @@ function abrirModalNotificaciones() {
         let htmlFinal = "";
 
         AppState.notificacionesGlobales.forEach(notif => {
+            if (notif.tipo === 'recordatorio') {
+                const claseRec = notif.esNueva ? "nueva" : "leida";
+                htmlFinal += `
+                    <div class="item-notificacion vencida ${claseRec}">
+                        <h4>Cuotas sin registrar</h4>
+                        <p>Hay ${notif.dias} alumno${notif.dias === 1 ? '' : 's'} con la cuota vencida. Si ya pagó, marcá el pago; si no, sigue figurando como deuda.</p>
+                    </div>
+                `;
+                return;
+            }
+
             let claseLeida = notif.esNueva ? "nueva" : "leida";
             let claseTipo = notif.tipo === 'vencida' ? "vencida" : "";
             let textoEstado = notif.tipo === 'vencida' ? `Vencida hace ${notif.dias} días` : `Vence en ${notif.dias} días`;
@@ -359,7 +380,7 @@ function abrirModalNotificaciones() {
                 </div>
             `;
         });
-        
+
         contenedor.innerHTML = htmlFinal;
     }
 
@@ -367,25 +388,25 @@ function abrirModalNotificaciones() {
 
     if (AppState.notificacionesGlobales && AppState.notificacionesGlobales.length > 0) {
         let leidasGuardadas = JSON.parse(localStorage.getItem('notifLeidas_' + AppState.profeActivoId)) || [];
-        
+
         AppState.notificacionesGlobales.forEach(n => {
             if (!leidasGuardadas.includes(n.idNotif)) {
-                leidasGuardadas.push(n.idNotif); 
+                leidasGuardadas.push(n.idNotif);
             }
         });
-        
+
         localStorage.setItem('notifLeidas_' + AppState.profeActivoId, JSON.stringify(leidasGuardadas));
 
         const badge = document.getElementById("badge-notificaciones");
         if (badge) badge.style.display = "none";
-        
+
         AppState.notificacionesGlobales.forEach(n => n.esNueva = false);
     }
 }
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     const btnNav = e.target.closest('.nav-item');
-    
+
     if (btnNav && !btnNav.classList.contains('tab-reloj')) {
         const pantallaReloj = document.getElementById('pantalla-reloj');
         if (pantallaReloj) {

@@ -53,6 +53,9 @@ const AppState = {
     asistenciasDiasAlumno: [],
     asistenciasAlumnoMes: [],
     notificacionesGlobales: [],
+
+    alumnoLogueadoId: null,
+    alumnoLogueadoData: null,
 };
 
 
